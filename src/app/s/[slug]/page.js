@@ -1,0 +1,59 @@
+import { notFound } from "next/navigation";
+import { connectDB } from "@/lib/mongodb";
+import Entreprise from "@/lib/models/Entreprise";
+import PlayClient from "./PlayClient";
+
+// Server component — fetch data by slug
+export async function generateMetadata({ params }) {
+  const { slug } = params;
+  try {
+    await connectDB();
+    const e = await Entreprise.findOne({ slug }).lean();
+    if (!e) return { title: "Page introuvable — zReview" };
+    return {
+      title: `${e.nom} — Tournez la roue !`,
+      description: e.cta_text,
+    };
+  } catch {
+    return { title: "zReview" };
+  }
+}
+
+export default async function SubdomainPage({ params }) {
+  const { slug } = params;
+
+  let entreprise = null;
+  try {
+    await connectDB();
+    entreprise = await Entreprise.findOne({ slug: slug.toLowerCase(), active: true }).lean();
+    if (entreprise) {
+      // Track scan
+      await Entreprise.updateOne({ _id: entreprise._id }, { $inc: { totalScans: 1 } });
+    }
+  } catch (err) {
+    console.error("SubdomainPage fetch error:", err);
+  }
+
+  if (!entreprise) {
+    notFound();
+  }
+
+  // Serialize for client
+  const data = {
+    _id: entreprise._id.toString(),
+    nom: entreprise.nom,
+    slug: entreprise.slug,
+    logo: entreprise.logo || "",
+    couleur_principale: entreprise.couleur_principale || "#6C5CE7",
+    couleur_secondaire: entreprise.couleur_secondaire || "#00B894",
+    lien_avis: entreprise.lien_avis || "",
+    cta_text: entreprise.cta_text || "Laissez-nous un avis et tentez votre chance !",
+    rewards: (entreprise.rewards || []).map((r) => ({
+      id: r.id || r._id?.toString(),
+      name: r.name,
+      probability: r.probability,
+    })),
+  };
+
+  return <PlayClient entreprise={data} />;
+}
