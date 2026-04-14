@@ -1,469 +1,642 @@
-import Link from "next/link";
+"use client";
 
-const FEATURES = [
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
-      </svg>
-    ),
-    title: "Roue de la fortune",
-    desc: "Gamifiez l'expérience client avec une roue personnalisée aux couleurs de votre marque.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-    ),
-    title: "Codes anti-fraude",
-    desc: "Chaque code est unique et à usage unique. Seuls les vrais clients qui ont laissé un avis peuvent jouer.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-    ),
-    title: "Analytics en temps réel",
-    desc: "Suivez vos scans, clics et conversions. Voyez exactement ce qui fonctionne pour vous.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-      </svg>
-    ),
-    title: "URL personnalisée",
-    desc: "Chaque établissement a sa propre URL : restaurant.visium-boost.fr — sans aucune configuration.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 7h3v3H7zM14 7h3v3h-3zM7 14h3v3H7z"/><rect x="14" y="14" width="3" height="3"/>
-      </svg>
-    ),
-    title: "QR Code intégré",
-    desc: "Générez un QR code imprimable en un clic. Affichez-le en caisse, sur les tables ou dans vos menus.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    ),
-    title: "Multi-établissements",
-    desc: "Gérez plusieurs restaurants ou boutiques depuis un seul dashboard. Parfait pour les chaînes.",
-  },
+import { useRef } from "react";
+import Link from "next/link";
+import {
+  motion, useScroll, useTransform, useMotionValue,
+  useSpring,
+} from "framer-motion";
+
+// ─── Constants ────────────────────────────────────────────────────────
+const E = [0.22, 1, 0.36, 1];
+
+// ─── Wheel ────────────────────────────────────────────────────────────
+const SEG = [
+  ["#3B82F6","Café"],["#8B5CF6","−20%"],["#06B6D4","Dessert"],
+  ["#F59E0B","−10%"],["#10B981","Boisson"],["#EF4444","−30%"],
+  ["#6366F1","Menu"],["#F97316","Pizza"],
+];
+function WheelMockup() {
+  const n = SEG.length;
+  const conic = SEG.map(([c],i)=>`${c} ${(i/n)*100}% ${((i+1)/n)*100}%`).join(",");
+  return (
+    <motion.div
+      animate={{ y:[0,-18,0] }}
+      transition={{ duration:4, repeat:Infinity, ease:"easeInOut" }}
+      style={{ position:"relative", width:300, height:300, filter:"drop-shadow(0 40px 80px rgba(59,130,246,0.45))" }}
+    >
+      <motion.div
+        animate={{ rotate:360 }}
+        transition={{ duration:28, repeat:Infinity, ease:"linear" }}
+        style={{
+          width:"100%", height:"100%", borderRadius:"50%",
+          background:`conic-gradient(${conic})`,
+          position:"relative",
+          boxShadow:"0 0 0 8px rgba(255,255,255,0.08), inset 0 0 40px rgba(0,0,0,0.35)",
+        }}
+      >
+        {SEG.map((_,i)=>(
+          <div key={i} style={{
+            position:"absolute", top:"50%", left:"50%",
+            width:"50%", height:2,
+            background:"rgba(255,255,255,0.25)",
+            transformOrigin:"0 50%",
+            transform:`rotate(${(i/n)*360}deg)`,
+          }}/>
+        ))}
+        <div style={{
+          position:"absolute", top:"50%", left:"50%",
+          width:32, height:32, borderRadius:"50%",
+          background:"linear-gradient(135deg,#fff,#e2e8f0)",
+          transform:"translate(-50%,-50%)",
+          boxShadow:"0 4px 16px rgba(0,0,0,0.4)",
+          zIndex:2,
+        }}/>
+      </motion.div>
+      {/* Arrow */}
+      <div style={{
+        position:"absolute", top:-14, left:"50%", transform:"translateX(-50%)",
+        width:0, height:0,
+        borderLeft:"11px solid transparent", borderRight:"11px solid transparent",
+        borderTop:"26px solid #F59E0B",
+        filter:"drop-shadow(0 2px 6px rgba(245,158,11,0.7))",
+        zIndex:5,
+      }}/>
+    </motion.div>
+  );
+}
+
+// ─── Float card ───────────────────────────────────────────────────────
+function FloatCard({ delay=0, children, style }) {
+  return (
+    <motion.div
+      initial={{ opacity:0, scale:0.85 }}
+      animate={{ opacity:1, scale:1 }}
+      transition={{ duration:0.5, delay, ease:E }}
+    >
+      <motion.div
+        animate={{ y:[0,-10,0] }}
+        transition={{ duration:3+delay*0.4, repeat:Infinity, ease:"easeInOut", delay:delay*0.3 }}
+        style={{
+          position:"absolute",
+          background:"rgba(10,10,30,0.85)",
+          backdropFilter:"blur(24px)",
+          border:"1px solid rgba(255,255,255,0.13)",
+          borderRadius:18, padding:"14px 20px",
+          boxShadow:"0 12px 40px rgba(0,0,0,0.4)",
+          zIndex:10, ...style,
+        }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── 3D Tilt ──────────────────────────────────────────────────────────
+function TiltCard({ children, style, className }) {
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rx = useSpring(useTransform(y,[-120,120],[8,-8]),{stiffness:300,damping:28});
+  const ry = useSpring(useTransform(x,[-120,120],[-8,8]),{stiffness:300,damping:28});
+  const onMove = (e) => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    x.set(e.clientX - r.left - r.width/2);
+    y.set(e.clientY - r.top - r.height/2);
+  };
+  return (
+    <motion.div ref={ref} onMouseMove={onMove} onMouseLeave={()=>{x.set(0);y.set(0);}}
+      style={{ rotateX:rx, rotateY:ry, transformStyle:"preserve-3d", ...style }} className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Orb ──────────────────────────────────────────────────────────────
+function Orb({ style }) {
+  return (
+    <div style={{
+      position:"absolute", borderRadius:"50%",
+      filter:"blur(90px)", pointerEvents:"none",
+      animation:"orbPulse 7s ease-in-out infinite",
+      ...style,
+    }}/>
+  );
+}
+
+// ─── Data ─────────────────────────────────────────────────────────────
+const STEPS = [
+  { n:"01", emoji:"⚡", title:"Créez en 5 min", desc:"Configurez votre roue, couleurs et récompenses. Aucune compétence technique requise.", accent:"rgba(59,130,246,0.15)" },
+  { n:"02", emoji:"📱", title:"Affichez le QR code", desc:"Imprimez le QR code généré automatiquement. Caisse, table, vitrine — n'importe où.", accent:"rgba(139,92,246,0.15)" },
+  { n:"03", emoji:"🚀", title:"Récoltez les avis", desc:"Vos clients jouent après avoir laissé un avis Google. Les avis arrivent en continu.", accent:"rgba(6,182,212,0.15)" },
 ];
 
-const PLANS = [
-  {
-    id: "free",
-    name: "Gratuit",
-    price: "0€",
-    period: "/mois",
-    desc: "Pour tester la plateforme",
-    features: ["1 établissement", "50 scans / mois", "Dashboard analytics", "Support email"],
-    cta: "Commencer gratuitement",
-    href: "/register",
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    price: "29€",
-    period: "/mois",
-    desc: "Pour les indépendants",
-    features: ["3 établissements", "500 scans / mois", "Analytics avancés", "URL personnalisée", "Support prioritaire"],
-    cta: "Essai 14 jours gratuit",
-    href: "/register",
-    highlight: true,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "79€",
-    period: "/mois",
-    desc: "Pour les chaînes et agences",
-    features: ["Établissements illimités", "Scans illimités", "API access", "White label", "Account manager dédié"],
-    cta: "Contacter l'équipe",
-    href: "/register",
-  },
+const FEATURES = [
+  { emoji:"🎯", title:"Roue 100% personnalisable", desc:"Couleurs, récompenses, logo, probabilités. Votre marque, votre expérience. Chaque détail configuré depuis votre dashboard en quelques secondes.", accent:"#3B82F6", big:true },
+  { emoji:"🔒", title:"Anti-fraude intégré", desc:"Codes uniques à usage unique. Seuls les vrais clients qui ont posté un avis peuvent jouer.", accent:"#8B5CF6" },
+  { emoji:"📊", title:"Analytics temps réel", desc:"Scans, conversions et ROI visibles en un coup d'œil.", accent:"#06B6D4" },
+  { emoji:"🔗", title:"URL personnalisée", desc:"votre-resto.visium-boost.fr — prête à l'emploi.", accent:"#F59E0B" },
+  { emoji:"📷", title:"QR Code intégré", desc:"Générez et téléchargez un QR code imprimable en un clic.", accent:"#10B981" },
+  { emoji:"🏢", title:"Multi-établissements", desc:"Un seul dashboard pour tous vos sites.", accent:"#EF4444" },
 ];
 
 const TESTIMONIALS = [
-  {
-    quote: "En 3 semaines j'ai doublé mes avis Google. Mes clients adorent tourner la roue après leur repas.",
-    name: "Marie D.",
-    role: "Restauratrice, Lyon",
-  },
-  {
-    quote: "La mise en place a pris 10 minutes. Maintenant j'ai 15 nouveaux avis chaque semaine sans rien faire.",
-    name: "Karim B.",
-    role: "Gérant café, Paris",
-  },
-  {
-    quote: "Mes clients reviennent plus souvent depuis qu'on a la roue. C'est un vrai boost pour la fidélité.",
-    name: "Sophie M.",
-    role: "Salon de coiffure, Bordeaux",
-  },
+  { q:"En 3 semaines, j'ai doublé mes avis Google. Mes clients adorent tourner la roue après leur repas.", name:"Marie D.", role:"Restauratrice, Lyon" },
+  { q:"La mise en place a pris 10 minutes. 15 nouveaux avis chaque semaine sans rien faire.", name:"Karim B.", role:"Gérant café, Paris" },
+  { q:"Mes clients reviennent plus souvent depuis la roue. C'est un vrai boost pour la fidélité.", name:"Sophie M.", role:"Salon de coiffure, Bordeaux" },
+  { q:"ROI incroyable : 200 avis en 2 mois pour 29€/mois. Je ne peux plus m'en passer.", name:"Thomas R.", role:"Pizzeria, Marseille" },
+  { q:"Interface simple, résultats impressionnants. Je le recommande à tous mes collègues.", name:"Isabelle V.", role:"Brasserie, Nantes" },
+  { q:"Notre note Google est passée de 3.8 à 4.7 en 6 semaines. Magique.", name:"Youssef A.", role:"Food truck, Toulouse" },
+];
+const T_COLORS = ["#3B82F6","#8B5CF6","#06B6D4","#F59E0B","#10B981","#EF4444"];
+
+const PLANS = [
+  { id:"free",    name:"Gratuit",  price:"0",  desc:"Pour tester",             features:["1 établissement","50 scans/mois","Analytics basiques","Support email"],                                                cta:"Commencer gratuitement", href:"/register" },
+  { id:"starter", name:"Starter", price:"29", desc:"Pour les indépendants",    features:["3 établissements","500 scans/mois","Analytics avancés","URL personnalisée","Support prioritaire"],                    cta:"Essai 14 jours gratuit", href:"/register", highlight:true },
+  { id:"pro",     name:"Pro",     price:"79", desc:"Pour les chaînes & agences",features:["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"], cta:"Nous contacter",          href:"/register" },
 ];
 
+// ─── Page ─────────────────────────────────────────────────────────────
 export default function LandingPage() {
-  return (
-    <div style={{ fontFamily: "'DM Sans', system-ui, sans-serif", background: "#fff", color: "#0F172A" }}>
+  const { scrollY } = useScroll();
+  const navBg     = useTransform(scrollY,[0,80],["rgba(5,5,16,0)","rgba(5,5,16,0.95)"]);
+  const navBorder = useTransform(scrollY,[0,80],["rgba(255,255,255,0)","rgba(255,255,255,0.08)"]);
 
-      {/* ── NAV ── */}
-      <nav style={{
-        position: "sticky", top: 0, zIndex: 100,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 40px", height: 64,
-        background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #E2E8F0",
+  const inView = (delay=0) => ({
+    initial:{ opacity:0, y:32 },
+    whileInView:{ opacity:1, y:0 },
+    viewport:{ once:true, amount:0.15 },
+    transition:{ duration:0.7, ease:E, delay },
+  });
+
+  return (
+    <div style={{ fontFamily:"'DM Sans',system-ui,sans-serif", background:"#050510", color:"#F8FAFC", overflowX:"hidden" }}>
+
+      {/* ── NAV ─────────────────────────────────────────────── */}
+      <motion.nav style={{
+        position:"fixed", top:0, left:0, right:0, zIndex:100,
+        display:"flex", alignItems:"center", justifyContent:"space-between",
+        padding:"0 clamp(20px,5vw,64px)", height:68,
+        background:navBg, backdropFilter:"blur(20px)",
+        borderBottom:"1px solid", borderColor:navBorder,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: "-1px" }}>z</span>
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 19, letterSpacing: "-0.4px", color: "#0F172A" }}>VisiumBoost</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Link href="/login" style={{
-            padding: "8px 18px", borderRadius: 10, textDecoration: "none",
-            color: "#64748B", fontWeight: 600, fontSize: 14,
-          }}>
+        <Link href="/" style={{ textDecoration:"none" }}>
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height:42, objectFit:"contain" }}/>
+        </Link>
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <Link href="/login" style={{ padding:"9px 20px", borderRadius:10, textDecoration:"none", color:"#64748B", fontWeight:600, fontSize:14 }}>
             Connexion
           </Link>
-          <Link href="/register" style={{
-            padding: "9px 20px", borderRadius: 10, textDecoration: "none",
-            background: "#2563EB", color: "#fff", fontWeight: 700, fontSize: 14,
-            boxShadow: "0 2px 12px rgba(37,99,235,0.3)",
-          }}>
-            Commencer gratuitement
-          </Link>
-        </div>
-      </nav>
-
-      {/* ── HERO ── */}
-      <section style={{
-        background: "#0F172A",
-        padding: "96px 24px 112px",
-        textAlign: "center", position: "relative", overflow: "hidden",
-      }}>
-        {/* Background blobs */}
-        <div style={{
-          position: "absolute", top: "10%", left: "10%", width: 500, height: 500, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", top: "20%", right: "5%", width: 400, height: 400, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }} />
-
-        <div style={{ position: "relative", zIndex: 1 }}>
-          {/* Badge */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)",
-            borderRadius: 100, padding: "5px 14px", marginBottom: 28,
-          }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#3B82F6", display: "inline-block" }} />
-            <span style={{ color: "#93C5FD", fontWeight: 600, fontSize: 13 }}>
-              Sous-domaines personnalisés disponibles
-            </span>
-          </div>
-
-          <h1 style={{
-            fontSize: "clamp(38px, 6vw, 66px)",
-            fontWeight: 800,
-            color: "#F1F5F9",
-            margin: "0 auto 20px",
-            lineHeight: 1.15,
-            maxWidth: 780,
-            letterSpacing: "-1.5px",
-          }}>
-            Transformez chaque client en{" "}
-            <span style={{
-              background: "linear-gradient(135deg, #60A5FA, #0EA5E9)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            }}>
-              ambassadeur Google
-            </span>
-          </h1>
-
-          <p style={{
-            color: "#64748B", fontSize: 18, maxWidth: 520, margin: "0 auto 44px",
-            lineHeight: 1.75, fontWeight: 400,
-          }}>
-            La roue de la fortune gamifiée qui booste vos avis Google automatiquement.
-            Configurez en <strong style={{ color: "#94A3B8" }}>5 minutes</strong>, récoltez des avis à vie.
-          </p>
-
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <motion.div whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }}>
             <Link href="/register" style={{
-              padding: "15px 32px", borderRadius: 12, textDecoration: "none",
-              background: "#2563EB", color: "#fff", fontWeight: 700, fontSize: 16,
-              boxShadow: "0 8px 28px rgba(37,99,235,0.4)",
+              display:"block", padding:"10px 22px", borderRadius:10, textDecoration:"none",
+              background:"linear-gradient(135deg,#3B82F6,#06B6D4)",
+              color:"#fff", fontWeight:700, fontSize:14,
+              boxShadow:"0 4px 20px rgba(59,130,246,0.4)",
             }}>
               Commencer gratuitement
             </Link>
-            <Link href="/login" style={{
-              padding: "15px 32px", borderRadius: 12, textDecoration: "none",
-              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
-              color: "#94A3B8", fontWeight: 600, fontSize: 16,
+          </motion.div>
+        </div>
+      </motion.nav>
+
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <section style={{
+        minHeight:"100dvh", display:"flex", alignItems:"center",
+        padding:"120px clamp(20px,6vw,80px) 80px",
+        position:"relative", overflow:"hidden",
+      }}>
+        <Orb style={{ width:700, height:700, top:"-15%", left:"-8%",  background:"radial-gradient(circle,rgba(59,130,246,0.14),transparent 70%)" }}/>
+        <Orb style={{ width:500, height:500, bottom:"-5%", right:"8%", background:"radial-gradient(circle,rgba(139,92,246,0.12),transparent 70%)" }}/>
+        <Orb style={{ width:400, height:400, top:"55%",   left:"42%", background:"radial-gradient(circle,rgba(6,182,212,0.08),transparent 70%)" }}/>
+        <div style={{ position:"absolute", inset:0, pointerEvents:"none",
+          backgroundImage:"radial-gradient(rgba(255,255,255,0.055) 1px,transparent 1px)",
+          backgroundSize:"32px 32px" }}/>
+
+        <div style={{ maxWidth:1200, margin:"0 auto", width:"100%",
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          gap:60, flexWrap:"wrap" }}>
+
+          {/* Left */}
+          <div style={{ flex:"1 1 420px", maxWidth:620 }}>
+            <motion.div {...inView(0)} style={{ marginBottom:28 }}>
+              <span style={{
+                display:"inline-flex", alignItems:"center", gap:8,
+                background:"rgba(59,130,246,0.1)", border:"1px solid rgba(59,130,246,0.3)",
+                borderRadius:100, padding:"6px 16px", color:"#93C5FD", fontWeight:600, fontSize:13,
+              }}>
+                <motion.span animate={{ scale:[1,1.4,1] }} transition={{ duration:1.4, repeat:Infinity }}
+                  style={{ width:8, height:8, borderRadius:"50%", background:"#3B82F6", display:"inline-block" }}/>
+                500+ établissements actifs
+              </span>
+            </motion.div>
+
+            <motion.h1 {...inView(0.08)} style={{
+              fontSize:"clamp(40px,5.5vw,74px)", fontWeight:900,
+              lineHeight:1.1, margin:"0 0 24px", letterSpacing:"-2px", color:"#F8FAFC",
             }}>
-              Se connecter →
-            </Link>
+              Transformez chaque<br/>client en{" "}
+              <span style={{
+                background:"linear-gradient(135deg,#60A5FA 0%,#06B6D4 50%,#8B5CF6 100%)",
+                WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+              }}>
+                ambassadeur<br/>Google
+              </span>
+            </motion.h1>
+
+            <motion.p {...inView(0.16)} style={{ color:"#64748B", fontSize:18, lineHeight:1.8, margin:"0 0 40px", maxWidth:500 }}>
+              La roue de la fortune gamifiée qui booste vos avis Google{" "}
+              <strong style={{ color:"#94A3B8" }}>automatiquement</strong>.
+              Configurez en 5 minutes, récoltez des avis à vie.
+            </motion.p>
+
+            <motion.div {...inView(0.24)} style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:56 }}>
+              <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
+                <Link href="/register" style={{
+                  display:"block", padding:"16px 34px", borderRadius:14, textDecoration:"none",
+                  background:"linear-gradient(135deg,#3B82F6,#06B6D4)",
+                  color:"#fff", fontWeight:700, fontSize:16,
+                  boxShadow:"0 8px 32px rgba(59,130,246,0.5)",
+                }}>
+                  Commencer gratuitement →
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
+                <Link href="/login" style={{
+                  display:"block", padding:"16px 34px", borderRadius:14, textDecoration:"none",
+                  background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.12)",
+                  color:"#94A3B8", fontWeight:600, fontSize:16,
+                }}>
+                  Se connecter
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            <motion.div {...inView(0.3)} style={{
+              display:"flex", gap:36, flexWrap:"wrap",
+              paddingTop:32, borderTop:"1px solid rgba(255,255,255,0.07)",
+            }}>
+              {[["500+","Établissements"],["4.9★","Note moyenne"],["98%","Satisfaction"],["<5min","Setup"]].map(([v,l])=>(
+                <div key={l}>
+                  <div style={{ fontSize:26, fontWeight:800, color:"#F8FAFC", letterSpacing:"-0.5px" }}>{v}</div>
+                  <div style={{ fontSize:12, color:"#475569", marginTop:2, fontWeight:500 }}>{l}</div>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
-          {/* Stats */}
-          <div style={{
-            display: "flex", gap: 48, justifyContent: "center", flexWrap: "wrap",
-            marginTop: 72, paddingTop: 40,
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-          }}>
-            {[["500+", "Établissements"], ["98%", "Satisfaction"], ["4.8★", "Note Google"], ["<5min", "Setup moyen"]].map(([val, label]) => (
-              <div key={label} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 30, fontWeight: 800, color: "#F1F5F9", letterSpacing: "-0.5px" }}>{val}</div>
-                <div style={{ fontSize: 13, color: "#475569", marginTop: 4, fontWeight: 500 }}>{label}</div>
+          {/* Right — wheel + floating UI cards */}
+          <motion.div
+            initial={{ opacity:0, scale:0.75 }}
+            animate={{ opacity:1, scale:1 }}
+            transition={{ duration:0.9, ease:E, delay:0.3 }}
+            style={{ flex:"1 1 300px", display:"flex", justifyContent:"center", alignItems:"center", position:"relative", minHeight:400 }}
+          >
+            <WheelMockup/>
+
+            <FloatCard delay={0.6} style={{ top:"2%", left:"-8%", minWidth:160 }}>
+              <div style={{ fontSize:10, color:"#475569", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Dernier avis</div>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:30, height:30, borderRadius:"50%", background:"linear-gradient(135deg,#3B82F6,#06B6D4)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:13, flexShrink:0 }}>M</div>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#F8FAFC" }}>Marie D.</div>
+                  <div style={{ fontSize:12, color:"#F59E0B", letterSpacing:1 }}>★★★★★</div>
+                </div>
               </div>
-            ))}
-          </div>
+            </FloatCard>
+
+            <FloatCard delay={0.9} style={{ bottom:"8%", left:"-14%", minWidth:140 }}>
+              <div style={{ fontSize:10, color:"#475569", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Ce mois-ci</div>
+              <div style={{ fontSize:30, fontWeight:900, color:"#10B981", letterSpacing:"-1px" }}>+47</div>
+              <div style={{ fontSize:11, color:"#64748B" }}>avis Google</div>
+            </FloatCard>
+
+            <FloatCard delay={1.2} style={{ bottom:"18%", right:"-6%", minWidth:150 }}>
+              <div style={{ fontSize:10, color:"#475569", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Cadeau gagné</div>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:34, height:34, borderRadius:10, background:"rgba(245,158,11,0.15)", border:"1px solid rgba(245,158,11,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>🎁</div>
+                <div>
+                  <div style={{ fontSize:14, fontWeight:800, color:"#F8FAFC" }}>−20%</div>
+                  <div style={{ fontSize:11, color:"#64748B" }}>prochaine visite</div>
+                </div>
+              </div>
+            </FloatCard>
+          </motion.div>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <section style={{ padding: "96px 24px", background: "#F8FAFC" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <p style={{ color: "#2563EB", fontWeight: 700, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
-              Comment ça marche
-            </p>
-            <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>
+      {/* ── MARQUEE ──────────────────────────────────────────── */}
+      <div style={{ borderTop:"1px solid rgba(255,255,255,0.06)", borderBottom:"1px solid rgba(255,255,255,0.06)", overflow:"hidden", padding:"18px 0", background:"rgba(255,255,255,0.015)" }}>
+        <motion.div
+          animate={{ x:["0%","-50%"] }}
+          transition={{ duration:28, repeat:Infinity, ease:"linear" }}
+          style={{ display:"flex", gap:0, width:"max-content" }}
+        >
+          {[...Array(2)].flatMap((_,r)=>
+            ["🍕 Restaurants","☕ Cafés","💈 Salons","🍺 Brasseries","🍣 Sushis","🥗 Traiteurs","🛍️ Boutiques","🏋️ Fitness","🎂 Pâtisseries","🏨 Hôtels"].map(item=>(
+              <span key={`${r}-${item}`} style={{ fontSize:13, fontWeight:600, color:"#334155", padding:"0 32px", borderRight:"1px solid rgba(255,255,255,0.05)" }}>
+                {item}
+              </span>
+            ))
+          )}
+        </motion.div>
+      </div>
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────── */}
+      <section style={{ padding:"100px clamp(20px,6vw,80px)", background:"#080814" }}>
+        <div style={{ maxWidth:1000, margin:"0 auto" }}>
+          <motion.div {...inView()} style={{ textAlign:"center", marginBottom:72 }}>
+            <div style={{ color:"#3B82F6", fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>Comment ça marche</div>
+            <h2 style={{ fontSize:"clamp(28px,4vw,50px)", fontWeight:900, margin:"0 0 16px", letterSpacing:"-1.5px" }}>
               Simple comme bonjour
             </h2>
-          </div>
+            <p style={{ color:"#64748B", fontSize:16, maxWidth:440, margin:"0 auto", lineHeight:1.75 }}>
+              De la configuration à vos premiers avis Google en moins de 10 minutes.
+            </p>
+          </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24 }}>
-            {[
-              { n: "01", title: "Créez votre compte", desc: "Inscrivez-vous en 30 secondes. Configurez vos couleurs, vos récompenses et votre lien Google." },
-              { n: "02", title: "Partagez votre QR code", desc: "Imprimez le QR code généré automatiquement. Affichez-le en caisse ou sur les tables." },
-              { n: "03", title: "Regardez les avis arriver", desc: "Vos clients laissent un avis, reçoivent un code, jouent à la roue. Vous collectez des avis en continu." },
-            ].map((item) => (
-              <div key={item.n} style={{
-                background: "#fff", borderRadius: 18, padding: "28px 28px",
-                border: "1.5px solid #E2E8F0",
-              }}>
-                <div style={{
-                  fontSize: 40, fontWeight: 800, color: "#EFF6FF",
-                  lineHeight: 1, marginBottom: 18,
-                }}>
-                  {item.n}
-                </div>
-                <h3 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 8px", color: "#0F172A" }}>{item.title}</h3>
-                <p style={{ fontSize: 14, color: "#64748B", lineHeight: 1.7, margin: 0 }}>{item.desc}</p>
-              </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:20 }}>
+            {STEPS.map((s,i)=>(
+              <motion.div
+                key={s.n}
+                {...inView(i*0.15)}
+                whileHover={{ y:-8, scale:1.02 }}
+                transition={{ type:"spring", stiffness:280, damping:22 }}
+                style={{
+                  background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.07)",
+                  borderRadius:24, padding:"38px 32px", position:"relative", overflow:"hidden",
+                  cursor:"default",
+                }}
+              >
+                <div style={{ position:"absolute", top:-50, right:-50, width:160, height:160, borderRadius:"50%",
+                  background:`radial-gradient(circle,${s.accent},transparent 70%)` }}/>
+                <div style={{ fontSize:60, fontWeight:900, color:"rgba(255,255,255,0.04)", lineHeight:1, marginBottom:24, letterSpacing:"-3px" }}>{s.n}</div>
+                <div style={{ fontSize:28, marginBottom:14 }}>{s.emoji}</div>
+                <h3 style={{ fontSize:19, fontWeight:800, margin:"0 0 12px", color:"#F8FAFC" }}>{s.title}</h3>
+                <p style={{ fontSize:14, color:"#64748B", lineHeight:1.8, margin:0 }}>{s.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
-      <section style={{ padding: "96px 24px", background: "#fff" }}>
-        <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <p style={{ color: "#2563EB", fontWeight: 700, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
-              Fonctionnalités
-            </p>
-            <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>
+      {/* ── FEATURES BENTO ───────────────────────────────────── */}
+      <section style={{ padding:"100px clamp(20px,6vw,80px)", background:"#050510" }}>
+        <div style={{ maxWidth:1080, margin:"0 auto" }}>
+          <motion.div {...inView()} style={{ textAlign:"center", marginBottom:64 }}>
+            <div style={{ color:"#8B5CF6", fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>Fonctionnalités</div>
+            <h2 style={{ fontSize:"clamp(28px,4vw,50px)", fontWeight:900, margin:"0 0 16px", letterSpacing:"-1.5px" }}>
               Tout ce dont vous avez besoin
             </h2>
-          </div>
+            <p style={{ color:"#64748B", fontSize:16, maxWidth:440, margin:"0 auto" }}>
+              Un outil complet, pensé pour les commerçants.
+            </p>
+          </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: 20 }}>
-            {FEATURES.map((f) => (
-              <div key={f.title} style={{
-                padding: "24px 28px", borderRadius: 16,
-                border: "1.5px solid #E2E8F0",
-                background: "#FAFAFA",
-              }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 12, background: "#EFF6FF",
-                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
-                }}>
-                  {f.icon}
-                </div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 8px", color: "#0F172A" }}>{f.title}</h3>
-                <p style={{ fontSize: 14, color: "#64748B", lineHeight: 1.7, margin: 0 }}>{f.desc}</p>
-              </div>
+          <div className="bento-grid">
+            {FEATURES.map((f,i)=>(
+              <TiltCard key={f.title} className={i===0?"bento-big":""}>
+                <motion.div
+                  {...inView(i*0.07)}
+                  whileHover={{ borderColor:`${f.accent}45` }}
+                  style={{
+                    background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.07)",
+                    borderRadius:22, padding:f.big?"40px 44px":"28px 28px",
+                    height:"100%", position:"relative", overflow:"hidden",
+                    transition:"border-color 0.3s",
+                  }}
+                >
+                  <div style={{ position:"absolute", top:-70, right:-70, width:220, height:220, borderRadius:"50%",
+                    background:`radial-gradient(circle,${f.accent}18,transparent 70%)` }}/>
+                  <div style={{
+                    width:f.big?52:44, height:f.big?52:44, borderRadius:f.big?16:12,
+                    background:`${f.accent}18`, border:`1px solid ${f.accent}35`,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontSize:f.big?26:21, marginBottom:f.big?22:16,
+                  }}>
+                    {f.emoji}
+                  </div>
+                  <h3 style={{ fontSize:f.big?22:16, fontWeight:800, margin:"0 0 10px", color:"#F8FAFC" }}>{f.title}</h3>
+                  <p style={{ fontSize:f.big?15:13, color:"#64748B", lineHeight:1.75, margin:0 }}>{f.desc}</p>
+                </motion.div>
+              </TiltCard>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── PRICING ── */}
-      <section style={{ padding: "96px 24px", background: "#F8FAFC" }}>
-        <div style={{ maxWidth: 980, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <p style={{ color: "#2563EB", fontWeight: 700, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
-              Tarifs
-            </p>
-            <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>
+      {/* ── TESTIMONIALS ─────────────────────────────────────── */}
+      <section style={{ padding:"100px 0", background:"#080814", overflow:"hidden" }}>
+        <motion.div {...inView()} style={{ textAlign:"center", marginBottom:64, padding:"0 24px" }}>
+          <div style={{ color:"#06B6D4", fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>Témoignages</div>
+          <h2 style={{ fontSize:"clamp(28px,4vw,50px)", fontWeight:900, margin:"0 0 20px", letterSpacing:"-1.5px" }}>
+            Ils nous font confiance
+          </h2>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
+            <span style={{ color:"#F59E0B", fontSize:22, letterSpacing:2 }}>★★★★★</span>
+            <span style={{ color:"#64748B", fontSize:14, fontWeight:600 }}>4.9 / 5 · 500+ établissements</span>
+          </div>
+        </motion.div>
+
+        <div style={{ position:"relative" }}>
+          <div style={{ position:"absolute", left:0, top:0, bottom:0, width:140, background:"linear-gradient(to right,#080814,transparent)", zIndex:2, pointerEvents:"none" }}/>
+          <div style={{ position:"absolute", right:0, top:0, bottom:0, width:140, background:"linear-gradient(to left,#080814,transparent)", zIndex:2, pointerEvents:"none" }}/>
+          <motion.div
+            animate={{ x:["0%","-50%"] }}
+            transition={{ duration:36, repeat:Infinity, ease:"linear" }}
+            style={{ display:"flex", gap:20, width:"max-content", padding:"8px 20px" }}
+          >
+            {[...TESTIMONIALS,...TESTIMONIALS].map((t,i)=>(
+              <motion.div
+                key={i}
+                whileHover={{ scale:1.03, y:-4 }}
+                transition={{ type:"spring", stiffness:300, damping:22 }}
+                style={{
+                  width:320, flexShrink:0,
+                  background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)",
+                  borderRadius:22, padding:"28px 30px", cursor:"default",
+                }}
+              >
+                <div style={{ color:"#F59E0B", fontSize:15, letterSpacing:2, marginBottom:16 }}>★★★★★</div>
+                <p style={{ fontSize:14, color:"#CBD5E1", lineHeight:1.8, margin:"0 0 22px", fontStyle:"italic" }}>
+                  &ldquo;{t.q}&rdquo;
+                </p>
+                <div style={{ display:"flex", alignItems:"center", gap:11 }}>
+                  <div style={{
+                    width:38, height:38, borderRadius:"50%",
+                    background:`linear-gradient(135deg,${T_COLORS[i%6]},${T_COLORS[(i+2)%6]})`,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontWeight:900, color:"#fff", fontSize:14, flexShrink:0,
+                  }}>
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight:700, fontSize:13, color:"#F8FAFC" }}>{t.name}</div>
+                    <div style={{ fontSize:12, color:"#475569" }}>{t.role}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── PRICING ──────────────────────────────────────────── */}
+      <section style={{ padding:"100px clamp(20px,6vw,80px)", background:"#050510" }}>
+        <div style={{ maxWidth:1020, margin:"0 auto" }}>
+          <motion.div {...inView()} style={{ textAlign:"center", marginBottom:72 }}>
+            <div style={{ color:"#F59E0B", fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>Tarifs</div>
+            <h2 style={{ fontSize:"clamp(28px,4vw,50px)", fontWeight:900, margin:"0 0 16px", letterSpacing:"-1.5px" }}>
               Simple et transparent
             </h2>
-            <p style={{ color: "#64748B", fontSize: 16, marginTop: 12 }}>Sans engagement. Annulez quand vous voulez.</p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))", gap: 20 }}>
-            {PLANS.map((plan) => (
-              <div key={plan.id} style={{
-                background: plan.highlight ? "#0F172A" : "#fff",
-                borderRadius: 20, padding: "32px 28px",
-                border: plan.highlight ? "none" : "1.5px solid #E2E8F0",
-                boxShadow: plan.highlight ? "0 16px 48px rgba(15,23,42,0.3)" : "none",
-                position: "relative",
-                transform: plan.highlight ? "scale(1.03)" : "scale(1)",
-              }}>
-                {plan.highlight && (
-                  <div style={{
-                    position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
-                    background: "#2563EB", color: "#fff", fontWeight: 700, fontSize: 11,
-                    padding: "4px 16px", borderRadius: 100, letterSpacing: 0.8,
-                    textTransform: "uppercase", whiteSpace: "nowrap",
-                  }}>
-                    Le plus populaire
-                  </div>
-                )}
-
-                <div style={{ marginBottom: 6, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: plan.highlight ? "#60A5FA" : "#2563EB" }}>
-                  {plan.name}
-                </div>
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 3, marginBottom: 5 }}>
-                  <span style={{ fontSize: 44, fontWeight: 800, color: plan.highlight ? "#F1F5F9" : "#0F172A", letterSpacing: "-1px", lineHeight: 1 }}>
-                    {plan.price}
-                  </span>
-                  <span style={{ color: plan.highlight ? "#475569" : "#94A3B8", fontSize: 14, marginBottom: 7 }}>{plan.period}</span>
-                </div>
-                <p style={{ color: plan.highlight ? "#475569" : "#94A3B8", fontSize: 13, margin: "0 0 24px" }}>{plan.desc}</p>
-
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "flex", flexDirection: "column", gap: 9 }}>
-                  {plan.features.map((feat) => (
-                    <li key={feat} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: plan.highlight ? "#CBD5E1" : "#475569" }}>
-                      <span style={{ color: plan.highlight ? "#3B82F6" : "#10B981", fontWeight: 900, flexShrink: 0, fontSize: 14 }}>✓</span>
-                      {feat}
-                    </li>
-                  ))}
-                </ul>
-
-                <Link href={plan.href} style={{
-                  display: "block", textAlign: "center", padding: "13px",
-                  borderRadius: 12, textDecoration: "none", fontWeight: 700, fontSize: 14,
-                  background: plan.highlight ? "#2563EB" : "transparent",
-                  color: plan.highlight ? "#fff" : "#2563EB",
-                  border: plan.highlight ? "none" : "2px solid #2563EB",
-                  boxShadow: plan.highlight ? "0 4px 16px rgba(37,99,235,0.4)" : "none",
-                }}>
-                  {plan.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section style={{ padding: "96px 24px", background: "#fff" }}>
-        <div style={{ maxWidth: 980, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <p style={{ color: "#2563EB", fontWeight: 700, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
-              Témoignages
+            <p style={{ color:"#64748B", fontSize:16, maxWidth:380, margin:"0 auto" }}>
+              Sans engagement. Annulez quand vous voulez.
             </p>
-            <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>
-              Ils nous font confiance
-            </h2>
-          </div>
+          </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))", gap: 20 }}>
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} style={{
-                background: "#F8FAFC", borderRadius: 18, padding: "26px 28px",
-                border: "1.5px solid #E2E8F0",
-              }}>
-                <div style={{ color: "#F59E0B", fontSize: 16, marginBottom: 14, letterSpacing: 1 }}>★★★★★</div>
-                <p style={{ fontSize: 15, color: "#334155", lineHeight: 1.7, margin: "0 0 18px", fontStyle: "italic" }}>
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: "#0F172A" }}>{t.name}</div>
-                  <div style={{ fontSize: 13, color: "#64748B" }}>{t.role}</div>
-                </div>
-              </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:20, alignItems:"center" }}>
+            {PLANS.map((plan,i)=>(
+              <TiltCard key={plan.id}>
+                <motion.div
+                  {...inView(i*0.1)}
+                  whileHover={{ y:-10 }}
+                  transition={{ type:"spring", stiffness:280, damping:22 }}
+                  style={{
+                    borderRadius:26, padding:"40px 34px",
+                    position:"relative", overflow:"hidden",
+                    ...(plan.highlight ? {
+                      background:"linear-gradient(145deg,#0F172A,#1a1440)",
+                      border:"1px solid rgba(59,130,246,0.5)",
+                      boxShadow:"0 0 0 1px rgba(59,130,246,0.15),0 32px 80px rgba(59,130,246,0.2)",
+                    }:{
+                      background:"rgba(255,255,255,0.025)",
+                      border:"1px solid rgba(255,255,255,0.07)",
+                    }),
+                  }}
+                >
+                  {plan.highlight && (
+                    <>
+                      <div style={{ position:"absolute", top:-80, left:"50%", transform:"translateX(-50%)", width:240, height:160, background:"radial-gradient(ellipse,rgba(59,130,246,0.28),transparent 70%)" }}/>
+                      <div style={{
+                        position:"absolute", top:-13, left:"50%", transform:"translateX(-50%)",
+                        background:"linear-gradient(135deg,#3B82F6,#06B6D4)",
+                        color:"#fff", fontWeight:700, fontSize:11,
+                        padding:"4px 22px", borderRadius:100, whiteSpace:"nowrap", letterSpacing:0.5,
+                      }}>
+                        ⚡ Le plus populaire
+                      </div>
+                    </>
+                  )}
+
+                  <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1.2, color:plan.highlight?"#60A5FA":"#475569", marginBottom:10 }}>
+                    {plan.name}
+                  </div>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:4, marginBottom:5 }}>
+                    <span style={{ fontSize:56, fontWeight:900, color:"#F8FAFC", letterSpacing:"-2px", lineHeight:1 }}>{plan.price}€</span>
+                    <span style={{ color:"#475569", fontSize:15 }}>/mois</span>
+                  </div>
+                  <p style={{ color:"#475569", fontSize:13, margin:"0 0 28px" }}>{plan.desc}</p>
+
+                  <ul style={{ listStyle:"none", padding:0, margin:"0 0 34px", display:"flex", flexDirection:"column", gap:11 }}>
+                    {plan.features.map(feat=>(
+                      <li key={feat} style={{ display:"flex", alignItems:"center", gap:10, fontSize:13, color:plan.highlight?"#CBD5E1":"#64748B" }}>
+                        <span style={{ color:plan.highlight?"#3B82F6":"#10B981", fontWeight:900, fontSize:16, flexShrink:0 }}>✓</span>
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <motion.div whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}>
+                    <Link href={plan.href} style={{
+                      display:"block", textAlign:"center", padding:"15px",
+                      borderRadius:14, textDecoration:"none", fontWeight:700, fontSize:14,
+                      ...(plan.highlight?{
+                        background:"linear-gradient(135deg,#3B82F6,#06B6D4)",
+                        color:"#fff", boxShadow:"0 8px 28px rgba(59,130,246,0.45)",
+                      }:{
+                        background:"transparent", color:"#3B82F6",
+                        border:"1.5px solid rgba(59,130,246,0.4)",
+                      }),
+                    }}>
+                      {plan.cta}
+                    </Link>
+                  </motion.div>
+                </motion.div>
+              </TiltCard>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA BANNER ── */}
-      <section style={{
-        background: "#0F172A",
-        padding: "80px 24px", textAlign: "center",
-      }}>
-        <h2 style={{
-          fontSize: "clamp(26px, 5vw, 48px)",
-          fontWeight: 800, color: "#F1F5F9", margin: "0 auto 14px",
-          maxWidth: 640, lineHeight: 1.2, letterSpacing: "-0.5px",
-        }}>
-          Prêt à booster vos avis Google ?
-        </h2>
-        <p style={{ color: "#64748B", fontSize: 16, marginBottom: 32 }}>
-          Rejoignez 500+ établissements qui utilisent VisiumBoost chaque jour.
-        </p>
-        <Link href="/register" style={{
-          display: "inline-block", padding: "16px 36px", borderRadius: 12,
-          background: "#2563EB", color: "#fff", textDecoration: "none",
-          fontWeight: 700, fontSize: 16,
-          boxShadow: "0 8px 28px rgba(37,99,235,0.4)",
-        }}>
-          Commencer gratuitement — Aucune CB requise
-        </Link>
+      {/* ── CTA BANNER ───────────────────────────────────────── */}
+      <section style={{ padding:"130px clamp(20px,6vw,80px)", position:"relative", overflow:"hidden", background:"#080814" }}>
+        <Orb style={{ width:700, height:700, top:"50%", left:"50%", transform:"translate(-50%,-50%)", background:"radial-gradient(circle,rgba(59,130,246,0.14),transparent 70%)" }}/>
+        <Orb style={{ width:400, height:400, top:"10%", right:"5%", background:"radial-gradient(circle,rgba(139,92,246,0.1),transparent 70%)" }}/>
+        <div style={{ position:"absolute", inset:0, backgroundImage:"radial-gradient(rgba(255,255,255,0.045) 1px,transparent 1px)", backgroundSize:"24px 24px", pointerEvents:"none" }}/>
+
+        <div style={{ textAlign:"center", position:"relative", zIndex:1, maxWidth:720, margin:"0 auto" }}>
+          <motion.div {...inView()} style={{ fontSize:11, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:"#3B82F6", marginBottom:20 }}>
+            Rejoindre la communauté
+          </motion.div>
+          <motion.h2 {...inView(0.1)} style={{
+            fontSize:"clamp(32px,5vw,64px)", fontWeight:900,
+            margin:"0 0 22px", lineHeight:1.12, letterSpacing:"-2px", color:"#F8FAFC",
+          }}>
+            Prêt à booster vos{" "}
+            <span style={{ background:"linear-gradient(135deg,#60A5FA,#06B6D4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+              avis Google
+            </span>{" "}?
+          </motion.h2>
+          <motion.p {...inView(0.18)} style={{ color:"#64748B", fontSize:17, marginBottom:44, lineHeight:1.8 }}>
+            Rejoignez 500+ établissements qui récoltent des avis chaque jour.<br/>
+            <strong style={{ color:"#94A3B8" }}>Aucune carte bancaire requise.</strong>
+          </motion.p>
+          <motion.div {...inView(0.26)}>
+            <motion.div whileHover={{ scale:1.06, y:-4 }} whileTap={{ scale:0.97 }} style={{ display:"inline-block" }}>
+              <Link href="/register" style={{
+                display:"inline-block", padding:"20px 48px", borderRadius:18,
+                background:"linear-gradient(135deg,#3B82F6,#06B6D4)",
+                color:"#fff", textDecoration:"none",
+                fontWeight:800, fontSize:17,
+                boxShadow:"0 16px 48px rgba(59,130,246,0.55)",
+                letterSpacing:"-0.3px",
+              }}>
+                Commencer gratuitement — Aucune CB
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer style={{
-        background: "#020617", padding: "36px 40px",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
-      }}>
-        <div style={{
-          maxWidth: 1080, margin: "0 auto",
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          flexWrap: "wrap", gap: 16,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-            <div style={{
-              width: 30, height: 30, borderRadius: 9,
-              background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ color: "#fff", fontWeight: 800, fontSize: 15, letterSpacing: "-1px" }}>z</span>
-            </div>
-            <span style={{ fontWeight: 800, fontSize: 17, color: "#F1F5F9", letterSpacing: "-0.3px" }}>VisiumBoost</span>
-          </div>
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            {[["Connexion", "/login"], ["Créer un compte", "/register"], ["Dashboard", "/dashboard"]].map(([label, href]) => (
-              <Link key={label} href={href} style={{ color: "#475569", textDecoration: "none", fontSize: 14, fontWeight: 500 }}>
-                {label}
-              </Link>
+      {/* ── FOOTER ───────────────────────────────────────────── */}
+      <footer style={{ background:"#020208", padding:"44px clamp(20px,6vw,80px)", borderTop:"1px solid rgba(255,255,255,0.04)" }}>
+        <div style={{ maxWidth:1080, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:20 }}>
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height:36, objectFit:"contain" }}/>
+          <div style={{ display:"flex", gap:28, flexWrap:"wrap" }}>
+            {[["Connexion","/login"],["Créer un compte","/register"],["Dashboard","/dashboard"]].map(([label,href])=>(
+              <Link key={label} href={href} style={{ color:"#334155", textDecoration:"none", fontSize:14, fontWeight:500 }}>{label}</Link>
             ))}
           </div>
-          <div style={{ fontSize: 13, color: "#334155" }}>© 2026 VisiumBoost</div>
+          <div style={{ fontSize:13, color:"#1E293B" }}>© 2026 VisiumBoost · Tous droits réservés</div>
         </div>
       </footer>
+
+      <style>{`
+        @keyframes orbPulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:0.75;transform:scale(1.15)} }
+        .bento-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+        .bento-big  { grid-column:1/3; }
+        @media(max-width:900px) {
+          .bento-grid { grid-template-columns:repeat(2,1fr); }
+          .bento-big  { grid-column:1/-1; }
+        }
+        @media(max-width:560px) {
+          .bento-grid { grid-template-columns:1fr; }
+          .bento-big  { grid-column:1; }
+        }
+      `}</style>
     </div>
   );
 }
