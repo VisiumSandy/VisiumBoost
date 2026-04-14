@@ -168,7 +168,7 @@ export default function AdminPage() {
           }}>
             <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, fontFamily: "'Calistoga', serif" }}>z</span>
           </div>
-          <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, fontFamily: "'Calistoga', serif" }}>zReview</span>
+          <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, fontFamily: "'Calistoga', serif" }}>VisiumBoost</span>
           <span style={{
             marginLeft: 8, padding: "3px 10px", borderRadius: 8,
             background: "rgba(108,92,231,0.25)", border: "1px solid rgba(108,92,231,0.4)",
@@ -204,7 +204,7 @@ export default function AdminPage() {
             Panel d&apos;administration
           </h1>
           <p style={{ color: "#636e72", fontSize: 14, margin: 0 }}>
-            Vue d&apos;ensemble de votre plateforme zReview
+            Vue d&apos;ensemble de votre plateforme VisiumBoost
           </p>
         </div>
 

@@ -645,7 +645,7 @@ export default function RoueClient({ entreprise }) {
         borderTop: "1px solid #f0f0f5",
       }}>
         Propulsé par{" "}
-        <a href="/" style={{ color: pc, fontWeight: 700, textDecoration: "none" }}>zReview</a>
+        <a href="/" style={{ color: pc, fontWeight: 700, textDecoration: "none" }}>VisiumBoost</a>
       </footer>
     </div>
   );

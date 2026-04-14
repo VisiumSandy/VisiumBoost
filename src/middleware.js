@@ -32,7 +32,7 @@ function extractSubdomain(host) {
     return sub || null;
   }
 
-  // Production: restaurant.zreview.fr → "restaurant"
+  // Production: restaurant.visium-boost.fr → "restaurant"
   const parts = hostname.split(".");
   if (parts.length > 2) {
     const sub = parts[0];
@@ -60,7 +60,7 @@ export function middleware(request) {
   }
 
   // ─── Auth checks (main domain only) ─────────────────────────────────
-  const token = request.cookies.get("zreview_token")?.value;
+  const token = request.cookies.get("visiumboost_token")?.value;
   const user = token ? decodeJWTPayload(token) : null;
 
   // Redirect authenticated users away from login/register

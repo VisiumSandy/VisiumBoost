@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
-const COOKIE_NAME = "zreview_token";
+const COOKIE_NAME = "visiumboost_token";
 
 export function signToken(payload) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });

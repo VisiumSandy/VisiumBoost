@@ -9,13 +9,13 @@ export async function generateMetadata({ params }) {
   try {
     await connectDB();
     const e = await Entreprise.findOne({ slug }).lean();
-    if (!e) return { title: "Page introuvable — zReview" };
+    if (!e) return { title: "Page introuvable — VisiumBoost" };
     return {
       title: `${e.nom} — Tournez la roue !`,
       description: e.cta_text,
     };
   } catch {
-    return { title: "zReview" };
+    return { title: "VisiumBoost" };
   }
 }
 

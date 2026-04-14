@@ -59,7 +59,7 @@ const FAQ = [
   },
   {
     q: "Comment fonctionne le plan gratuit ?",
-    a: "Le plan gratuit est illimité dans le temps. Vous pouvez tester zReview sans carte bancaire.",
+    a: "Le plan gratuit est illimité dans le temps. Vous pouvez tester VisiumBoost sans carte bancaire.",
   },
 ];
 

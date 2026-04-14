@@ -16,12 +16,12 @@ async function ensureAdmin() {
     await User.create({
       email: adminEmail,
       password: hashed,
-      name: "Admin zReview",
+      name: "Admin VisiumBoost",
       role: "admin",
       plan: "pro",
-      businessName: "zReview HQ",
+      businessName: "VisiumBoost HQ",
     });
-    console.log("[zReview] Admin account created:", adminEmail);
+    console.log("[VisiumBoost] Admin account created:", adminEmail);
   }
 }
 

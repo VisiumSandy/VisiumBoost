@@ -45,7 +45,7 @@ export default function Sidebar({ user }) {
         </div>
         {!sidebarCollapsed && (
           <span style={{ color: "#fff", fontWeight: 800, fontSize: 17, letterSpacing: "-0.4px" }}>
-            zReview
+            VisiumBoost
           </span>
         )}
         {!sidebarCollapsed && (

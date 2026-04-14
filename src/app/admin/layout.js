@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Admin — zReview",
+  title: "Admin — VisiumBoost",
 };
 
 export default function AdminLayout({ children }) {

@@ -35,7 +35,7 @@ const FEATURES = [
       </svg>
     ),
     title: "URL personnalisée",
-    desc: "Chaque établissement a sa propre URL : restaurant.zreview.fr — sans aucune configuration.",
+    desc: "Chaque établissement a sa propre URL : restaurant.visium-boost.fr — sans aucune configuration.",
   },
   {
     icon: (
@@ -129,7 +129,7 @@ export default function LandingPage() {
           }}>
             <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: "-1px" }}>z</span>
           </div>
-          <span style={{ fontWeight: 800, fontSize: 19, letterSpacing: "-0.4px", color: "#0F172A" }}>zReview</span>
+          <span style={{ fontWeight: 800, fontSize: 19, letterSpacing: "-0.4px", color: "#0F172A" }}>VisiumBoost</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Link href="/login" style={{
@@ -422,7 +422,7 @@ export default function LandingPage() {
           Prêt à booster vos avis Google ?
         </h2>
         <p style={{ color: "#64748B", fontSize: 16, marginBottom: 32 }}>
-          Rejoignez 500+ établissements qui utilisent zReview chaque jour.
+          Rejoignez 500+ établissements qui utilisent VisiumBoost chaque jour.
         </p>
         <Link href="/register" style={{
           display: "inline-block", padding: "16px 36px", borderRadius: 12,
@@ -452,7 +452,7 @@ export default function LandingPage() {
             }}>
               <span style={{ color: "#fff", fontWeight: 800, fontSize: 15, letterSpacing: "-1px" }}>z</span>
             </div>
-            <span style={{ fontWeight: 800, fontSize: 17, color: "#F1F5F9", letterSpacing: "-0.3px" }}>zReview</span>
+            <span style={{ fontWeight: 800, fontSize: 17, color: "#F1F5F9", letterSpacing: "-0.3px" }}>VisiumBoost</span>
           </div>
           <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[["Connexion", "/login"], ["Créer un compte", "/register"], ["Dashboard", "/dashboard"]].map(([label, href]) => (
@@ -461,7 +461,7 @@ export default function LandingPage() {
               </Link>
             ))}
           </div>
-          <div style={{ fontSize: 13, color: "#334155" }}>© 2026 zReview</div>
+          <div style={{ fontSize: 13, color: "#334155" }}>© 2026 VisiumBoost</div>
         </div>
       </footer>
     </div>

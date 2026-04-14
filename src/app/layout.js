@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 
 export const metadata = {
-  title: "zReview — Boostez vos avis Google",
+  title: "VisiumBoost — Boostez vos avis Google",
   description:
     "La roue de la fortune gamifiée qui transforme vos clients en ambassadeurs Google. Configurez en 5 minutes, récoltez des avis à vie.",
   icons: { icon: "/favicon.ico" },

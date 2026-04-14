@@ -11,7 +11,7 @@ export function AppProvider({ children }) {
   // Restore sidebar state
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("zreview-ui");
+      const saved = localStorage.getItem("visiumboost-ui");
       if (saved) {
         const data = JSON.parse(saved);
         if (typeof data.sidebarCollapsed === "boolean") {
@@ -23,7 +23,7 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem("zreview-ui", JSON.stringify({ sidebarCollapsed }));
+      localStorage.setItem("visiumboost-ui", JSON.stringify({ sidebarCollapsed }));
     } catch {}
   }, [sidebarCollapsed]);
 

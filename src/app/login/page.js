@@ -51,7 +51,7 @@ export default function LoginPage() {
           }}>
             <span style={{ color: "#fff", fontWeight: 800, fontSize: 20, letterSpacing: "-1px" }}>z</span>
           </div>
-          <span style={{ color: "#F1F5F9", fontWeight: 800, fontSize: 20, letterSpacing: "-0.4px" }}>zReview</span>
+          <span style={{ color: "#F1F5F9", fontWeight: 800, fontSize: 20, letterSpacing: "-0.4px" }}>VisiumBoost</span>
         </Link>
 
         <h2 style={{ fontSize: 36, fontWeight: 800, color: "#F1F5F9", lineHeight: 1.2, margin: "0 0 16px", letterSpacing: "-0.5px" }}>
@@ -100,7 +100,7 @@ export default function LoginPage() {
             }}>
               <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: "-1px" }}>z</span>
             </div>
-            <span style={{ fontWeight: 800, fontSize: 18, color: "#0F172A", letterSpacing: "-0.4px" }}>zReview</span>
+            <span style={{ fontWeight: 800, fontSize: 18, color: "#0F172A", letterSpacing: "-0.4px" }}>VisiumBoost</span>
           </Link>
 
           <h1 style={{ fontSize: 26, fontWeight: 800, margin: "0 0 6px", color: "#0F172A", letterSpacing: "-0.3px" }}>

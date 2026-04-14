@@ -34,7 +34,7 @@ export default function NotFound() {
           fontWeight: 700, fontSize: 14,
         }}
       >
-        Retour à zReview
+        Retour à VisiumBoost
       </a>
     </div>
   );

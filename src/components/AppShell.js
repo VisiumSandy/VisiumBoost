@@ -42,7 +42,7 @@ export default function AppShell({ user }) {
             <span className="text-white font-extrabold text-[17px]" style={{ letterSpacing: "-1px" }}>z</span>
           </div>
           <span className="font-extrabold text-xl text-slate-900" style={{ letterSpacing: "-0.4px" }}>
-            zReview
+            VisiumBoost
           </span>
         </div>
 
