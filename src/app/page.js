@@ -369,9 +369,9 @@ const TESTIMONIALS = [
 const TC = ["#2563EB","#7C3AED","#0891B2","#D97706","#059669","#DC2626"];
 
 const PLANS = [
-  { id:"free",    name:"Gratuit", price:"0",  desc:"Pour tester",              features:["1 établissement","50 scans/mois","Analytics basiques","Support email"],                               cta:"Commencer gratuitement", href:"/register" },
-  { id:"starter", name:"Starter",price:"29", desc:"Pour les indépendants",    features:["3 établissements","500 scans/mois","Analytics avancés","URL personnalisée","Support prioritaire"], cta:"Essai 14 jours gratuit",  href:"/register", highlight:true },
-  { id:"pro",     name:"Pro",    price:"79", desc:"Pour les chaînes & agences",features:["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],   cta:"Nous contacter",          href:"/register" },
+  { id:"free",    name:"Essentiel", price:"9,99",  desc:"Après votre essai gratuit",  features:["1 établissement","100 scans/mois","Roue personnalisée","Codes anti-fraude","Support email"],                     cta:"Démarrer l'essai gratuit", href:"/register" },
+  { id:"starter", name:"Starter",  price:"29",    desc:"Pour les indépendants",      features:["3 établissements","500 scans/mois","Analytics avancés","URL personnalisée","Support prioritaire"], cta:"Essai 14 jours gratuit",   href:"/register", highlight:true },
+  { id:"pro",     name:"Pro",      price:"79",    desc:"Pour les chaînes & agences", features:["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],   cta:"Nous contacter",           href:"/register" },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────

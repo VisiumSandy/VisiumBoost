@@ -4,14 +4,16 @@ import { useApp } from "@/lib/context";
 import Icon from "@/components/Icon";
 
 const MOBILE_ITEMS = [
-  { id: "dashboard", icon: "dashboard", label: "Accueil" },
-  { id: "clients", icon: "users", label: "Clients" },
-  { id: "wheel", icon: "wheel", label: "Roue" },
-  { id: "codes", icon: "code", label: "Codes" },
-  { id: "account", icon: "user", label: "Compte" },
+  { id: "dashboard",    icon: "dashboard", label: "Accueil" },
+  { id: "clients",      icon: "users",     label: "Clients" },
+  { id: "wheel",        icon: "wheel",     label: "Roue" },
+  { id: "codes",        icon: "code",      label: "Codes" },
+  { id: "account",      icon: "user",      label: "Compte" },
 ];
 
-export default function MobileNav() {
+const FREE_PAGES = ["subscription", "account"];
+
+export default function MobileNav({ hasAccess }) {
   const { currentPage, setCurrentPage } = useApp();
 
   return (
@@ -20,24 +22,16 @@ export default function MobileNav() {
     >
       {MOBILE_ITEMS.map((item) => {
         const active = currentPage === item.id;
+        const locked = !hasAccess && !FREE_PAGES.includes(item.id);
         return (
           <button
             key={item.id}
-            onClick={() => setCurrentPage(item.id)}
-            className="flex-1 flex flex-col items-center gap-1 py-2 border-none bg-transparent cursor-pointer"
+            onClick={() => !locked && setCurrentPage(item.id)}
+            className="flex-1 flex flex-col items-center gap-1 py-2 border-none bg-transparent"
+            style={{ cursor: locked ? "not-allowed" : "pointer", opacity: locked ? 0.35 : 1 }}
           >
-            <Icon
-              name={item.icon}
-              size={20}
-              color={active ? "#2563EB" : "#94A3B8"}
-            />
-            <span
-              className="text-[10px]"
-              style={{
-                color: active ? "#2563EB" : "#94A3B8",
-                fontWeight: active ? 700 : 500,
-              }}
-            >
+            <Icon name={item.icon} size={20} color={active ? "#2563EB" : "#94A3B8"} />
+            <span className="text-[10px]" style={{ color: active ? "#2563EB" : "#94A3B8", fontWeight: active ? 700 : 500 }}>
               {item.label}
             </span>
           </button>

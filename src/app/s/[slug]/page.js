@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { connectDB } from "@/lib/mongodb";
 import Entreprise from "@/lib/models/Entreprise";
+import User from "@/lib/models/User";
 import PlayClient from "./PlayClient";
+import { isAccessAllowed } from "@/lib/utils";
 
 // Server component — fetch data by slug
 export async function generateMetadata({ params }) {
@@ -17,6 +19,46 @@ export async function generateMetadata({ params }) {
   } catch {
     return { title: "VisiumBoost" };
   }
+}
+
+function WheelBlocked({ nom, couleur }) {
+  const c = couleur || "#2563EB";
+  return (
+    <div style={{
+      minHeight: "100dvh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      background: "#F8FAFC", fontFamily: "'DM Sans', system-ui, sans-serif",
+      padding: "24px",
+    }}>
+      <div style={{
+        background: "#fff", borderRadius: 24, padding: "48px 36px",
+        boxShadow: "0 8px 40px rgba(0,0,0,0.08)", textAlign: "center",
+        maxWidth: 420, width: "100%",
+        border: "1.5px solid #E2E8F0",
+      }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: "50%",
+          background: `${c}18`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 auto 20px",
+        }}>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", margin: "0 0 10px", letterSpacing: "-0.3px" }}>
+          Roue indisponible
+        </h2>
+        <p style={{ fontSize: 15, color: "#64748B", lineHeight: 1.65, margin: "0 0 8px" }}>
+          La roue de <strong style={{ color: "#0F172A" }}>{nom}</strong> n&apos;est pas accessible pour le moment.
+        </p>
+        <p style={{ fontSize: 13, color: "#94A3B8", lineHeight: 1.6, margin: 0 }}>
+          Veuillez contacter l&apos;établissement — il doit activer son abonnement VisiumBoost pour que la roue soit disponible.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default async function SubdomainPage({ params }) {
@@ -36,6 +78,19 @@ export default async function SubdomainPage({ params }) {
 
   if (!entreprise) {
     notFound();
+  }
+
+  // Check owner trial / subscription access
+  let ownerBlocked = false;
+  try {
+    const owner = await User.findById(entreprise.userId).select("plan trialEndsAt role").lean();
+    ownerBlocked = !isAccessAllowed(owner);
+  } catch {
+    ownerBlocked = false;
+  }
+
+  if (ownerBlocked) {
+    return <WheelBlocked nom={entreprise.nom} couleur={entreprise.couleur_principale} />;
   }
 
   // Serialize for client

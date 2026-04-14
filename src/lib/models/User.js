@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema(
     businessName: { type: String, trim: true, default: "" },
     googleLink: { type: String, trim: true, default: "" },
     phone: { type: String, trim: true, default: "" },
+    trialEndsAt: { type: Date, default: null },
     active: { type: Boolean, default: true },
     lastLogin: { type: Date, default: null },
     // Stats cached

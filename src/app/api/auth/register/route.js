@@ -23,6 +23,7 @@ export async function POST(req) {
     }
 
     const hashed = await bcrypt.hash(password, 12);
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     const user = await User.create({
       email: email.toLowerCase(),
       password: hashed,
@@ -30,6 +31,7 @@ export async function POST(req) {
       businessName: businessName || name,
       phone: phone || "",
       role: "client",
+      trialEndsAt,
     });
 
     const token = signToken({ id: user._id.toString(), email: user.email, role: user.role, name: user.name });

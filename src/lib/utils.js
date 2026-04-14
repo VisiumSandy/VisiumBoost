@@ -1,3 +1,27 @@
+// ─── Trial / access helpers ──────────────────────────────────────────
+
+/**
+ * Returns true if the user has active access (trial or paid plan).
+ * Admins always have access.
+ */
+export function isAccessAllowed(user) {
+  if (!user) return false;
+  if (user.role === "admin") return true;
+  if (user.plan === "starter" || user.plan === "pro") return true;
+  // free plan: check trial
+  if (user.trialEndsAt && new Date(user.trialEndsAt) > new Date()) return true;
+  return false;
+}
+
+/**
+ * Returns days remaining in trial (0 if expired or no trial).
+ */
+export function trialDaysLeft(user) {
+  if (!user?.trialEndsAt) return 0;
+  const diff = new Date(user.trialEndsAt) - new Date();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
 // ─── Generate unique anti-fraud code ────────────────────────────────
 export function generateCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

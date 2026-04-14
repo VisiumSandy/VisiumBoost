@@ -1,18 +1,20 @@
 "use client";
 
+import { isAccessAllowed, trialDaysLeft } from "@/lib/utils";
 import Icon from "@/components/Icon";
 
 const PLANS = [
   {
     id: "free",
-    name: "Gratuit",
-    price: "0 €",
+    name: "Essentiel",
+    price: "9,99 €",
     period: "/mois",
-    desc: "Pour démarrer et tester",
+    desc: "Pour démarrer après l'essai gratuit",
     features: [
       "1 établissement",
-      "50 scans/mois",
+      "100 scans/mois",
       "Roue personnalisée",
+      "Codes anti-fraude",
       "Support email",
     ],
   },
@@ -50,6 +52,10 @@ const PLANS = [
 
 const FAQ = [
   {
+    q: "Comment fonctionne l'essai gratuit ?",
+    a: "À l'inscription, vous bénéficiez de 14 jours d'accès complet et gratuit, sans carte bancaire. À l'issue de cette période, choisissez un plan pour continuer.",
+  },
+  {
     q: "Puis-je changer de plan à tout moment ?",
     a: "Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. Le changement est effectif immédiatement.",
   },
@@ -58,26 +64,63 @@ const FAQ = [
     a: "Non, tous nos plans sont sans engagement. Vous pouvez annuler à tout moment.",
   },
   {
-    q: "Comment fonctionne le plan gratuit ?",
-    a: "Le plan gratuit est illimité dans le temps. Vous pouvez tester VisiumBoost sans carte bancaire.",
+    q: "Que se passe-t-il si mon essai expire ?",
+    a: "Votre accès au tableau de bord est restreint et la roue de vos établissements est mise en pause. Vos données sont conservées — souscrivez un plan pour tout récupérer instantanément.",
   },
 ];
 
 export default function PageSubscription({ user }) {
   const currentPlan = user?.plan || "free";
+  const hasAccess   = isAccessAllowed(user);
+  const daysLeft    = trialDaysLeft(user);
+  const isAdmin     = user?.role === "admin";
 
   return (
     <div className="animate-fade-in">
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Choisissez votre plan</h1>
         <p className="text-slate-400 text-sm mt-1.5">
-          Sans engagement · Changez de plan à tout moment
+          14 jours offerts · Sans engagement · Sans carte bancaire
         </p>
       </div>
 
+      {/* Expired trial alert */}
+      {!isAdmin && !hasAccess && (
+        <div style={{
+          display: "flex", alignItems: "flex-start", gap: 14,
+          background: "#FEF2F2", border: "1.5px solid #FECACA",
+          borderRadius: 14, padding: "16px 20px", marginBottom: 28,
+        }}>
+          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, color: "#DC2626", fontSize: 14, marginBottom: 3 }}>Votre essai gratuit est terminé</div>
+            <div style={{ fontSize: 13, color: "#B91C1C", lineHeight: 1.6 }}>
+              Votre accès au tableau de bord est restreint et votre roue est hors ligne. Choisissez un plan ci-dessous pour rétablir l&apos;accès immédiatement.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Active trial info */}
+      {!isAdmin && hasAccess && daysLeft > 0 && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 12,
+          background: "#FFFBEB", border: "1.5px solid #FDE68A",
+          borderRadius: 12, padding: "12px 18px", marginBottom: 24,
+          fontSize: 13, color: "#92400E",
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Essai gratuit en cours — <strong>{daysLeft} jour{daysLeft > 1 ? "s" : ""} restant{daysLeft > 1 ? "s" : ""}</strong>. Souscrivez un plan avant expiration pour ne pas interrompre le service.</span>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-5 justify-center mb-10">
         {PLANS.map((plan) => {
-          const isCurrent = currentPlan === plan.id;
+          const isCurrent = currentPlan === plan.id && (hasAccess || isAdmin);
           return (
             <div
               key={plan.id}
