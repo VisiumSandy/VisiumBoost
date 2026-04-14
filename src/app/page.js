@@ -380,56 +380,123 @@ export default function LandingPage() {
           backgroundImage:`radial-gradient(${isDark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.03)"} 1px,transparent 1px)`,
           backgroundSize:"28px 28px" }}/>
 
-        <div style={{ maxWidth:760, margin:"0 auto", width:"100%", position:"relative", zIndex:1 }}>
-          <motion.div {...iv(0)} style={{ marginBottom:24, display:"flex", justifyContent:"center" }}>
-            <span style={{ display:"inline-flex", alignItems:"center", gap:8,
-              background:t.badge, border:`1px solid ${t.badgeBorder}`,
-              borderRadius:100, padding:"6px 16px", color:t.badgeText, fontWeight:600, fontSize:13 }}>
-              <motion.span animate={{ scale:[1,1.5,1] }} transition={{ duration:1.4, repeat:Infinity }}
-                style={{ width:7, height:7, borderRadius:"50%", background:t.accent, display:"inline-block" }}/>
-              500+ établissements actifs en France
-            </span>
-          </motion.div>
+        <div style={{ maxWidth:1200, margin:"0 auto", width:"100%", position:"relative", zIndex:1,
+          display:"flex", alignItems:"center", justifyContent:"space-between", gap:60, flexWrap:"wrap" }}>
 
-          <motion.h1 {...iv(0.07)} style={{ fontSize:"clamp(44px,6vw,80px)", fontWeight:900,
-            lineHeight:1.08, margin:"0 0 24px", letterSpacing:"-2.5px", color:t.text, textAlign:"center" }}>
-            Transformez chaque client en<br/>
-            <span style={{ background:"linear-gradient(135deg,#2563EB,#06B6D4,#8B5CF6)",
-              WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
-              ambassadeur Google
-            </span>
-          </motion.h1>
-
-          <motion.p {...iv(0.14)} style={{ color:t.text2, fontSize:18, lineHeight:1.8,
-            margin:"0 auto 44px", maxWidth:560, textAlign:"center" }}>
-            La roue de la fortune gamifiée qui booste vos avis Google <strong style={{ color:t.text }}>automatiquement</strong>.
-            Configurez en 5 minutes, récoltez des avis à vie.
-          </motion.p>
-
-          <motion.div {...iv(0.21)} style={{ display:"flex", gap:12, flexWrap:"wrap", justifyContent:"center", marginBottom:60 }}>
-            <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
-              <Link href="/register" style={{ display:"block", padding:"16px 36px", borderRadius:12, textDecoration:"none",
-                background:t.accent, color:"#fff", fontWeight:700, fontSize:16,
-                boxShadow:`0 8px 28px rgba(${t.accentHex},0.4)` }}>
-                Commencer gratuitement →
-              </Link>
+          {/* Left — text */}
+          <div style={{ flex:"1 1 420px", maxWidth:600 }}>
+            <motion.div {...iv(0)} style={{ marginBottom:24 }}>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:8,
+                background:t.badge, border:`1px solid ${t.badgeBorder}`,
+                borderRadius:100, padding:"6px 16px", color:t.badgeText, fontWeight:600, fontSize:13 }}>
+                <motion.span animate={{ scale:[1,1.5,1] }} transition={{ duration:1.4, repeat:Infinity }}
+                  style={{ width:7, height:7, borderRadius:"50%", background:t.accent, display:"inline-block" }}/>
+                500+ établissements actifs en France
+              </span>
             </motion.div>
-            <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
-              <Link href="/login" style={{ display:"block", padding:"16px 36px", borderRadius:12, textDecoration:"none",
-                background:"transparent", border:`1.5px solid ${t.border}`,
-                color:t.text2, fontWeight:600, fontSize:16 }}>
-                Voir une démo
-              </Link>
-            </motion.div>
-          </motion.div>
 
-          <motion.div {...iv(0.28)} style={{ display:"flex", gap:48, justifyContent:"center", flexWrap:"wrap",
-            paddingTop:36, borderTop:`1px solid ${t.border}` }}>
-            {[["500+","Établissements"],["4.9★","Note moyenne"],["98%","Satisfaction"],["<5min","Setup"]].map(([v,l])=>(
-              <div key={l} style={{ textAlign:"center" }}>
-                <div style={{ fontSize:24, fontWeight:800, color:t.text, letterSpacing:"-0.5px" }}>{v}</div>
-                <div style={{ fontSize:12, color:t.text3, marginTop:2, fontWeight:500 }}>{l}</div>
-              </div>
+            <motion.h1 {...iv(0.07)} style={{ fontSize:"clamp(40px,5.5vw,72px)", fontWeight:900,
+              lineHeight:1.08, margin:"0 0 24px", letterSpacing:"-2.5px", color:t.text }}>
+              Transformez chaque client en{" "}
+              <span style={{ background:"linear-gradient(135deg,#2563EB,#06B6D4,#8B5CF6)",
+                WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+                ambassadeur Google
+              </span>
+            </motion.h1>
+
+            <motion.p {...iv(0.14)} style={{ color:t.text2, fontSize:18, lineHeight:1.8, margin:"0 0 40px", maxWidth:500 }}>
+              La roue de la fortune gamifiée qui booste vos avis Google <strong style={{ color:t.text }}>automatiquement</strong>.
+              Configurez en 5 minutes, récoltez des avis à vie.
+            </motion.p>
+
+            <motion.div {...iv(0.21)} style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:52 }}>
+              <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
+                <Link href="/register" style={{ display:"block", padding:"16px 34px", borderRadius:12, textDecoration:"none",
+                  background:t.accent, color:"#fff", fontWeight:700, fontSize:16,
+                  boxShadow:`0 8px 28px rgba(${t.accentHex},0.4)` }}>
+                  Commencer gratuitement →
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
+                <Link href="/login" style={{ display:"block", padding:"16px 34px", borderRadius:12, textDecoration:"none",
+                  background:"transparent", border:`1.5px solid ${t.border}`,
+                  color:t.text2, fontWeight:600, fontSize:16 }}>
+                  Voir une démo
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            <motion.div {...iv(0.28)} style={{ display:"flex", gap:36, flexWrap:"wrap",
+              paddingTop:32, borderTop:`1px solid ${t.border}` }}>
+              {[["500+","Établissements"],["4.9★","Note moyenne"],["98%","Satisfaction"],["<5min","Setup"]].map(([v,l])=>(
+                <div key={l}>
+                  <div style={{ fontSize:24, fontWeight:800, color:t.text, letterSpacing:"-0.5px" }}>{v}</div>
+                  <div style={{ fontSize:12, color:t.text3, marginTop:2, fontWeight:500 }}>{l}</div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Right — wheel + floating cards */}
+          <motion.div initial={{ opacity:0, scale:0.75 }} animate={{ opacity:1, scale:1 }}
+            transition={{ duration:0.9, ease:E, delay:0.3 }}
+            style={{ flex:"1 1 300px", display:"flex", justifyContent:"center", alignItems:"center",
+              position:"relative", minHeight:400 }}>
+            {/* Wheel */}
+            <motion.div animate={{ y:[0,-18,0] }} transition={{ duration:4, repeat:Infinity, ease:"easeInOut" }}
+              style={{ position:"relative", width:300, height:300,
+                filter:`drop-shadow(0 40px 60px rgba(${t.accentHex},0.35)) drop-shadow(0 10px 20px rgba(0,0,0,0.2))` }}>
+              <motion.div animate={{ rotate:360 }} transition={{ duration:28, repeat:Infinity, ease:"linear" }}
+                style={{ width:"100%", height:"100%", borderRadius:"50%",
+                  background:`conic-gradient(${CONIC})`, position:"relative",
+                  boxShadow:"0 0 0 8px rgba(255,255,255,0.12), inset 0 0 40px rgba(0,0,0,0.3)" }}>
+                {SEG.map((_,i)=>(
+                  <div key={i} style={{ position:"absolute", top:"50%", left:"50%", width:"50%", height:2,
+                    background:"rgba(255,255,255,0.28)", transformOrigin:"0 50%",
+                    transform:`rotate(${(i/SEG.length)*360}deg)` }}/>
+                ))}
+                <div style={{ position:"absolute", top:"50%", left:"50%", width:32, height:32, borderRadius:"50%",
+                  background:"linear-gradient(135deg,#fff,#e2e8f0)", transform:"translate(-50%,-50%)",
+                  boxShadow:"0 4px 16px rgba(0,0,0,0.3)", zIndex:2 }}/>
+              </motion.div>
+              <div style={{ position:"absolute", top:-14, left:"50%", transform:"translateX(-50%)",
+                width:0, height:0, borderLeft:"11px solid transparent", borderRight:"11px solid transparent",
+                borderTop:"26px solid #F59E0B", filter:"drop-shadow(0 2px 6px rgba(245,158,11,0.7))", zIndex:5 }}/>
+            </motion.div>
+
+            {/* Floating cards */}
+            {[
+              { delay:0.6, style:{ top:"2%", left:"-8%", minWidth:160 }, content:(
+                <><div style={{ fontSize:10, color:"#94A3B8", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Dernier avis</div>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#2563EB,#06B6D4)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:12 }}>M</div>
+                  <div><div style={{ fontSize:13, fontWeight:700, color:"#F8FAFC" }}>Marie D.</div>
+                  <div style={{ display:"flex", gap:1 }}>{[...Array(5)].map((_,j)=><Ic.Star key={j} s={11}/>)}</div></div>
+                </div></>
+              )},
+              { delay:0.9, style:{ bottom:"8%", left:"-14%", minWidth:130 }, content:(
+                <><div style={{ fontSize:10, color:"#94A3B8", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Ce mois-ci</div>
+                <div style={{ fontSize:30, fontWeight:900, color:"#10B981", letterSpacing:"-1px" }}>+47</div>
+                <div style={{ fontSize:11, color:"#64748B" }}>avis Google</div></>
+              )},
+              { delay:1.2, style:{ bottom:"18%", right:"-6%", minWidth:150 }, content:(
+                <><div style={{ fontSize:10, color:"#94A3B8", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Cadeau gagné</div>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ width:32, height:32, borderRadius:9, background:"rgba(245,158,11,0.15)", border:"1px solid rgba(245,158,11,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><Ic.Star s={16}/></div>
+                  <div><div style={{ fontSize:14, fontWeight:800, color:"#F8FAFC" }}>−20%</div>
+                  <div style={{ fontSize:11, color:"#64748B" }}>prochaine visite</div></div>
+                </div></>
+              )},
+            ].map(({delay,style,content},i)=>(
+              <motion.div key={i} initial={{ opacity:0, scale:0.85 }} animate={{ opacity:1, scale:1 }}
+                transition={{ duration:0.5, delay, ease:E }}>
+                <motion.div animate={{ y:[0,-10,0] }} transition={{ duration:3+i*0.4, repeat:Infinity, ease:"easeInOut", delay:i*0.3 }}
+                  style={{ position:"absolute", background:"rgba(10,10,30,0.88)", backdropFilter:"blur(24px)",
+                    border:"1px solid rgba(255,255,255,0.13)", borderRadius:18, padding:"14px 18px",
+                    boxShadow:"0 12px 40px rgba(0,0,0,0.35)", zIndex:10, ...style }}>
+                  {content}
+                </motion.div>
+              </motion.div>
             ))}
           </motion.div>
         </div>
