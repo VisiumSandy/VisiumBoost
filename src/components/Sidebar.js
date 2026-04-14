@@ -37,16 +37,9 @@ export default function Sidebar({ user }) {
     >
       {/* Logo row */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-3">
-        <div
-          className="rounded-xl flex items-center justify-center shrink-0"
-          style={{ width: 36, height: 36, background: "linear-gradient(135deg, #3B82F6, #0EA5E9)" }}
-        >
-          <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, fontFamily: "'DM Sans', sans-serif", letterSpacing: "-1px" }}>z</span>
-        </div>
+        <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 36, objectFit: "contain", flexShrink: 0 }} />
         {!sidebarCollapsed && (
-          <span style={{ color: "#fff", fontWeight: 800, fontSize: 17, letterSpacing: "-0.4px" }}>
-            VisiumBoost
-          </span>
+          <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 22, objectFit: "contain" }} />
         )}
         {!sidebarCollapsed && (
           <button

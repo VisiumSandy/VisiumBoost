@@ -131,14 +131,8 @@ export default function AdminPage() {
         background: "#F8FAFC", fontFamily: "'Inter', sans-serif",
       }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: 16,
-            background: "linear-gradient(135deg, #6C5CE7, #00B894)",
-            margin: "0 auto 16px",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 900, fontSize: 26, fontFamily: "'Calistoga', serif" }}>z</span>
-          </div>
+          <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
+          <img src="/images/logo_second.png" alt="VisiumBoost" style={{ height: 64, objectFit: "contain", margin: "0 auto 16px", display: "block", animation: "pulse 1.6s ease-in-out infinite" }} />
           <p style={{ color: "#718096", fontSize: 14, fontFamily: "'Inter', sans-serif" }}>Chargement du panel admin…</p>
         </div>
       </div>
@@ -161,14 +155,8 @@ export default function AdminPage() {
         padding: "0 32px", height: 62,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: "linear-gradient(135deg, #6C5CE7, #00B894)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, fontFamily: "'Calistoga', serif" }}>z</span>
-          </div>
-          <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, fontFamily: "'Calistoga', serif" }}>VisiumBoost</span>
+          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 34, objectFit: "contain" }} />
+          <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 20, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
           <span style={{
             marginLeft: 8, padding: "3px 10px", borderRadius: 8,
             background: "rgba(108,92,231,0.25)", border: "1px solid rgba(108,92,231,0.4)",

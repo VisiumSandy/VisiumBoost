@@ -35,15 +35,8 @@ export default function AppShell({ user }) {
       >
         {/* Mobile header */}
         <div className="md:hidden flex items-center gap-3 mb-6">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg, #3B82F6, #0EA5E9)" }}
-          >
-            <span className="text-white font-extrabold text-[17px]" style={{ letterSpacing: "-1px" }}>z</span>
-          </div>
-          <span className="font-extrabold text-xl text-slate-900" style={{ letterSpacing: "-0.4px" }}>
-            VisiumBoost
-          </span>
+          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 36, objectFit: "contain" }} />
+          <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 22, objectFit: "contain" }} />
         </div>
 
         <div className="max-w-[1080px]">

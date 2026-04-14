@@ -27,14 +27,8 @@ export default function DashboardPage() {
         background: "#F8FAFC", fontFamily: "'Inter', sans-serif",
       }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 14,
-            background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
-            margin: "0 auto 16px",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 22, letterSpacing: "-1px" }}>z</span>
-          </div>
+          <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
+          <img src="/images/logo_second.png" alt="VisiumBoost" style={{ height: 64, objectFit: "contain", margin: "0 auto 16px", display: "block", animation: "pulse 1.6s ease-in-out infinite" }} />
           <p style={{ color: "#64748B", fontSize: 14 }}>Chargement…</p>
         </div>
       </div>

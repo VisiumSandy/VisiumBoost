@@ -44,14 +44,8 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 64 }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 11,
-            background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 20, letterSpacing: "-1px" }}>z</span>
-          </div>
-          <span style={{ color: "#F1F5F9", fontWeight: 800, fontSize: 20, letterSpacing: "-0.4px" }}>VisiumBoost</span>
+          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 38, objectFit: "contain" }} />
+          <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 24, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
         </Link>
 
         <h2 style={{ fontSize: 36, fontWeight: 800, color: "#F1F5F9", lineHeight: 1.2, margin: "0 0 16px", letterSpacing: "-0.5px" }}>
@@ -93,14 +87,8 @@ export default function LoginPage() {
         <div style={{ width: "100%", maxWidth: 400 }}>
           {/* Mobile logo */}
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 40 }} className="md:hidden">
-            <div style={{
-              width: 34, height: 34, borderRadius: 10,
-              background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: "-1px" }}>z</span>
-            </div>
-            <span style={{ fontWeight: 800, fontSize: 18, color: "#0F172A", letterSpacing: "-0.4px" }}>VisiumBoost</span>
+            <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 34, objectFit: "contain" }} />
+            <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 22, objectFit: "contain" }} />
           </Link>
 
           <h1 style={{ fontSize: 26, fontWeight: 800, margin: "0 0 6px", color: "#0F172A", letterSpacing: "-0.3px" }}>
