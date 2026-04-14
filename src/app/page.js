@@ -669,51 +669,74 @@ export default function LandingPage() {
             <h2 style={{ fontSize:"clamp(28px,4vw,48px)", fontWeight:900, margin:"0 0 14px", letterSpacing:"-1.5px", color:t.text }}>Simple et transparent</h2>
             <p style={{ color:t.text2, fontSize:16, maxWidth:360, margin:"0 auto" }}>Sans engagement. Annulez quand vous voulez.</p>
           </motion.div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(270px,1fr))", gap:18, alignItems:"center" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:20, alignItems:"stretch" }}>
             {PLANS.map((plan,i)=>(
-              <TiltCard key={plan.id}>
-                <motion.div {...iv(i*0.1)} whileHover={{ y:-8 }} transition={{ type:"spring", stiffness:300, damping:22 }}
-                  style={{ borderRadius:22, padding:"38px 32px", position:"relative", overflow:"hidden",
+              <TiltCard key={plan.id} style={{ paddingTop: plan.highlight ? 20 : 0 }}>
+                <motion.div {...iv(i*0.1)} whileHover={{ y:-6 }} transition={{ type:"spring", stiffness:300, damping:22 }}
+                  style={{ borderRadius:22, padding:"36px 32px", position:"relative", height:"100%",
+                    display:"flex", flexDirection:"column",
                     ...(plan.highlight ? {
                       background:isDark?"linear-gradient(145deg,#0F172A,#1a1440)":"#0F172A",
-                      border:`1px solid rgba(${t.accentHex},0.4)`,
-                      boxShadow:`0 0 0 1px rgba(${t.accentHex},0.15),0 32px 64px rgba(${t.accentHex},0.2)`,
+                      border:`1px solid rgba(${t.accentHex},0.45)`,
+                      boxShadow:`0 0 0 1px rgba(${t.accentHex},0.12), 0 24px 60px rgba(${t.accentHex},0.18)`,
                     }:{
                       background:t.card, border:`1px solid ${t.border}`, boxShadow:t.shadow,
                     }) }}>
+
+                  {/* Glow orb inside card (does not clip) */}
                   {plan.highlight && (
-                    <>
-                      <div style={{ position:"absolute", top:-60, left:"50%", transform:"translateX(-50%)", width:220, height:140,
-                        background:`radial-gradient(ellipse,rgba(${t.accentHex},0.25),transparent 70%)` }}/>
-                      <div style={{ position:"absolute", top:-12, left:"50%", transform:"translateX(-50%)",
-                        background:`linear-gradient(135deg,${t.accent},#06B6D4)`, color:"#fff", fontWeight:700,
-                        fontSize:11, padding:"3px 18px", borderRadius:100, whiteSpace:"nowrap", letterSpacing:0.5 }}>
-                        ⚡ Le plus populaire
-                      </div>
-                    </>
+                    <div style={{ position:"absolute", top:-40, left:"50%", transform:"translateX(-50%)",
+                      width:220, height:120, borderRadius:"50%",
+                      background:`radial-gradient(ellipse,rgba(${t.accentHex},0.22),transparent 70%)`,
+                      pointerEvents:"none" }}/>
                   )}
-                  <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1.2,
-                    color:plan.highlight?"#60A5FA":t.text3, marginBottom:10 }}>{plan.name}</div>
-                  <div style={{ display:"flex", alignItems:"baseline", gap:4, marginBottom:5 }}>
-                    <span style={{ fontSize:52, fontWeight:900, color:plan.highlight?"#F8FAFC":t.text, letterSpacing:"-2px", lineHeight:1 }}>{plan.price}€</span>
-                    <span style={{ color:plan.highlight?"#475569":t.text3, fontSize:14 }}>/mois</span>
+
+                  {/* Badge above card */}
+                  {plan.highlight && (
+                    <div style={{ position:"absolute", top:-16, left:"50%", transform:"translateX(-50%)",
+                      background:`linear-gradient(135deg,${t.accent},#06B6D4)`, color:"#fff", fontWeight:700,
+                      fontSize:11, padding:"4px 20px", borderRadius:100, whiteSpace:"nowrap",
+                      letterSpacing:0.5, boxShadow:`0 4px 14px rgba(${t.accentHex},0.45)` }}>
+                      ⚡ Le plus populaire
+                    </div>
+                  )}
+
+                  {/* Plan name */}
+                  <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1.4,
+                    color:plan.highlight?"#60A5FA":t.text3, marginBottom:12 }}>{plan.name}</div>
+
+                  {/* Price */}
+                  <div style={{ display:"flex", alignItems:"baseline", gap:4, marginBottom:6 }}>
+                    <span style={{ fontSize:54, fontWeight:900, color:plan.highlight?"#F8FAFC":t.text,
+                      letterSpacing:"-2px", lineHeight:1 }}>{plan.price}€</span>
+                    <span style={{ color:plan.highlight?"#64748B":t.text3, fontSize:14 }}>/mois</span>
                   </div>
-                  <p style={{ color:plan.highlight?"#64748B":t.text3, fontSize:13, margin:"0 0 26px" }}>{plan.desc}</p>
-                  <ul style={{ listStyle:"none", padding:0, margin:"0 0 30px", display:"flex", flexDirection:"column", gap:10 }}>
+                  <p style={{ color:plan.highlight?"#64748B":t.text3, fontSize:13, margin:"0 0 24px", lineHeight:1.5 }}>{plan.desc}</p>
+
+                  {/* Separator */}
+                  <div style={{ height:1, background:plan.highlight?"rgba(255,255,255,0.08)":t.border, marginBottom:20 }}/>
+
+                  {/* Features */}
+                  <ul style={{ listStyle:"none", padding:0, margin:"0 0 28px", display:"flex", flexDirection:"column", gap:12, flex:1 }}>
                     {plan.features.map(feat=>(
-                      <li key={feat} style={{ display:"flex", alignItems:"center", gap:10, fontSize:13, color:plan.highlight?"#CBD5E1":t.text2 }}>
-                        <Ic.Check s={14} c={plan.highlight?t.accent:"#10B981"}/>{feat}
+                      <li key={feat} style={{ display:"flex", alignItems:"center", gap:10, fontSize:13,
+                        color:plan.highlight?"#CBD5E1":t.text2 }}>
+                        <span style={{ flexShrink:0 }}><Ic.Check s={14} c={plan.highlight?t.accent:"#10B981"}/></span>
+                        {feat}
                       </li>
                     ))}
                   </ul>
-                  <motion.div whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}>
-                    <Link href={plan.href} style={{ display:"block", textAlign:"center", padding:"14px", borderRadius:12,
-                      textDecoration:"none", fontWeight:700, fontSize:14,
+
+                  {/* CTA */}
+                  <motion.div whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}>
+                    <Link href={plan.href} style={{ display:"block", textAlign:"center", padding:"14px 20px",
+                      borderRadius:12, textDecoration:"none", fontWeight:700, fontSize:14,
                       ...(plan.highlight?{
                         background:`linear-gradient(135deg,${t.accent},#06B6D4)`,
-                        color:"#fff", boxShadow:`0 8px 24px rgba(${t.accentHex},0.4)`,
+                        color:"#fff", boxShadow:`0 6px 20px rgba(${t.accentHex},0.4)`,
                       }:{
-                        background:"transparent", color:t.accent, border:`1.5px solid ${t.accent}55`,
+                        background:"transparent", color:t.accent,
+                        border:`1.5px solid rgba(${t.accentHex},0.35)`,
                       }) }}>
                       {plan.cta}
                     </Link>
