@@ -155,7 +155,7 @@ export default function AdminPage() {
         padding: "0 32px", height: 62,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 34, objectFit: "contain" }} />
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 34, objectFit: "contain" }} />
           <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 20, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
           <span style={{
             marginLeft: 8, padding: "3px 10px", borderRadius: 8,

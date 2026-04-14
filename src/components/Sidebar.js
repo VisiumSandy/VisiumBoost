@@ -38,7 +38,7 @@ export default function Sidebar({ user }) {
       {/* Logo row */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-3">
         <img
-          src="/images/logo_main.png"
+          src="/images/logo_main2.png"
           alt="VisiumBoost"
           style={{ height: sidebarCollapsed ? 36 : 48, objectFit: "contain", flexShrink: 0, transition: "height 0.3s" }}
         />

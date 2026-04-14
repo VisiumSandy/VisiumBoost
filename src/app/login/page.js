@@ -44,7 +44,7 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <Link href="/" style={{ textDecoration: "none", marginBottom: 64, display: "block" }}>
-          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 56, objectFit: "contain" }} />
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 56, objectFit: "contain" }} />
         </Link>
 
         <h2 style={{ fontSize: 36, fontWeight: 800, color: "#F1F5F9", lineHeight: 1.2, margin: "0 0 16px", letterSpacing: "-0.5px" }}>
@@ -85,7 +85,7 @@ export default function LoginPage() {
       }}>
         <div style={{ width: "100%", maxWidth: 400 }}>
           <Link href="/" style={{ textDecoration: "none", display: "block", marginBottom: 40 }}>
-            <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 56, objectFit: "contain" }} />
+            <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 56, objectFit: "contain" }} />
           </Link>
 
           <h1 style={{ fontSize: 26, fontWeight: 800, margin: "0 0 6px", color: "#0F172A", letterSpacing: "-0.3px" }}>

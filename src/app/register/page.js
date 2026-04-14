@@ -51,7 +51,7 @@ export default function RegisterPage() {
         }}
       >
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 64 }}>
-          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 38, objectFit: "contain" }} />
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 38, objectFit: "contain" }} />
           <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 24, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
         </Link>
 
@@ -89,7 +89,7 @@ export default function RegisterPage() {
         <div style={{ width: "100%", maxWidth: 420 }}>
           {/* Mobile logo */}
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 36 }} className="md:hidden">
-            <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 34, objectFit: "contain" }} />
+            <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 34, objectFit: "contain" }} />
             <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 22, objectFit: "contain" }} />
           </Link>
 

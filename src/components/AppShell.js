@@ -35,7 +35,7 @@ export default function AppShell({ user }) {
       >
         {/* Mobile header */}
         <div className="md:hidden flex items-center mb-6">
-          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 48, objectFit: "contain" }} />
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 48, objectFit: "contain" }} />
         </div>
 
         <div className="max-w-[1080px]">
