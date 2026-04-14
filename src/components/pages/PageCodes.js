@@ -88,7 +88,7 @@ export default function PageCodes() {
             onChange={e => { setQuickCode(e.target.value.toUpperCase()); setQuickResult(null); }}
             onKeyDown={e => e.key === "Enter" && handleQuickValidate()}
             placeholder="WIN-XXXX-XXXX"
-            maxLength={12}
+            maxLength={20}
             style={{
               flex: "1 1 200px", padding: "12px 18px", borderRadius: 12,
               border: "2px solid #E2E8F0", fontSize: 18, fontWeight: 700,
