@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Icon from "@/components/Icon";
+import ImageUpload from "@/components/ImageUpload";
 
 const CUSTOM_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "";
@@ -12,7 +13,7 @@ function getPublicUrl(slug) {
 }
 
 const emptyForm = {
-  nom: "", slug: "", lien_avis: "",
+  nom: "", slug: "", lien_avis: "", logo: "",
   couleur_principale: "#3B82F6",
   couleur_secondaire: "#0EA5E9",
   cta_text: "Laissez-nous un avis et tentez votre chance !",
@@ -175,6 +176,14 @@ export default function PageClients() {
                 style={inp}
                 onFocus={e => e.target.style.borderColor = "#3B82F6"}
                 onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+              />
+            </div>
+
+            <div style={{ gridColumn: "1 / -1" }}>
+              <ImageUpload
+                label="Logo"
+                value={form.logo}
+                onChange={url => setForm(p => ({ ...p, logo: url }))}
               />
             </div>
 

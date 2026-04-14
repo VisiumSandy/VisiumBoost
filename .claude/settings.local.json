@@ -16,7 +16,8 @@
       "Bash(python3 \"C:/Users/sandax/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"SaaS B2B review gamification dashboard modern minimal\" --design-system -p \"zReview\" -f markdown)",
       "Bash(python \"C:/Users/sandax/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"SaaS B2B review gamification dashboard modern minimal\" --design-system -p \"zReview\" -f markdown)",
       "Bash(python:*)",
-      "Bash(rtk next:*)"
+      "Bash(rtk next:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }

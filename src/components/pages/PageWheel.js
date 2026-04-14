@@ -5,6 +5,7 @@ import { uid } from "@/lib/utils";
 import Icon from "@/components/Icon";
 import SpinWheel from "@/components/SpinWheel";
 import Confetti from "@/components/Confetti";
+import ImageUpload from "@/components/ImageUpload";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://visium-boost.fr";
 
@@ -13,6 +14,7 @@ const DEFAULT_CONFIG = {
   primaryColor: "#3B82F6",
   secondaryColor: "#0EA5E9",
   ctaText: "Laissez-nous un avis et tentez votre chance !",
+  logoUrl: "",
   rewards: [],
 };
 
@@ -23,6 +25,7 @@ function entrepriseToConfig(e) {
     primaryColor:   e.couleur_principale   || "#3B82F6",
     secondaryColor: e.couleur_secondaire   || "#0EA5E9",
     ctaText:        e.cta_text             || DEFAULT_CONFIG.ctaText,
+    logoUrl:        e.logo                 || "",
     // Entreprise stocke "probability", PageWheel utilise "prob" en interne
     rewards: (e.rewards || []).map(r => ({
       id:   r.id || r._id?.toString() || uid(),
@@ -101,6 +104,7 @@ export default function PageWheel() {
           couleur_principale:  config.primaryColor,
           couleur_secondaire:  config.secondaryColor,
           cta_text:            config.ctaText,
+          logo:                config.logoUrl,
           // Remap "prob" → "probability" pour le modèle Entreprise
           rewards: config.rewards.map(r => ({
             id:          r.id,
@@ -360,6 +364,14 @@ export default function PageWheel() {
               style={inp}
               onFocus={e => e.target.style.borderColor = "#3B82F6"}
               onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+            />
+          </div>
+
+          <div style={{ marginBottom: 8 }}>
+            <ImageUpload
+              label="Logo"
+              value={config.logoUrl}
+              onChange={url => update("logoUrl", url)}
             />
           </div>
 
