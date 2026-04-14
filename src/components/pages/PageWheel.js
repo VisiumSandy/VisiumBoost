@@ -6,6 +6,8 @@ import Icon from "@/components/Icon";
 import SpinWheel from "@/components/SpinWheel";
 import Confetti from "@/components/Confetti";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://visium-boost.fr";
+
 const DEFAULT_CONFIG = {
   googleLink: "",
   primaryColor: "#3B82F6",
@@ -14,77 +16,60 @@ const DEFAULT_CONFIG = {
   rewards: [],
 };
 
+// Charge les champs d'une Entreprise dans le format interne de PageWheel
+function entrepriseToConfig(e) {
+  return {
+    googleLink:     e.lien_avis            || "",
+    primaryColor:   e.couleur_principale   || "#3B82F6",
+    secondaryColor: e.couleur_secondaire   || "#0EA5E9",
+    ctaText:        e.cta_text             || DEFAULT_CONFIG.ctaText,
+    // Entreprise stocke "probability", PageWheel utilise "prob" en interne
+    rewards: (e.rewards || []).map(r => ({
+      id:   r.id || r._id?.toString() || uid(),
+      name: r.name || "",
+      prob: r.probability ?? 0,
+    })),
+  };
+}
+
 export default function PageWheel() {
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [step, setStep] = useState(1);
+  const [entreprises, setEntreprises]   = useState([]);
+  const [selectedId, setSelectedId]     = useState(null);
+  const [config, setConfig]             = useState(DEFAULT_CONFIG);
+  const [loading, setLoading]           = useState(true);
+  const [saving, setSaving]             = useState(false);
+  const [saved, setSaved]               = useState(false);
+  const [step, setStep]                 = useState(1);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [entreprises, setEntreprises] = useState([]);
-  const [copiedSlug, setCopiedSlug] = useState(null);
+  const [previewOpen, setPreviewOpen]   = useState(false);
+  const [copiedSlug, setCopiedSlug]     = useState(null);
   const qrCanvasRefs = useRef({});
 
+  // ─── Chargement initial ─────────────────────────────────────────────
   useEffect(() => {
-    fetch("/api/user/wheel")
+    fetch("/api/entreprises")
       .then(r => r.json())
       .then(d => {
-        if (d.config) {
-          setConfig({
-            googleLink:     d.config.googleLink     || "",
-            primaryColor:   d.config.primaryColor   || "#3B82F6",
-            secondaryColor: d.config.secondaryColor || "#0EA5E9",
-            ctaText:        d.config.ctaText        || DEFAULT_CONFIG.ctaText,
-            rewards:        d.config.rewards        || [],
-          });
+        const list = d.entreprises || [];
+        setEntreprises(list);
+        if (list.length > 0) {
+          setSelectedId(list[0]._id);
+          setConfig(entrepriseToConfig(list[0]));
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-
-    fetch("/api/entreprises")
-      .then(r => r.json())
-      .then(d => setEntreprises(d.entreprises || []))
-      .catch(() => {});
   }, []);
 
-  const getPublicUrl = (slug) => {
-    const base = process.env.NEXT_PUBLIC_APP_URL || "https://visium-boost.fr";
-    return `${base}/roue/${slug}`;
+  // ─── Changement d'entreprise sélectionnée ───────────────────────────
+  const handleSelectEntreprise = (id) => {
+    setSelectedId(id);
+    const e = entreprises.find(x => x._id === id);
+    if (e) setConfig(entrepriseToConfig(e));
+    setSaved(false);
   };
 
-  const copyLink = async (slug) => {
-    await navigator.clipboard.writeText(getPublicUrl(slug));
-    setCopiedSlug(slug);
-    setTimeout(() => setCopiedSlug(null), 2000);
-  };
-
-  const downloadQR = (slug) => {
-    const canvas = qrCanvasRefs.current[slug];
-    if (!canvas) return;
-    const link = document.createElement("a");
-    link.download = `qr-${slug}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  };
-
-  // Génère le QR code sur un canvas via la lib qrcode
-  const QRCanvas = ({ slug }) => {
-    const ref = useRef(null);
-    useEffect(() => {
-      if (!ref.current) return;
-      qrCanvasRefs.current[slug] = ref.current;
-      import("qrcode").then(QRCode => {
-        QRCode.toCanvas(ref.current, getPublicUrl(slug), {
-          width: 160, margin: 2,
-          color: { dark: "#0F172A", light: "#ffffff" },
-        }).catch(() => {});
-      });
-    }, [slug]);
-    return <canvas ref={ref} style={{ borderRadius: 10 }} />;
-  };
-
+  // ─── Helpers état config ────────────────────────────────────────────
   const update = (field, val) => setConfig(prev => ({ ...prev, [field]: val }));
 
   const addReward = () =>
@@ -102,18 +87,70 @@ export default function PageWheel() {
     update("rewards", next);
   };
 
+  // ─── Sauvegarde → PATCH /api/entreprises (modèle Entreprise) ────────
   const handleSave = async () => {
+    if (!selectedId) return;
     setSaving(true); setSaved(false);
     try {
-      await fetch("/api/user/wheel", {
-        method: "PUT",
+      const r = await fetch("/api/entreprises", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
+        body: JSON.stringify({
+          id: selectedId,
+          lien_avis:           config.googleLink,
+          couleur_principale:  config.primaryColor,
+          couleur_secondaire:  config.secondaryColor,
+          cta_text:            config.ctaText,
+          // Remap "prob" → "probability" pour le modèle Entreprise
+          rewards: config.rewards.map(r => ({
+            id:          r.id,
+            name:        r.name,
+            probability: r.prob,
+          })),
+        }),
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      if (r.ok) {
+        // Mettre à jour la liste locale pour refléter les nouvelles valeurs
+        const { entreprise: updated } = await r.json();
+        setEntreprises(prev => prev.map(e => e._id === updated._id ? updated : e));
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
     } catch {}
     setSaving(false);
+  };
+
+  // ─── QR Code ────────────────────────────────────────────────────────
+  const getPublicUrl = (slug) => `${APP_URL}/roue/${slug}`;
+
+  const copyLink = async (slug) => {
+    await navigator.clipboard.writeText(getPublicUrl(slug));
+    setCopiedSlug(slug);
+    setTimeout(() => setCopiedSlug(null), 2000);
+  };
+
+  const downloadQR = (slug) => {
+    const canvas = qrCanvasRefs.current[slug];
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `qr-${slug}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  const QRCanvas = ({ slug }) => {
+    const ref = useRef(null);
+    useEffect(() => {
+      if (!ref.current) return;
+      qrCanvasRefs.current[slug] = ref.current;
+      import("qrcode").then(QRCode => {
+        QRCode.toCanvas(ref.current, getPublicUrl(slug), {
+          width: 160, margin: 2,
+          color: { dark: "#0F172A", light: "#ffffff" },
+        }).catch(() => {});
+      });
+    }, [slug]);
+    return <canvas ref={ref} style={{ borderRadius: 10 }} />;
   };
 
   const totalProb = config.rewards.reduce((s, r) => s + (r.prob || 0), 0);
@@ -131,23 +168,47 @@ export default function PageWheel() {
     fontFamily: "'DM Sans', sans-serif", color: "#0F172A",
   };
 
+  // ─── Loading ─────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="animate-fade-in">
         <div className="mb-7">
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Ma Roue</h1>
         </div>
-        <div className="card p-12 text-center text-slate-300 text-sm">Chargement de la configuration…</div>
+        <div className="card p-12 text-center text-slate-300 text-sm">Chargement…</div>
       </div>
     );
   }
+
+  // ─── Aucune entreprise ───────────────────────────────────────────────
+  if (entreprises.length === 0) {
+    return (
+      <div className="animate-fade-in">
+        <div className="mb-7">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Ma Roue</h1>
+        </div>
+        <div className="card p-12 text-center">
+          <div style={{ fontSize: 40, marginBottom: 14 }}>🏪</div>
+          <p style={{ fontWeight: 700, color: "#0F172A", marginBottom: 6 }}>
+            Aucun établissement trouvé
+          </p>
+          <p style={{ color: "#94A3B8", fontSize: 13 }}>
+            Créez d&apos;abord un établissement dans{" "}
+            <strong>Mes entreprises</strong> pour configurer votre roue.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const selectedEntreprise = entreprises.find(e => e._id === selectedId);
 
   return (
     <div className="animate-fade-in">
       <Confetti active={showConfetti} />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-7 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Ma Roue</h1>
           <p className="text-slate-400 text-sm mt-1">Configurez votre roue de la fortune en 3 étapes</p>
@@ -170,6 +231,29 @@ export default function PageWheel() {
           </button>
         </div>
       </div>
+
+      {/* Sélecteur d'établissement */}
+      {entreprises.length > 1 && (
+        <div className="card p-4 mb-5">
+          <label style={{ fontSize: 12, fontWeight: 700, color: "#64748B", display: "block", marginBottom: 7 }}>
+            Établissement à configurer
+          </label>
+          <select
+            value={selectedId || ""}
+            onChange={e => handleSelectEntreprise(e.target.value)}
+            style={{
+              ...inp, width: "auto", minWidth: 260, padding: "9px 13px",
+              cursor: "pointer",
+            }}
+            onFocus={e => e.target.style.borderColor = "#3B82F6"}
+            onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+          >
+            {entreprises.map(e => (
+              <option key={e._id} value={e._id}>{e.nom}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Step indicators */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, alignItems: "center", flexWrap: "wrap" }}>
@@ -203,14 +287,13 @@ export default function PageWheel() {
         ))}
       </div>
 
-      {/* STEP 1 */}
+      {/* STEP 1 — Lien Google */}
       {step === 1 && (
         <div className="card p-6">
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
             <Icon name="link" size={18} color="#2563EB" />
             Lien d&apos;avis Google
           </h3>
-
           <input
             value={config.googleLink}
             onChange={e => update("googleLink", e.target.value)}
@@ -222,7 +305,6 @@ export default function PageWheel() {
           <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 6 }}>
             Récupérez ce lien depuis votre fiche Google Business → Obtenir plus d&apos;avis
           </p>
-
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
             <button onClick={() => setStep(2)} className="btn-primary">
               Suivant
@@ -232,7 +314,7 @@ export default function PageWheel() {
         </div>
       )}
 
-      {/* STEP 2 */}
+      {/* STEP 2 — Personnalisation */}
       {step === 2 && (
         <div className="card p-6">
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 20 }}>
@@ -281,23 +363,6 @@ export default function PageWheel() {
             />
           </div>
 
-          <div style={{ marginBottom: 8 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 6 }}>
-              Logo
-            </label>
-            <div style={{
-              border: "2px dashed #E2E8F0", borderRadius: 12, padding: "28px 20px",
-              textAlign: "center", cursor: "pointer", transition: "border-color 0.2s",
-            }}>
-              <Icon name="qr" size={28} color="#CBD5E1" />
-              <div style={{ color: "#94A3B8", fontSize: 13, marginTop: 8 }}>
-                Glissez votre logo ici ou{" "}
-                <span style={{ color: "#2563EB", fontWeight: 600 }}>parcourir</span>
-              </div>
-              <div style={{ color: "#CBD5E1", fontSize: 12, marginTop: 4 }}>PNG, JPG · Max 2 Mo</div>
-            </div>
-          </div>
-
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
             <button onClick={() => setStep(1)} className="btn-secondary">Retour</button>
             <button onClick={() => setStep(3)} className="btn-primary">
@@ -308,7 +373,7 @@ export default function PageWheel() {
         </div>
       )}
 
-      {/* STEP 3 */}
+      {/* STEP 3 — Récompenses */}
       {step === 3 && (
         <div className="card p-6">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
@@ -321,16 +386,19 @@ export default function PageWheel() {
               color: totalProb === 100 ? "#10B981" : totalProb > 100 ? "#EF4444" : "#F59E0B",
             }}>
               Total : {totalProb}%
-              {totalProb !== 100 && <span style={{ fontSize: 12, fontWeight: 500, marginLeft: 6 }}>— doit être = 100%</span>}
+              {totalProb !== 100 && (
+                <span style={{ fontSize: 12, fontWeight: 500, marginLeft: 6 }}>— doit être = 100%</span>
+              )}
             </span>
           </div>
 
           {config.rewards.length === 0 && (
             <div style={{
               padding: "24px", borderRadius: 12, background: "#F8FAFC",
-              border: "1.5px dashed #E2E8F0", textAlign: "center", marginBottom: 14, color: "#94A3B8", fontSize: 13,
+              border: "1.5px dashed #E2E8F0", textAlign: "center", marginBottom: 14,
+              color: "#94A3B8", fontSize: 13,
             }}>
-              Aucune récompense ajoutée. Cliquez sur "Ajouter une récompense".
+              Aucune récompense ajoutée. Cliquez sur &quot;Ajouter une récompense&quot;.
             </div>
           )}
 
@@ -387,11 +455,11 @@ export default function PageWheel() {
             <button onClick={() => setStep(2)} className="btn-secondary">Retour</button>
             <button
               onClick={handleSave}
-              disabled={saving || totalProb !== 100}
+              disabled={saving || totalProb !== 100 || !selectedId}
               className="btn-primary"
               style={{
-                opacity: saving || totalProb !== 100 ? 0.5 : 1,
-                cursor: saving || totalProb !== 100 ? "not-allowed" : "pointer",
+                opacity: saving || totalProb !== 100 || !selectedId ? 0.5 : 1,
+                cursor: saving || totalProb !== 100 || !selectedId ? "not-allowed" : "pointer",
               }}
             >
               {saving ? "Sauvegarde…" : "Enregistrer la configuration"}
@@ -401,7 +469,7 @@ export default function PageWheel() {
       )}
 
       {/* Section Publier */}
-      {entreprises.length > 0 && (
+      {selectedEntreprise && (
         <div className="card p-6 mt-5">
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
             <Icon name="qr" size={20} color="#2563EB" />
@@ -415,60 +483,49 @@ export default function PageWheel() {
             </div>
           </div>
 
-          {entreprises.map(e => (
-            <div key={e._id} style={{
-              border: "1.5px solid #E2E8F0", borderRadius: 14, padding: "16px 18px",
-              marginBottom: 12, display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap",
-            }}>
-              {/* QR */}
-              <div style={{ flexShrink: 0 }}>
-                <QRCanvas slug={e.slug} />
-              </div>
-
-              {/* Infos + actions */}
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <p style={{ fontWeight: 700, color: "#0F172A", fontSize: 14, margin: "0 0 6px" }}>
-                  {e.nom}
-                </p>
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  background: "#F8FAFC", borderRadius: 8, padding: "8px 12px",
-                  border: "1.5px solid #E2E8F0", marginBottom: 12, flexWrap: "wrap",
+          <div style={{
+            border: "1.5px solid #E2E8F0", borderRadius: 14, padding: "16px 18px",
+            display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap",
+          }}>
+            <div style={{ flexShrink: 0 }}>
+              <QRCanvas slug={selectedEntreprise.slug} />
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ fontWeight: 700, color: "#0F172A", fontSize: 14, margin: "0 0 6px" }}>
+                {selectedEntreprise.nom}
+              </p>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                background: "#F8FAFC", borderRadius: 8, padding: "8px 12px",
+                border: "1.5px solid #E2E8F0", marginBottom: 12,
+              }}>
+                <span style={{
+                  fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#475569",
+                  flex: 1, wordBreak: "break-all",
                 }}>
-                  <span style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#475569",
-                    flex: 1, wordBreak: "break-all",
-                  }}>
-                    {getPublicUrl(e.slug)}
-                  </span>
-                </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button
-                    onClick={() => copyLink(e.slug)}
-                    className="btn-primary"
-                    style={{ padding: "8px 16px", fontSize: 13, borderRadius: 9, display: "flex", alignItems: "center", gap: 6 }}
-                  >
-                    <Icon name="copy" size={14} color="#fff" />
-                    {copiedSlug === e.slug ? "✓ Copié !" : "Copier le lien"}
-                  </button>
-                  <button
-                    onClick={() => downloadQR(e.slug)}
-                    className="btn-secondary"
-                    style={{ padding: "8px 16px", fontSize: 13, borderRadius: 9, display: "flex", alignItems: "center", gap: 6 }}
-                  >
-                    <Icon name="download" size={14} />
-                    Télécharger QR
-                  </button>
-                </div>
+                  {getPublicUrl(selectedEntreprise.slug)}
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  onClick={() => copyLink(selectedEntreprise.slug)}
+                  className="btn-primary"
+                  style={{ padding: "8px 16px", fontSize: 13, borderRadius: 9, display: "flex", alignItems: "center", gap: 6 }}
+                >
+                  <Icon name="copy" size={14} color="#fff" />
+                  {copiedSlug === selectedEntreprise.slug ? "✓ Copié !" : "Copier le lien"}
+                </button>
+                <button
+                  onClick={() => downloadQR(selectedEntreprise.slug)}
+                  className="btn-secondary"
+                  style={{ padding: "8px 16px", fontSize: 13, borderRadius: 9, display: "flex", alignItems: "center", gap: 6 }}
+                >
+                  <Icon name="download" size={14} />
+                  Télécharger QR
+                </button>
               </div>
             </div>
-          ))}
-
-          {entreprises.length === 0 && (
-            <p style={{ color: "#94A3B8", fontSize: 13 }}>
-              Créez d&apos;abord un établissement dans &quot;Mes établissements&quot; pour obtenir votre lien.
-            </p>
-          )}
+          </div>
         </div>
       )}
 
@@ -478,7 +535,9 @@ export default function PageWheel() {
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>Aperçu de la roue</h3>
           <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24 }}>{config.ctaText}</p>
           <SpinWheel
-            rewards={config.rewards.filter(r => r.name)}
+            rewards={config.rewards
+              .filter(r => r.name)
+              .map(r => ({ ...r, probability: r.prob }))}
             primaryColor={config.primaryColor}
             secondaryColor={config.secondaryColor}
             onResult={() => { setShowConfetti(true); setTimeout(() => setShowConfetti(false), 4000); }}

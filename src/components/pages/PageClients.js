@@ -7,9 +7,8 @@ const CUSTOM_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "";
 
 function getPublicUrl(slug) {
-  if (CUSTOM_DOMAIN) return `https://${slug}.${CUSTOM_DOMAIN}`;
-  const base = APP_URL || (typeof window !== "undefined" ? window.location.origin : "");
-  return `${base}/s/${slug}`;
+  const base = APP_URL || (typeof window !== "undefined" ? window.location.origin : "https://visium-boost.fr");
+  return `${base}/roue/${slug}`;
 }
 
 const emptyForm = {
@@ -91,7 +90,7 @@ export default function PageClients() {
             {entreprises.length} établissement{entreprises.length > 1 ? "s" : ""}
             {" "}— URL publique :{" "}
             <code style={{ fontSize: 11, background: "#EFF6FF", color: "#2563EB", padding: "2px 7px", borderRadius: 5 }}>
-              {CUSTOM_DOMAIN ? `slug.${CUSTOM_DOMAIN}` : `${APP_URL}/s/slug`}
+              {APP_URL || "https://visium-boost.fr"}/roue/slug
             </code>
           </p>
         </div>
