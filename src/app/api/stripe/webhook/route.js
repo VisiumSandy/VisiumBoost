@@ -3,8 +3,8 @@ import stripe, { PRICE_TO_PLAN } from "@/lib/stripe";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 
-// Disable body parsing — Stripe needs the raw body to verify signature
-export const config = { api: { bodyParser: false } };
+// App Router: disable body buffering so we can read the raw stream for Stripe signature
+export const dynamic = "force-dynamic";
 
 async function handleSubscriptionUpsert(subscription) {
   const userId = subscription.metadata?.userId;
