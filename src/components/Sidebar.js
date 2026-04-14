@@ -37,10 +37,11 @@ export default function Sidebar({ user }) {
     >
       {/* Logo row */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-3">
-        <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 36, objectFit: "contain", flexShrink: 0 }} />
-        {!sidebarCollapsed && (
-          <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 22, objectFit: "contain" }} />
-        )}
+        <img
+          src="/images/logo_main.png"
+          alt="VisiumBoost"
+          style={{ height: sidebarCollapsed ? 36 : 48, objectFit: "contain", flexShrink: 0, transition: "height 0.3s" }}
+        />
         {!sidebarCollapsed && (
           <button
             onClick={() => setSidebarCollapsed(true)}

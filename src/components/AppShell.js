@@ -34,9 +34,8 @@ export default function AppShell({ user }) {
         style={{ marginLeft: "var(--sidebar-w)", padding: "36px 40px" }}
       >
         {/* Mobile header */}
-        <div className="md:hidden flex items-center gap-3 mb-6">
-          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 36, objectFit: "contain" }} />
-          <img src="/images/logo_main1.png" alt="VisiumBoost" style={{ height: 22, objectFit: "contain" }} />
+        <div className="md:hidden flex items-center mb-6">
+          <img src="/images/logo_main.png" alt="VisiumBoost" style={{ height: 48, objectFit: "contain" }} />
         </div>
 
         <div className="max-w-[1080px]">
