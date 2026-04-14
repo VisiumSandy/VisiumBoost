@@ -20,7 +20,8 @@
       "Bash(npm uninstall:*)",
       "Bash(cmd:*)",
       "Bash(powershell:*)",
-      "Bash(rtk git:*)"
+      "Bash(rtk git:*)",
+      "Bash(node -e \"require\\('stripe'\\)\")"
     ]
   }
 }

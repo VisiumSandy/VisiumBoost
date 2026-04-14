@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { isAccessAllowed, trialDaysLeft } from "@/lib/utils";
 import Icon from "@/components/Icon";
 
@@ -70,10 +71,46 @@ const FAQ = [
 ];
 
 export default function PageSubscription({ user }) {
+  const [loadingPlan, setLoadingPlan] = useState(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+
   const currentPlan = user?.plan || "free";
   const hasAccess   = isAccessAllowed(user);
   const daysLeft    = trialDaysLeft(user);
   const isAdmin     = user?.role === "admin";
+  const hasPaid     = user?.stripeSubscriptionId;
+
+  const handleSubscribe = async (planId) => {
+    setLoadingPlan(planId);
+    try {
+      const r = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planId }),
+      });
+      const d = await r.json();
+      if (d.url) window.location.href = d.url;
+      else alert(d.error || "Erreur lors de la redirection vers le paiement");
+    } catch {
+      alert("Erreur réseau. Réessayez.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const handlePortal = async () => {
+    setPortalLoading(true);
+    try {
+      const r = await fetch("/api/stripe/portal", { method: "POST" });
+      const d = await r.json();
+      if (d.url) window.location.href = d.url;
+      else alert(d.error || "Erreur portail");
+    } catch {
+      alert("Erreur réseau. Réessayez.");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   return (
     <div className="animate-fade-in">
@@ -177,27 +214,56 @@ export default function PageSubscription({ user }) {
               </div>
 
               <button
-                disabled={isCurrent}
+                disabled={isCurrent || loadingPlan === plan.id}
+                onClick={() => !isCurrent && handleSubscribe(plan.id)}
                 style={{
                   width: "100%", padding: "12px", borderRadius: 12,
                   border: isCurrent ? "1.5px solid #E2E8F0" : "none",
                   background: isCurrent
                     ? "#F8FAFC"
+                    : loadingPlan === plan.id
+                    ? "#94A3B8"
                     : plan.recommended
                     ? "#2563EB"
                     : "#0F172A",
                   color: isCurrent ? "#94A3B8" : "#fff",
                   fontWeight: 700, fontSize: 14,
-                  cursor: isCurrent ? "default" : "pointer",
+                  cursor: isCurrent || loadingPlan === plan.id ? "default" : "pointer",
                   transition: "all 0.2s",
                 }}
               >
-                {isCurrent ? "Plan actuel" : `Choisir ${plan.name}`}
+                {isCurrent
+                  ? "Plan actuel"
+                  : loadingPlan === plan.id
+                  ? "Redirection…"
+                  : `Choisir ${plan.name}`}
               </button>
             </div>
           );
         })}
       </div>
+
+      {/* Manage subscription */}
+      {hasPaid && (
+        <div className="card p-5 max-w-2xl mx-auto mb-6" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
+          <div>
+            <div style={{ fontWeight:700, color:"#0F172A", fontSize:14, marginBottom:3 }}>Gérer mon abonnement</div>
+            <div style={{ fontSize:13, color:"#64748B" }}>Modifier votre plan, mettre à jour votre moyen de paiement ou annuler votre abonnement.</div>
+          </div>
+          <button
+            onClick={handlePortal}
+            disabled={portalLoading}
+            style={{
+              padding:"10px 20px", borderRadius:10, border:"1.5px solid #E2E8F0",
+              background: portalLoading ? "#F8FAFC" : "#fff", fontWeight:700, fontSize:13,
+              color: portalLoading ? "#94A3B8" : "#0F172A", cursor: portalLoading ? "default" : "pointer",
+              flexShrink:0, transition:"all 0.2s",
+            }}
+          >
+            {portalLoading ? "Chargement…" : "Portail de facturation →"}
+          </button>
+        </div>
+      )}
 
       {/* FAQ */}
       <div className="card p-6 max-w-2xl mx-auto">

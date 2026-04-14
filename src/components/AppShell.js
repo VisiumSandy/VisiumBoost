@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useApp } from "@/lib/context";
 import { isAccessAllowed, trialDaysLeft } from "@/lib/utils";
 import Sidebar from "@/components/Sidebar";
@@ -23,17 +25,44 @@ const PAGES = {
   account:      PageAccount,
 };
 
-// Pages accessible even when trial expired
 const FREE_PAGES = ["subscription", "account"];
+
+// Isolated component to read ?stripe= param without blocking SSR
+function StripeReturnHandler({ onToast }) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { setCurrentPage } = useApp();
+
+  useEffect(() => {
+    const stripe = searchParams.get("stripe");
+    if (!stripe) return;
+
+    if (stripe === "success") {
+      onToast({ ok: true, msg: "Paiement confirmé — votre abonnement est actif !" });
+      setCurrentPage("dashboard");
+    } else if (stripe === "cancel") {
+      onToast({ ok: false, msg: "Paiement annulé. Vous pouvez réessayer à tout moment." });
+    }
+    router.replace("/dashboard", { scroll: false });
+  }, [searchParams, router, setCurrentPage, onToast]);
+
+  return null;
+}
 
 export default function AppShell({ user }) {
   const { currentPage, setCurrentPage, sidebarCollapsed } = useApp();
+  const [toast, setToast] = useState(null);
 
   const hasAccess = isAccessAllowed(user);
   const daysLeft  = trialDaysLeft(user);
   const isAdmin   = user?.role === "admin";
 
-  // Redirect to subscription if locked page is requested
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   const effectivePage = (!hasAccess && !isAdmin && !FREE_PAGES.includes(currentPage))
     ? "subscription"
     : currentPage;
@@ -42,7 +71,30 @@ export default function AppShell({ user }) {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <StripeReturnHandler onToast={setToast} />
+      </Suspense>
+
       <Sidebar user={user} hasAccess={hasAccess} daysLeft={daysLeft} />
+
+      {/* Stripe toast */}
+      {toast && (
+        <div style={{
+          position: "fixed", top: 20, right: 20, zIndex: 200,
+          background: toast.ok ? "#F0FDF4" : "#FEF2F2",
+          border: `1.5px solid ${toast.ok ? "#BBF7D0" : "#FECACA"}`,
+          borderRadius: 14, padding: "14px 18px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          display: "flex", alignItems: "center", gap: 10,
+          fontSize: 14, fontWeight: 600,
+          color: toast.ok ? "#166534" : "#DC2626",
+          maxWidth: 380, animation: "slideIn 0.3s ease",
+        }}>
+          <span style={{ fontSize: 18 }}>{toast.ok ? "✓" : "✗"}</span>
+          {toast.msg}
+          <button onClick={() => setToast(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit", fontSize: 16, opacity: 0.6 }}>×</button>
+        </div>
+      )}
 
       <main
         className="min-h-screen transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
@@ -53,7 +105,7 @@ export default function AppShell({ user }) {
           <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 48, objectFit: "contain" }} />
         </div>
 
-        {/* Trial expiry banner */}
+        {/* Trial expiry warning banner (last 3 days) */}
         {!isAdmin && hasAccess && daysLeft > 0 && daysLeft <= 3 && (
           <div style={{
             display: "flex", alignItems: "center", gap: 10,
@@ -87,6 +139,7 @@ export default function AppShell({ user }) {
           :root { --sidebar-w: 0px; }
           main { padding: 20px 16px 96px !important; }
         }
+        @keyframes slideIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
       `}</style>
     </>
   );
