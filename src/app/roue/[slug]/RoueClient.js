@@ -7,31 +7,41 @@ function SpinWheel({ rewards, primaryColor, secondaryColor, onResult }) {
   const canvasRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [done, setDone] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
   const angleRef = useRef(0);
+  const drawRef = useRef(null);
 
   const COLORS = [primaryColor, secondaryColor, "#FDCB6E", "#E17055", "#0984E3", "#FD79A8", "#74B9FF", "#55EFC4"];
 
+  // Garde : rewards doit être un tableau non vide avec des noms valides
+  const validRewards = (rewards || []).filter(r => r && r.name && r.name.trim() !== "");
+
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || validRewards.length === 0) return;
+
     const ctx = canvas.getContext("2d");
     const W = canvas.width, cx = W / 2, R = cx - 14;
     ctx.clearRect(0, 0, W, W);
 
+    // Disque ombré de fond
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.18)"; ctx.shadowBlur = 28; ctx.shadowOffsetY = 8;
     ctx.beginPath(); ctx.arc(cx, cx, R + 4, 0, Math.PI * 2);
     ctx.fillStyle = "#fff"; ctx.fill();
     ctx.restore();
 
-    const n = rewards.length;
+    // Segments
+    const n = validRewards.length;
     const arc = (Math.PI * 2) / n;
-    rewards.forEach((rw, i) => {
+    validRewards.forEach((rw, i) => {
       const a0 = angleRef.current + i * arc;
       ctx.beginPath(); ctx.moveTo(cx, cx); ctx.arc(cx, cx, R, a0, a0 + arc); ctx.closePath();
       ctx.fillStyle = COLORS[i % COLORS.length]; ctx.fill();
       ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.lineWidth = 2.5; ctx.stroke();
-      ctx.save(); ctx.translate(cx, cx); ctx.rotate(a0 + arc / 2);
+
+      ctx.save();
+      ctx.translate(cx, cx); ctx.rotate(a0 + arc / 2);
       ctx.textAlign = "right"; ctx.fillStyle = "#fff";
       ctx.font = `bold 13px 'Inter', sans-serif`;
       const label = rw.name.length > 14 ? rw.name.slice(0, 14) + "…" : rw.name;
@@ -39,29 +49,48 @@ function SpinWheel({ rewards, primaryColor, secondaryColor, onResult }) {
       ctx.restore();
     });
 
+    // Moyeu central
     ctx.beginPath(); ctx.arc(cx, cx, 22, 0, Math.PI * 2);
     ctx.fillStyle = "#fff"; ctx.fill();
     ctx.strokeStyle = primaryColor; ctx.lineWidth = 3; ctx.stroke();
 
+    // Flèche
     ctx.save(); ctx.translate(cx + R + 2, cx);
     ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-6, -12); ctx.lineTo(-6, 12); ctx.closePath();
     ctx.fillStyle = "#E17055"; ctx.fill(); ctx.restore();
-  }, [rewards, primaryColor, secondaryColor]);
+  }, [validRewards, primaryColor, secondaryColor]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { draw(); }, [draw]);
+  // Garde une ref à jour pour l'utiliser dans l'animation sans closure stale
+  useEffect(() => { drawRef.current = draw; }, [draw]);
+
+  // Dessin initial : utiliser rAF pour s'assurer que le canvas est layouté
+  useEffect(() => {
+    const rAF = requestAnimationFrame(() => {
+      drawRef.current?.();
+      setCanvasReady(true);
+    });
+    return () => cancelAnimationFrame(rAF);
+  }, []); // une seule fois au montage du canvas
+
+  // Redessine quand les données changent (ex : couleurs mises à jour)
+  useEffect(() => {
+    if (!canvasReady) return;
+    const rAF = requestAnimationFrame(() => drawRef.current?.());
+    return () => cancelAnimationFrame(rAF);
+  }, [draw, canvasReady]);
 
   const spin = () => {
-    if (spinning || done || rewards.length === 0) return;
+    if (spinning || done || validRewards.length === 0) return;
     setSpinning(true);
 
     const rand = Math.random() * 100;
     let acc = 0, winIdx = 0;
-    for (let i = 0; i < rewards.length; i++) {
-      acc += rewards[i].probability;
+    for (let i = 0; i < validRewards.length; i++) {
+      acc += validRewards[i].probability;
       if (rand <= acc) { winIdx = i; break; }
     }
 
-    const arc = (Math.PI * 2) / rewards.length;
+    const arc = (Math.PI * 2) / validRewards.length;
     const target = -(winIdx * arc + arc / 2);
     const spins = 6 + Math.random() * 4;
     const total = Math.PI * 2 * spins + (target - (angleRef.current % (Math.PI * 2)));
@@ -71,27 +100,65 @@ function SpinWheel({ rewards, primaryColor, secondaryColor, onResult }) {
     const anim = () => {
       const t = Math.min((Date.now() - start) / dur, 1);
       angleRef.current = startA + total * ease(t);
-      draw();
+      drawRef.current?.();
       if (t < 1) requestAnimationFrame(anim);
       else {
         setSpinning(false);
         setDone(true);
-        onResult?.(rewards[winIdx], winIdx);
+        onResult?.(validRewards[winIdx], winIdx);
       }
     };
     requestAnimationFrame(anim);
   };
 
+  // Pas de récompenses valides → message d'erreur
+  if (validRewards.length === 0) {
+    return (
+      <div style={{
+        textAlign: "center", padding: "40px 24px",
+        background: "#FFF5F5", borderRadius: 20, border: "2px dashed #FED7D7",
+      }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>⚙️</div>
+        <p style={{ fontWeight: 700, color: "#C53030", fontSize: 15, margin: "0 0 6px" }}>
+          Roue non configurée
+        </p>
+        <p style={{ color: "#FC8181", fontSize: 13, margin: 0 }}>
+          Le commerçant n&apos;a pas encore renseigné ses récompenses.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+      {/* Spinner de chargement le temps que rAF initialise le canvas */}
+      {!canvasReady && (
+        <div style={{
+          width: 320, height: 320, maxWidth: "100%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <style>{`@keyframes wSpin { to { transform: rotate(360deg); } }`}</style>
+          <div style={{
+            width: 48, height: 48, borderRadius: "50%",
+            border: "4px solid #E2E8F0", borderTopColor: primaryColor,
+            animation: "wSpin 0.8s linear infinite",
+          }} />
+        </div>
+      )}
       <canvas
-        ref={canvasRef} width={320} height={320}
-        style={{ maxWidth: "100%", cursor: done ? "default" : spinning ? "wait" : "pointer" }}
+        ref={canvasRef}
+        width={320}
+        height={320}
+        style={{
+          maxWidth: "100%", display: canvasReady ? "block" : "none",
+          cursor: done ? "default" : spinning ? "wait" : "pointer",
+        }}
         onClick={spin}
       />
-      {!done && (
+      {!done && canvasReady && (
         <button
-          onClick={spin} disabled={spinning}
+          onClick={spin}
+          disabled={spinning}
           style={{
             padding: "16px 40px", borderRadius: 14, border: "none",
             cursor: spinning ? "not-allowed" : "pointer",

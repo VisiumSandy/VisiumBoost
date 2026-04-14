@@ -158,7 +158,7 @@ npm run dev      # Démarrage en développement (port 3000)
 npm run build    # Build production
 npm run start    # Lancement en production
 ```
-
+donne moi a chaque fin de travail la commande git commit
 ---
 
 ## Déploiement Vercel
