@@ -13,7 +13,9 @@ function decodeJWTPayload(token) {
         .map((c) => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
         .join("")
     );
-    return JSON.parse(json);
+    const payload = JSON.parse(json);
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
+    return payload;
   } catch {
     return null;
   }

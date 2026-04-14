@@ -151,6 +151,8 @@ La page `/s/[slug]` est un **Server Component** qui :
 
 ## Commandes
 
+faire commande avec prefix rtk *
+
 ```bash
 npm run dev      # Démarrage en développement (port 3000)
 npm run build    # Build production

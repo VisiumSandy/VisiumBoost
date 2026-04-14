@@ -10,6 +10,12 @@ const SpinSchema = new mongoose.Schema(
     rewardIndex: { type: Number, default: 0 },
     validated: { type: Boolean, default: false },           // le patron a validé en physique
     validatedAt: { type: Date, default: null },
+    expired: { type: Boolean, default: false },             // le patron a expiré (fraude, etc.)
+    expiredAt: { type: Date, default: null },
+    // infos client capturées après la roue
+    clientName:  { type: String, default: "" },
+    clientEmail: { type: String, default: "" },
+    clientPhone: { type: String, default: "" },
     // optionnel : infos pour traçabilité
     ip: { type: String, default: "" },
   },

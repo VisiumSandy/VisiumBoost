@@ -16,7 +16,7 @@ function generateWinCode() {
 // Retourne: { winCode, rewardName }
 export async function POST(req) {
   try {
-    const { slug, rewardName, rewardIndex } = await req.json();
+    const { slug, rewardName, rewardIndex, clientName, clientEmail, clientPhone } = await req.json();
 
     if (!slug || !rewardName) {
       return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
@@ -43,6 +43,9 @@ export async function POST(req) {
       winCode,
       rewardName,
       rewardIndex: rewardIndex ?? 0,
+      clientName:  (clientName  || "").slice(0, 100),
+      clientEmail: (clientEmail || "").slice(0, 200),
+      clientPhone: (clientPhone || "").slice(0, 30),
       ip: ip.split(",")[0].trim(),
     });
 

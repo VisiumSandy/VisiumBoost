@@ -26,8 +26,9 @@ export async function GET(req) {
 
   const filter = { entrepriseId: { $in: entrepriseIds } };
   if (q) filter.winCode = { $regex: q.toUpperCase(), $options: "i" };
-  if (status === "pending") filter.validated = false;
-  if (status === "validated") filter.validated = true;
+  if (status === "pending")   { filter.validated = false; filter.expired = { $ne: true }; }
+  if (status === "validated") { filter.validated = true; }
+  if (status === "expired")   { filter.expired = true; }
   if (entrepriseId) filter.entrepriseId = entrepriseId;
 
   const spins = await Spin.find(filter)
@@ -41,13 +42,13 @@ export async function GET(req) {
   return NextResponse.json({ spins, total });
 }
 
-// POST /api/user/validations — valider un code en physique
-// body: { winCode }
+// POST /api/user/validations
+// body: { winCode, action?: "validate" | "expire" }
 export async function POST(req) {
   const session = getCurrentUser();
   if (!session) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-  const { winCode } = await req.json();
+  const { winCode, action = "validate" } = await req.json();
   if (!winCode) return NextResponse.json({ error: "Code manquant" }, { status: 400 });
 
   await connectDB();
@@ -61,6 +62,19 @@ export async function POST(req) {
 
   if (!spin) {
     return NextResponse.json({ error: "Code introuvable ou n'appartient pas à vos entreprises" }, { status: 404 });
+  }
+
+  if (action === "expire") {
+    if (spin.expired) {
+      return NextResponse.json({ error: "Code déjà expiré" }, { status: 409 });
+    }
+    await Spin.updateOne({ _id: spin._id }, { expired: true, expiredAt: new Date() });
+    return NextResponse.json({ success: true, winCode: spin.winCode, action: "expired" });
+  }
+
+  // action === "validate"
+  if (spin.expired) {
+    return NextResponse.json({ error: "Ce code est expiré et ne peut plus être validé" }, { status: 409 });
   }
   if (spin.validated) {
     return NextResponse.json({

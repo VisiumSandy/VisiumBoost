@@ -95,6 +95,12 @@ const paths = {
       <path d="M6 8h.01M10 8h.01M14 8h.01M8 12h8M8 16h5" />
     </>
   ),
+  copy: (
+    <>
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </>
+  ),
   chevronRight: <polyline points="9 18 15 12 9 6" />,
   chevronLeft: <polyline points="15 18 9 12 15 6" />,
   star: (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { uid } from "@/lib/utils";
 import Icon from "@/components/Icon";
 import SpinWheel from "@/components/SpinWheel";
@@ -22,6 +22,9 @@ export default function PageWheel() {
   const [step, setStep] = useState(1);
   const [showConfetti, setShowConfetti] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [entreprises, setEntreprises] = useState([]);
+  const [copiedSlug, setCopiedSlug] = useState(null);
+  const qrCanvasRefs = useRef({});
 
   useEffect(() => {
     fetch("/api/user/wheel")
@@ -39,7 +42,48 @@ export default function PageWheel() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    fetch("/api/entreprises")
+      .then(r => r.json())
+      .then(d => setEntreprises(d.entreprises || []))
+      .catch(() => {});
   }, []);
+
+  const getPublicUrl = (slug) => {
+    const base = process.env.NEXT_PUBLIC_APP_URL || "https://visium-boost.fr";
+    return `${base}/roue/${slug}`;
+  };
+
+  const copyLink = async (slug) => {
+    await navigator.clipboard.writeText(getPublicUrl(slug));
+    setCopiedSlug(slug);
+    setTimeout(() => setCopiedSlug(null), 2000);
+  };
+
+  const downloadQR = (slug) => {
+    const canvas = qrCanvasRefs.current[slug];
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `qr-${slug}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  // Génère le QR code sur un canvas via la lib qrcode
+  const QRCanvas = ({ slug }) => {
+    const ref = useRef(null);
+    useEffect(() => {
+      if (!ref.current) return;
+      qrCanvasRefs.current[slug] = ref.current;
+      import("qrcode").then(QRCode => {
+        QRCode.toCanvas(ref.current, getPublicUrl(slug), {
+          width: 160, margin: 2,
+          color: { dark: "#0F172A", light: "#ffffff" },
+        }).catch(() => {});
+      });
+    }, [slug]);
+    return <canvas ref={ref} style={{ borderRadius: 10 }} />;
+  };
 
   const update = (field, val) => setConfig(prev => ({ ...prev, [field]: val }));
 
@@ -353,6 +397,78 @@ export default function PageWheel() {
               {saving ? "Sauvegarde…" : "Enregistrer la configuration"}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Section Publier */}
+      {entreprises.length > 0 && (
+        <div className="card p-6 mt-5">
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <Icon name="qr" size={20} color="#2563EB" />
+            <div>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", margin: 0 }}>
+                Lien public &amp; QR Code
+              </h3>
+              <p style={{ fontSize: 12, color: "#94A3B8", margin: 0 }}>
+                Partagez ce lien ou imprimez le QR code pour vos clients.
+              </p>
+            </div>
+          </div>
+
+          {entreprises.map(e => (
+            <div key={e._id} style={{
+              border: "1.5px solid #E2E8F0", borderRadius: 14, padding: "16px 18px",
+              marginBottom: 12, display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap",
+            }}>
+              {/* QR */}
+              <div style={{ flexShrink: 0 }}>
+                <QRCanvas slug={e.slug} />
+              </div>
+
+              {/* Infos + actions */}
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <p style={{ fontWeight: 700, color: "#0F172A", fontSize: 14, margin: "0 0 6px" }}>
+                  {e.nom}
+                </p>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  background: "#F8FAFC", borderRadius: 8, padding: "8px 12px",
+                  border: "1.5px solid #E2E8F0", marginBottom: 12, flexWrap: "wrap",
+                }}>
+                  <span style={{
+                    fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#475569",
+                    flex: 1, wordBreak: "break-all",
+                  }}>
+                    {getPublicUrl(e.slug)}
+                  </span>
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    onClick={() => copyLink(e.slug)}
+                    className="btn-primary"
+                    style={{ padding: "8px 16px", fontSize: 13, borderRadius: 9, display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <Icon name="copy" size={14} color="#fff" />
+                    {copiedSlug === e.slug ? "✓ Copié !" : "Copier le lien"}
+                  </button>
+                  <button
+                    onClick={() => downloadQR(e.slug)}
+                    className="btn-secondary"
+                    style={{ padding: "8px 16px", fontSize: 13, borderRadius: 9, display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <Icon name="download" size={14} />
+                    Télécharger QR
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {entreprises.length === 0 && (
+            <p style={{ color: "#94A3B8", fontSize: 13 }}>
+              Créez d&apos;abord un établissement dans &quot;Mes établissements&quot; pour obtenir votre lien.
+            </p>
+          )}
         </div>
       )}
 

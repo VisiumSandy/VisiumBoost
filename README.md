@@ -15,7 +15,7 @@ Plateforme SaaS complète pour booster les avis Google grâce à une **roue de l
 ```bash
 npm install
 ```
-
+faire commande avec prefix rtk *
 
 
 ```bash

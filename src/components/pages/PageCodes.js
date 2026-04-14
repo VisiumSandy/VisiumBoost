@@ -8,7 +8,7 @@ export default function PageCodes() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [validating, setValidating] = useState(null);
+  const [actioning, setActioning] = useState(null); // winCode en cours
   const [quickCode, setQuickCode] = useState("");
   const [quickResult, setQuickResult] = useState(null);
   const [quickLoading, setQuickLoading] = useState(false);
@@ -33,7 +33,7 @@ export default function PageCodes() {
     const r = await fetch("/api/user/validations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ winCode: quickCode.trim() }),
+      body: JSON.stringify({ winCode: quickCode.trim(), action: "validate" }),
     });
     const d = await r.json();
     setQuickResult({ ok: r.ok, ...d });
@@ -41,24 +41,37 @@ export default function PageCodes() {
     if (r.ok) { setQuickCode(""); fetchSpins(); }
   };
 
-  const handleValidate = async (winCode) => {
-    setValidating(winCode);
+  const handleAction = async (winCode, action) => {
+    setActioning(winCode + "_" + action);
     const r = await fetch("/api/user/validations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ winCode }),
+      body: JSON.stringify({ winCode, action }),
     });
     const d = await r.json();
     if (r.ok) fetchSpins();
     else alert(d.error || "Erreur");
-    setValidating(null);
+    setActioning(null);
+  };
+
+  // Détermine le statut d'un spin
+  const getStatus = (spin) => {
+    if (spin.expired)   return "expired";
+    if (spin.validated) return "validated";
+    return "pending";
+  };
+
+  const STATUS_STYLES = {
+    pending:   { bg: "#fff",     border: "#E2E8F0", label: "" },
+    validated: { bg: "#F0FDF4",  border: "#BBF7D0", label: "" },
+    expired:   { bg: "#FFF5F5",  border: "#FED7D7", label: "" },
   };
 
   return (
     <div className="animate-fade-in">
       <div className="mb-7">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Validations</h1>
-        <p className="text-slate-400 text-sm mt-1">Vérifiez et validez les codes gagnants de vos clients</p>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Codes clients</h1>
+        <p className="text-slate-400 text-sm mt-1">Vérifiez et gérez les codes gagnants de vos clients</p>
       </div>
 
       {/* Quick validate */}
@@ -69,7 +82,6 @@ export default function PageCodes() {
         <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>
           Le client vous présente son code — entrez-le ici pour le valider et lui remettre son cadeau.
         </p>
-
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <input
             value={quickCode}
@@ -100,7 +112,6 @@ export default function PageCodes() {
             {quickLoading ? "Vérification…" : "Valider"}
           </button>
         </div>
-
         {quickResult && (
           <div style={{
             marginTop: 14, padding: "14px 18px", borderRadius: 12,
@@ -137,12 +148,11 @@ export default function PageCodes() {
         <input
           value={search}
           onChange={e => setSearch(e.target.value.toUpperCase())}
-          placeholder="Rechercher WIN-XXXX-XXXX…"
+          placeholder="Rechercher par code, nom ou email…"
           style={{
-            flex: "1 1 200px", padding: "9px 14px", borderRadius: 10,
+            flex: "1 1 220px", padding: "9px 14px", borderRadius: 10,
             border: "1.5px solid #E2E8F0", fontSize: 13, outline: "none",
-            fontFamily: "'DM Mono', monospace", background: "#fff", color: "#0F172A",
-            transition: "border-color 0.2s",
+            background: "#fff", color: "#0F172A", transition: "border-color 0.2s",
           }}
           onFocus={e => e.target.style.borderColor = "#3B82F6"}
           onBlur={e => e.target.style.borderColor = "#E2E8F0"}
@@ -153,27 +163,31 @@ export default function PageCodes() {
           style={{
             padding: "9px 14px", borderRadius: 10, border: "1.5px solid #E2E8F0",
             fontSize: 13, outline: "none", background: "#fff", cursor: "pointer",
-            fontFamily: "'DM Sans', sans-serif", color: "#0F172A",
+            color: "#0F172A",
           }}
         >
           <option value="">Tous les codes</option>
           <option value="pending">En attente</option>
           <option value="validated">Validés</option>
+          <option value="expired">Expirés</option>
         </select>
       </div>
 
       {/* Table */}
       <div className="card overflow-hidden">
+        {/* Header */}
         <div style={{
-          display: "grid", gridTemplateColumns: "1.5fr 2fr 1.2fr 1fr 100px",
-          padding: "11px 20px", background: "#FAFAFA", borderBottom: "1.5px solid #F1F5F9",
+          display: "grid",
+          gridTemplateColumns: "1.3fr 1.4fr 1.6fr 1.1fr 0.9fr 150px",
+          padding: "11px 16px", background: "#FAFAFA", borderBottom: "1.5px solid #F1F5F9",
           fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.8,
         }}>
           <div>Code</div>
-          <div>Cadeau gagné</div>
-          <div>Établissement</div>
+          <div>Client</div>
+          <div>Cadeau · Établissement</div>
+          <div>Contact</div>
           <div>Date</div>
-          <div style={{ textAlign: "center" }}>Statut</div>
+          <div style={{ textAlign: "center" }}>Actions</div>
         </div>
 
         {loading && (
@@ -191,7 +205,9 @@ export default function PageCodes() {
               <span style={{ fontSize: 24 }}>🎰</span>
             </div>
             <p style={{ fontWeight: 600, color: "#64748B", marginBottom: 5 }}>
-              Aucun code {statusFilter === "pending" ? "en attente" : statusFilter === "validated" ? "validé" : "généré"} pour l&apos;instant
+              Aucun code{" "}
+              {statusFilter === "pending" ? "en attente" : statusFilter === "validated" ? "validé" : statusFilter === "expired" ? "expiré" : "généré"}{" "}
+              pour l&apos;instant
             </p>
             <p style={{ color: "#94A3B8", fontSize: 13 }}>
               Les codes apparaissent ici dès qu&apos;un client tourne la roue.
@@ -199,54 +215,117 @@ export default function PageCodes() {
           </div>
         )}
 
-        {spins.map((spin) => (
-          <div
-            key={spin._id}
-            style={{
-              display: "grid", gridTemplateColumns: "1.5fr 2fr 1.2fr 1fr 100px",
-              padding: "12px 20px", borderBottom: "1px solid #F8FAFC",
-              alignItems: "center", fontSize: 13,
-              background: spin.validated ? "#F0FDF4" : "#fff",
-              transition: "background 0.12s",
-            }}
-          >
-            <div style={{
-              fontFamily: "'DM Mono', monospace",
-              fontWeight: 700, fontSize: 13, color: "#0F172A", letterSpacing: 1,
-            }}>
-              {spin.winCode}
+        {spins.map((spin) => {
+          const status = getStatus(spin);
+          const styles = STATUS_STYLES[status];
+          return (
+            <div
+              key={spin._id}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1.3fr 1.4fr 1.6fr 1.1fr 0.9fr 150px",
+                padding: "13px 16px", borderBottom: "1px solid #F8FAFC",
+                alignItems: "center", fontSize: 13,
+                background: styles.bg,
+                transition: "background 0.12s",
+              }}
+            >
+              {/* Code */}
+              <div style={{
+                fontFamily: "'DM Mono', monospace",
+                fontWeight: 700, fontSize: 12, color: "#0F172A", letterSpacing: 1,
+              }}>
+                {spin.winCode}
+              </div>
+
+              {/* Client */}
+              <div>
+                <div style={{ fontWeight: 700, color: "#1E293B", fontSize: 13 }}>
+                  {spin.clientName || <span style={{ color: "#CBD5E1", fontStyle: "italic" }}>—</span>}
+                </div>
+                <div style={{ color: "#64748B", fontSize: 11, marginTop: 1 }}>
+                  {spin.clientEmail || ""}
+                </div>
+              </div>
+
+              {/* Cadeau + établissement */}
+              <div>
+                <div style={{ fontWeight: 600, color: "#1E293B", fontSize: 13 }}>{spin.rewardName}</div>
+                <div style={{ color: "#94A3B8", fontSize: 11, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {spin.entrepriseId?.nom || "—"}
+                </div>
+              </div>
+
+              {/* Téléphone */}
+              <div style={{ color: "#64748B", fontSize: 12 }}>
+                {spin.clientPhone || <span style={{ color: "#CBD5E1" }}>—</span>}
+              </div>
+
+              {/* Date */}
+              <div style={{ color: "#94A3B8", fontSize: 11 }}>
+                {new Date(spin.createdAt).toLocaleDateString("fr-FR")}
+                <br />
+                <span style={{ fontSize: 10 }}>
+                  {new Date(spin.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: "flex", gap: 5, justifyContent: "center", flexWrap: "wrap" }}>
+                {status === "validated" && (
+                  <span style={{
+                    padding: "5px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+                    background: "#DCFCE7", color: "#15803D", border: "1px solid #BBF7D0",
+                    whiteSpace: "nowrap",
+                  }}>
+                    ✓ Validé
+                  </span>
+                )}
+                {status === "expired" && (
+                  <span style={{
+                    padding: "5px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+                    background: "#FEE2E2", color: "#DC2626", border: "1px solid #FECACA",
+                    whiteSpace: "nowrap",
+                  }}>
+                    ✗ Expiré
+                  </span>
+                )}
+                {status === "pending" && (
+                  <>
+                    <button
+                      onClick={() => handleAction(spin.winCode, "validate")}
+                      disabled={actioning === spin.winCode + "_validate"}
+                      style={{
+                        padding: "5px 10px", fontSize: 11, borderRadius: 8, border: "none",
+                        background: actioning === spin.winCode + "_validate" ? "#E2E8F0" : "#DCFCE7",
+                        color: actioning === spin.winCode + "_validate" ? "#94A3B8" : "#15803D",
+                        cursor: actioning === spin.winCode + "_validate" ? "not-allowed" : "pointer",
+                        fontWeight: 700, whiteSpace: "nowrap",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {actioning === spin.winCode + "_validate" ? "…" : "✓ Valider"}
+                    </button>
+                    <button
+                      onClick={() => handleAction(spin.winCode, "expire")}
+                      disabled={actioning === spin.winCode + "_expire"}
+                      style={{
+                        padding: "5px 10px", fontSize: 11, borderRadius: 8, border: "none",
+                        background: actioning === spin.winCode + "_expire" ? "#E2E8F0" : "#FEE2E2",
+                        color: actioning === spin.winCode + "_expire" ? "#94A3B8" : "#DC2626",
+                        cursor: actioning === spin.winCode + "_expire" ? "not-allowed" : "pointer",
+                        fontWeight: 700, whiteSpace: "nowrap",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {actioning === spin.winCode + "_expire" ? "…" : "✗ Expirer"}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-            <div style={{ fontWeight: 600, color: "#1E293B" }}>{spin.rewardName}</div>
-            <div style={{ color: "#64748B", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {spin.entrepriseId?.nom || "—"}
-            </div>
-            <div style={{ color: "#94A3B8", fontSize: 12 }}>
-              {new Date(spin.createdAt).toLocaleDateString("fr-FR")}
-              <br />
-              <span style={{ fontSize: 11 }}>
-                {new Date(spin.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-              </span>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              {spin.validated ? (
-                <span className="badge-success">✓ Validé</span>
-              ) : (
-                <button
-                  onClick={() => handleValidate(spin.winCode)}
-                  disabled={validating === spin.winCode}
-                  className="btn-primary"
-                  style={{
-                    padding: "5px 14px", fontSize: 12, borderRadius: 8,
-                    opacity: validating === spin.winCode ? 0.5 : 1,
-                    cursor: validating === spin.winCode ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {validating === spin.winCode ? "…" : "Valider"}
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {total > 0 && (

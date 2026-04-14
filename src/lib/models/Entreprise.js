@@ -27,8 +27,6 @@ const EntrepriseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Unique index on slug
-EntrepriseSchema.index({ slug: 1 }, { unique: true });
 EntrepriseSchema.index({ userId: 1 });
 
 export default mongoose.models.Entreprise || mongoose.model("Entreprise", EntrepriseSchema);
