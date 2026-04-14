@@ -29,13 +29,13 @@ export default function DashboardPage() {
         <div style={{ textAlign: "center" }}>
           <div style={{
             width: 48, height: 48, borderRadius: 14,
-            background: "linear-gradient(135deg, #6C5CE7, #00B894)",
+            background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
             margin: "0 auto 16px",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <span style={{ color: "#fff", fontWeight: 900, fontSize: 22, fontFamily: "'Calistoga', serif" }}>z</span>
+            <span style={{ color: "#fff", fontWeight: 800, fontSize: 22, letterSpacing: "-1px" }}>z</span>
           </div>
-          <p style={{ color: "#718096", fontSize: 14 }}>Chargement…</p>
+          <p style={{ color: "#64748B", fontSize: 14 }}>Chargement…</p>
         </div>
       </div>
     );

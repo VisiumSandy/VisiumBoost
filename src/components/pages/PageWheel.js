@@ -1,33 +1,56 @@
 "use client";
 
-import { useState } from "react";
-import { useApp } from "@/lib/context";
+import { useState, useEffect } from "react";
 import { uid } from "@/lib/utils";
 import Icon from "@/components/Icon";
 import SpinWheel from "@/components/SpinWheel";
 import Confetti from "@/components/Confetti";
 
+const DEFAULT_CONFIG = {
+  googleLink: "",
+  primaryColor: "#3B82F6",
+  secondaryColor: "#0EA5E9",
+  ctaText: "Laissez-nous un avis et tentez votre chance !",
+  rewards: [],
+};
+
 export default function PageWheel() {
-  const { wheelConfig, setWheelConfig } = useApp();
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [step, setStep] = useState(1);
   const [showConfetti, setShowConfetti] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  const { googleLink, socials, primaryColor, secondaryColor, ctaText, rewards } =
-    wheelConfig;
+  useEffect(() => {
+    fetch("/api/user/wheel")
+      .then(r => r.json())
+      .then(d => {
+        if (d.config) {
+          setConfig({
+            googleLink:     d.config.googleLink     || "",
+            primaryColor:   d.config.primaryColor   || "#3B82F6",
+            secondaryColor: d.config.secondaryColor || "#0EA5E9",
+            ctaText:        d.config.ctaText        || DEFAULT_CONFIG.ctaText,
+            rewards:        d.config.rewards        || [],
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-  const update = (field, val) =>
-    setWheelConfig((prev) => ({ ...prev, [field]: val }));
+  const update = (field, val) => setConfig(prev => ({ ...prev, [field]: val }));
 
-  // ─── Rewards helpers ──────────────────────────────
   const addReward = () =>
-    update("rewards", [...rewards, { id: uid(), name: "", prob: 0 }]);
+    update("rewards", [...config.rewards, { id: uid(), name: "", prob: 0 }]);
 
   const removeReward = (i) =>
-    update("rewards", rewards.filter((_, idx) => idx !== i));
+    update("rewards", config.rewards.filter((_, idx) => idx !== i));
 
   const updateReward = (i, field, val) => {
-    const next = [...rewards];
+    const next = [...config.rewards];
     next[i] = {
       ...next[i],
       [field]: field === "prob" ? Math.max(0, Math.min(100, +val || 0)) : val,
@@ -35,24 +58,45 @@ export default function PageWheel() {
     update("rewards", next);
   };
 
-  const totalProb = rewards.reduce((s, r) => s + r.prob, 0);
-
-  // ─── Socials helpers ──────────────────────────────
-  const addSocial = () => update("socials", [...socials, ""]);
-  const removeSocial = (i) =>
-    update("socials", socials.filter((_, idx) => idx !== i));
-  const updateSocial = (i, val) => {
-    const next = [...socials];
-    next[i] = val;
-    update("socials", next);
+  const handleSave = async () => {
+    setSaving(true); setSaved(false);
+    try {
+      await fetch("/api/user/wheel", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch {}
+    setSaving(false);
   };
 
-  // ─── Step indicator ───────────────────────────────
-  const steps = [
+  const totalProb = config.rewards.reduce((s, r) => s + (r.prob || 0), 0);
+
+  const STEPS = [
     { n: 1, label: "Lien d'avis" },
     { n: 2, label: "Personnalisation" },
     { n: 3, label: "Récompenses" },
   ];
+
+  const inp = {
+    width: "100%", padding: "10px 13px", borderRadius: 10,
+    border: "1.5px solid #E2E8F0", fontSize: 14, outline: "none",
+    background: "#fff", boxSizing: "border-box", transition: "border-color 0.2s",
+    fontFamily: "'DM Sans', sans-serif", color: "#0F172A",
+  };
+
+  if (loading) {
+    return (
+      <div className="animate-fade-in">
+        <div className="mb-7">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Ma Roue</h1>
+        </div>
+        <div className="card p-12 text-center text-slate-300 text-sm">Chargement de la configuration…</div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in">
@@ -61,307 +105,267 @@ export default function PageWheel() {
       {/* Header */}
       <div className="flex items-center justify-between mb-7 flex-wrap gap-3">
         <div>
-          <h1 className="text-[28px] font-extrabold text-dark-900 tracking-tight">
-            Ma Roue
-          </h1>
-          <p className="text-gray-400 text-sm mt-1.5">
-            Configurez votre roue de la fortune en 3 étapes
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Ma Roue</h1>
+          <p className="text-slate-400 text-sm mt-1">Configurez votre roue de la fortune en 3 étapes</p>
         </div>
-        <button
-          onClick={() => setPreviewOpen(!previewOpen)}
-          className={previewOpen ? "btn-primary" : "btn-secondary"}
-        >
-          <Icon name="eye" size={18} color={previewOpen ? "#fff" : undefined} />
-          Aperçu
-        </button>
+        <div style={{ display: "flex", gap: 10 }}>
+          {saved && (
+            <span style={{
+              padding: "8px 14px", borderRadius: 10, background: "#F0FDF4",
+              border: "1.5px solid #BBF7D0", color: "#16A34A", fontSize: 13, fontWeight: 600,
+            }}>
+              ✓ Sauvegardé
+            </span>
+          )}
+          <button
+            onClick={() => setPreviewOpen(!previewOpen)}
+            className={previewOpen ? "btn-primary" : "btn-secondary"}
+          >
+            <Icon name="eye" size={16} color={previewOpen ? "#fff" : undefined} />
+            Aperçu
+          </button>
+        </div>
       </div>
 
       {/* Step indicators */}
-      <div className="flex gap-3 mb-8 items-center flex-wrap">
-        {steps.map((s, idx) => (
-          <div key={s.n} className="flex items-center gap-2">
+      <div style={{ display: "flex", gap: 8, marginBottom: 24, alignItems: "center", flexWrap: "wrap" }}>
+        {STEPS.map((s, idx) => (
+          <div key={s.n} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={() => setStep(s.n)}
-              className="w-9 h-9 rounded-full border-none font-extrabold text-sm transition-all duration-200"
               style={{
-                background: step >= s.n ? "#6C5CE7" : "#e8e8f0",
-                color: step >= s.n ? "#fff" : "#8b8da0",
-                cursor: "pointer",
+                width: 32, height: 32, borderRadius: "50%", border: "none",
+                background: step >= s.n ? "#2563EB" : "#E2E8F0",
+                color: step >= s.n ? "#fff" : "#94A3B8",
+                fontWeight: 700, fontSize: 13, cursor: "pointer",
+                transition: "all 0.2s",
               }}
             >
               {s.n}
             </button>
-            <span
-              className="text-[13px]"
-              style={{
-                fontWeight: step === s.n ? 700 : 500,
-                color: step === s.n ? "#0F0F1A" : "#8b8da0",
-              }}
-            >
+            <span style={{
+              fontSize: 13, fontWeight: step === s.n ? 700 : 500,
+              color: step === s.n ? "#0F172A" : "#94A3B8",
+            }}>
               {s.label}
             </span>
             {idx < 2 && (
-              <div
-                className="w-10 h-0.5 rounded-full ml-1"
-                style={{ background: step > s.n ? "#6C5CE7" : "#e8e8f0" }}
-              />
+              <div style={{
+                width: 32, height: 2, borderRadius: 9999, marginLeft: 2,
+                background: step > s.n ? "#2563EB" : "#E2E8F0",
+              }} />
             )}
           </div>
         ))}
       </div>
 
-      {/* ═══════════ STEP 1 ═══════════ */}
+      {/* STEP 1 */}
       {step === 1 && (
-        <div className="card p-7">
-          <h3 className="text-[17px] font-bold text-dark-900 mb-5 flex items-center gap-2">
-            <Icon name="link" size={20} color="#6C5CE7" />
+        <div className="card p-6">
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+            <Icon name="link" size={18} color="#2563EB" />
             Lien d&apos;avis Google
           </h3>
 
-          <div className="flex gap-2.5 mb-6">
-            <input
-              value={googleLink}
-              onChange={(e) => update("googleLink", e.target.value)}
-              placeholder="https://g.page/r/votre-lien-avis"
-              className="input-field flex-1"
-            />
-            <button
-              className="w-11 h-11 rounded-[10px] border-none flex items-center justify-center shrink-0"
-              style={{
-                background: googleLink ? "#00B894" : "#e8e8f0",
-                cursor: "pointer",
-              }}
-            >
-              <Icon
-                name="check"
-                size={20}
-                color={googleLink ? "#fff" : "#b2bec3"}
-              />
-            </button>
-          </div>
+          <input
+            value={config.googleLink}
+            onChange={e => update("googleLink", e.target.value)}
+            placeholder="https://g.page/r/votre-lien-avis"
+            style={inp}
+            onFocus={e => e.target.style.borderColor = "#3B82F6"}
+            onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+          />
+          <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 6 }}>
+            Récupérez ce lien depuis votre fiche Google Business → Obtenir plus d&apos;avis
+          </p>
 
-          <h4 className="text-sm font-semibold text-gray-400 mb-3">
-            Liens réseaux sociaux (facultatif)
-          </h4>
-
-          {socials.map((s, i) => (
-            <div key={i} className="flex gap-2 mb-2">
-              <input
-                value={s}
-                onChange={(e) => updateSocial(i, e.target.value)}
-                placeholder="https://instagram.com/..."
-                className="input-field flex-1"
-              />
-              <button
-                onClick={() => removeSocial(i)}
-                className="border-none bg-transparent cursor-pointer"
-              >
-                <Icon name="trash" size={16} color="#e17055" />
-              </button>
-            </div>
-          ))}
-
-          <button
-            onClick={addSocial}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-dashed border-gray-300 bg-transparent text-brand-500 text-[13px] font-semibold cursor-pointer hover:border-brand-500 transition-colors"
-          >
-            <Icon name="plus" size={16} color="#6C5CE7" />
-            Ajouter un réseau
-          </button>
-
-          <div className="flex justify-end mt-6">
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
             <button onClick={() => setStep(2)} className="btn-primary">
               Suivant
-              <Icon name="chevronRight" size={18} color="#fff" />
+              <Icon name="chevronRight" size={16} color="#fff" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ═══════════ STEP 2 ═══════════ */}
+      {/* STEP 2 */}
       {step === 2 && (
-        <div className="card p-7">
-          <h3 className="text-[17px] font-bold text-dark-900 mb-6">
+        <div className="card p-6">
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 20 }}>
             Personnalisation
           </h3>
 
-          <div className="flex flex-wrap gap-6 mb-6">
-            {/* Primary color */}
-            <div className="flex-1 min-w-[200px]">
-              <label className="text-xs font-semibold text-gray-400 block mb-2">
-                Couleur principale
-              </label>
-              <div className="flex gap-2.5 items-center">
-                <input
-                  type="color"
-                  value={primaryColor}
-                  onChange={(e) => update("primaryColor", e.target.value)}
-                  className="w-11 h-11 rounded-[10px] border border-gray-200 cursor-pointer p-0.5"
-                />
-                <input
-                  value={primaryColor}
-                  onChange={(e) => update("primaryColor", e.target.value)}
-                  className="w-[100px] px-3 py-2.5 rounded-[10px] border border-gray-200 text-[13px] font-mono outline-none focus:border-brand-500"
-                />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginBottom: 20 }}>
+            {[
+              ["Couleur principale", "primaryColor"],
+              ["Couleur secondaire", "secondaryColor"],
+            ].map(([label, field]) => (
+              <div key={field} style={{ flex: "1 1 200px" }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 6 }}>
+                  {label}
+                </label>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <input
+                    type="color"
+                    value={config[field]}
+                    onChange={e => update(field, e.target.value)}
+                    style={{ width: 38, height: 34, borderRadius: 8, border: "1.5px solid #E2E8F0", cursor: "pointer", padding: 2 }}
+                  />
+                  <input
+                    value={config[field]}
+                    onChange={e => update(field, e.target.value)}
+                    style={{ ...inp, flex: 1, padding: "7px 10px", fontFamily: "'DM Mono', monospace" }}
+                    onFocus={e => e.target.style.borderColor = "#3B82F6"}
+                    onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+                  />
+                </div>
               </div>
-            </div>
-
-            {/* Secondary color */}
-            <div className="flex-1 min-w-[200px]">
-              <label className="text-xs font-semibold text-gray-400 block mb-2">
-                Couleur secondaire
-              </label>
-              <div className="flex gap-2.5 items-center">
-                <input
-                  type="color"
-                  value={secondaryColor}
-                  onChange={(e) => update("secondaryColor", e.target.value)}
-                  className="w-11 h-11 rounded-[10px] border border-gray-200 cursor-pointer p-0.5"
-                />
-                <input
-                  value={secondaryColor}
-                  onChange={(e) => update("secondaryColor", e.target.value)}
-                  className="w-[100px] px-3 py-2.5 rounded-[10px] border border-gray-200 text-[13px] font-mono outline-none focus:border-brand-500"
-                />
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* CTA text */}
-          <div className="mb-6">
-            <label className="text-xs font-semibold text-gray-400 block mb-2">
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 6 }}>
               Texte d&apos;invitation (call-to-action)
             </label>
             <input
-              value={ctaText}
-              onChange={(e) => update("ctaText", e.target.value)}
+              value={config.ctaText}
+              onChange={e => update("ctaText", e.target.value)}
               placeholder="Laissez-nous un avis et tentez votre chance !"
-              className="input-field"
+              style={inp}
+              onFocus={e => e.target.style.borderColor = "#3B82F6"}
+              onBlur={e => e.target.style.borderColor = "#E2E8F0"}
             />
           </div>
 
-          {/* Logo upload */}
-          <div className="mb-6">
-            <label className="text-xs font-semibold text-gray-400 block mb-2">
-              Logo de votre entreprise
+          <div style={{ marginBottom: 8 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 6 }}>
+              Logo
             </label>
-            <div
-              className="border-2 border-dashed border-gray-300 rounded-[14px] p-8 text-center cursor-pointer transition-colors hover:border-brand-500"
-              onDragOver={(e) => e.preventDefault()}
-            >
-              <div className="text-[32px] mb-2">📁</div>
-              <div className="text-gray-400 text-sm">
+            <div style={{
+              border: "2px dashed #E2E8F0", borderRadius: 12, padding: "28px 20px",
+              textAlign: "center", cursor: "pointer", transition: "border-color 0.2s",
+            }}>
+              <Icon name="qr" size={28} color="#CBD5E1" />
+              <div style={{ color: "#94A3B8", fontSize: 13, marginTop: 8 }}>
                 Glissez votre logo ici ou{" "}
-                <span className="text-brand-500 font-semibold">parcourir</span>
+                <span style={{ color: "#2563EB", fontWeight: 600 }}>parcourir</span>
               </div>
-              <div className="text-gray-300 text-xs mt-1">
-                PNG, JPG · Max 2 Mo
-              </div>
+              <div style={{ color: "#CBD5E1", fontSize: 12, marginTop: 4 }}>PNG, JPG · Max 2 Mo</div>
             </div>
           </div>
 
-          <div className="flex justify-between mt-6">
-            <button onClick={() => setStep(1)} className="btn-secondary">
-              Retour
-            </button>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
+            <button onClick={() => setStep(1)} className="btn-secondary">Retour</button>
             <button onClick={() => setStep(3)} className="btn-primary">
               Suivant
-              <Icon name="chevronRight" size={18} color="#fff" />
+              <Icon name="chevronRight" size={16} color="#fff" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ═══════════ STEP 3 ═══════════ */}
+      {/* STEP 3 */}
       {step === 3 && (
-        <div className="card p-7">
-          <h3 className="text-[17px] font-bold text-dark-900 mb-1.5 flex items-center gap-2">
-            <Icon name="gift" size={20} color="#6C5CE7" />
-            Récompenses
-          </h3>
-          <p className="text-gray-400 text-[13px] mb-5">
-            Total des probabilités :{" "}
-            <strong style={{ color: totalProb === 100 ? "#00B894" : "#e17055" }}>
-              {totalProb}%
-            </strong>
-            {totalProb !== 100 && (
-              <span className="text-danger text-xs ml-2">
-                ⚠ Doit être = 100%
-              </span>
-            )}
-          </p>
+        <div className="card p-6">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon name="gift" size={18} color="#2563EB" />
+              Récompenses
+            </h3>
+            <span style={{
+              fontSize: 13, fontWeight: 700,
+              color: totalProb === 100 ? "#10B981" : totalProb > 100 ? "#EF4444" : "#F59E0B",
+            }}>
+              Total : {totalProb}%
+              {totalProb !== 100 && <span style={{ fontSize: 12, fontWeight: 500, marginLeft: 6 }}>— doit être = 100%</span>}
+            </span>
+          </div>
 
-          {rewards.map((r, i) => (
-            <div key={r.id || i} className="flex gap-2.5 mb-2.5 items-center flex-wrap">
+          {config.rewards.length === 0 && (
+            <div style={{
+              padding: "24px", borderRadius: 12, background: "#F8FAFC",
+              border: "1.5px dashed #E2E8F0", textAlign: "center", marginBottom: 14, color: "#94A3B8", fontSize: 13,
+            }}>
+              Aucune récompense ajoutée. Cliquez sur "Ajouter une récompense".
+            </div>
+          )}
+
+          {config.rewards.map((r, i) => (
+            <div key={r.id || i} style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "center", flexWrap: "wrap" }}>
               <input
                 value={r.name}
-                onChange={(e) => updateReward(i, "name", e.target.value)}
+                onChange={e => updateReward(i, "name", e.target.value)}
                 placeholder="Nom de la récompense"
-                className="input-field flex-[2_1_180px]"
+                style={{ ...inp, flex: "2 1 180px" }}
+                onFocus={e => e.target.style.borderColor = "#3B82F6"}
+                onBlur={e => e.target.style.borderColor = "#E2E8F0"}
               />
-              <div className="flex items-center gap-1 flex-[0_0_100px]">
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <input
                   type="number"
                   value={r.prob}
-                  onChange={(e) => updateReward(i, "prob", e.target.value)}
-                  min={0}
-                  max={100}
-                  className="w-[70px] px-2.5 py-2.5 rounded-[10px] border border-gray-200 text-sm text-center outline-none focus:border-brand-500"
+                  onChange={e => updateReward(i, "prob", e.target.value)}
+                  min={0} max={100}
+                  style={{ ...inp, width: 72, textAlign: "center", padding: "10px 8px" }}
+                  onFocus={e => e.target.style.borderColor = "#3B82F6"}
+                  onBlur={e => e.target.style.borderColor = "#E2E8F0"}
                 />
-                <span className="text-gray-400 font-bold">%</span>
+                <span style={{ color: "#64748B", fontWeight: 700, fontSize: 13 }}>%</span>
               </div>
               <button
                 onClick={() => removeReward(i)}
-                className="border-none bg-transparent cursor-pointer"
+                style={{
+                  width: 34, height: 34, borderRadius: 8, border: "none",
+                  background: "#FEF2F2", color: "#EF4444", cursor: "pointer", fontSize: 16,
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                }}
               >
-                <Icon name="trash" size={16} color="#e17055" />
+                ×
               </button>
             </div>
           ))}
 
           <button
             onClick={addReward}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] mt-2 border border-dashed border-gray-300 bg-transparent text-brand-500 text-[13px] font-semibold cursor-pointer hover:border-brand-500 transition-colors"
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "9px 16px", borderRadius: 10, marginTop: 4,
+              border: "1.5px dashed #CBD5E1", background: "transparent",
+              color: "#3B82F6", fontSize: 13, fontWeight: 600, cursor: "pointer",
+              transition: "border-color 0.2s",
+            }}
           >
-            <Icon name="plus" size={16} color="#6C5CE7" />
-            Ajouter récompense
+            <Icon name="plus" size={15} color="#3B82F6" />
+            Ajouter une récompense
           </button>
 
-          <div className="flex justify-between mt-7">
-            <button onClick={() => setStep(2)} className="btn-secondary">
-              Retour
-            </button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
+            <button onClick={() => setStep(2)} className="btn-secondary">Retour</button>
             <button
-              onClick={() => setPreviewOpen(true)}
-              disabled={totalProb !== 100}
-              className="flex items-center gap-2 px-7 py-[11px] rounded-[10px] border-none font-bold text-sm text-white"
+              onClick={handleSave}
+              disabled={saving || totalProb !== 100}
+              className="btn-primary"
               style={{
-                background: totalProb === 100 ? "#00B894" : "#b2bec3",
-                cursor: totalProb === 100 ? "pointer" : "not-allowed",
+                opacity: saving || totalProb !== 100 ? 0.5 : 1,
+                cursor: saving || totalProb !== 100 ? "not-allowed" : "pointer",
               }}
             >
-              Enregistrer & Aperçu
+              {saving ? "Sauvegarde…" : "Enregistrer la configuration"}
             </button>
           </div>
         </div>
       )}
 
-      {/* ═══════════ WHEEL PREVIEW ═══════════ */}
-      {previewOpen && rewards.length > 0 && rewards.some((r) => r.name) && (
-        <div className="card p-7 mt-6 text-center">
-          <h3 className="text-[17px] font-bold text-dark-900 mb-1.5">
-            Aperçu de la roue
-          </h3>
-          <p className="text-gray-400 text-[13px] mb-6">{ctaText}</p>
+      {/* Preview */}
+      {previewOpen && config.rewards.length > 0 && config.rewards.some(r => r.name) && (
+        <div className="card p-7 mt-5 text-center animate-slide-up">
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>Aperçu de la roue</h3>
+          <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24 }}>{config.ctaText}</p>
           <SpinWheel
-            rewards={rewards.filter((r) => r.name)}
-            primaryColor={primaryColor}
-            secondaryColor={secondaryColor}
-            onResult={() => {
-              setShowConfetti(true);
-              setTimeout(() => setShowConfetti(false), 4000);
-            }}
+            rewards={config.rewards.filter(r => r.name)}
+            primaryColor={config.primaryColor}
+            secondaryColor={config.secondaryColor}
+            onResult={() => { setShowConfetti(true); setTimeout(() => setShowConfetti(false), 4000); }}
           />
         </div>
       )}

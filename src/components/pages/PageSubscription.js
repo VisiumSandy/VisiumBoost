@@ -4,141 +4,174 @@ import Icon from "@/components/Icon";
 
 const PLANS = [
   {
-    name: "Starter",
+    id: "free",
+    name: "Gratuit",
     price: "0 €",
     period: "/mois",
-    features: ["1 roue", "100 codes/mois", "Stats basiques", "Support email"],
-    current: true,
+    desc: "Pour démarrer et tester",
+    features: [
+      "1 établissement",
+      "50 scans/mois",
+      "Roue personnalisée",
+      "Support email",
+    ],
   },
   {
-    name: "Pro",
+    id: "starter",
+    name: "Starter",
     price: "29 €",
     period: "/mois",
+    desc: "Pour les petits établissements",
     features: [
-      "Roues illimitées",
-      "Codes illimités",
-      "Stats avancées",
+      "3 établissements",
+      "500 scans/mois",
+      "Analytics avancés",
       "Support prioritaire",
-      "Export CSV",
-      "Personnalisation complète",
+      "Export des données",
     ],
     recommended: true,
   },
   {
-    name: "Enterprise",
-    price: "99 €",
+    id: "pro",
+    name: "Pro",
+    price: "79 €",
     period: "/mois",
+    desc: "Pour les établissements en croissance",
     features: [
-      "Tout Pro +",
-      "API access",
+      "Établissements illimités",
+      "Scans illimités",
+      "Analytics en temps réel",
+      "Support dédié",
       "White label",
-      "Account manager",
-      "SLA garanti",
-      "Intégrations custom",
+      "API access",
     ],
   },
 ];
 
-export default function PageSubscription() {
+const FAQ = [
+  {
+    q: "Puis-je changer de plan à tout moment ?",
+    a: "Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. Le changement est effectif immédiatement.",
+  },
+  {
+    q: "Y a-t-il un engagement ?",
+    a: "Non, tous nos plans sont sans engagement. Vous pouvez annuler à tout moment.",
+  },
+  {
+    q: "Comment fonctionne le plan gratuit ?",
+    a: "Le plan gratuit est illimité dans le temps. Vous pouvez tester zReview sans carte bancaire.",
+  },
+];
+
+export default function PageSubscription({ user }) {
+  const currentPlan = user?.plan || "free";
+
   return (
     <div className="animate-fade-in">
       <div className="mb-8 text-center">
-        <h1 className="text-[28px] font-extrabold text-dark-900 tracking-tight">
-          Abonnement
-        </h1>
-        <p className="text-gray-400 text-sm mt-1.5">
-          Choisissez le plan adapté à vos besoins
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Choisissez votre plan</h1>
+        <p className="text-slate-400 text-sm mt-1.5">
+          Sans engagement · Changez de plan à tout moment
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-5 justify-center">
-        {PLANS.map((plan) => (
-          <div
-            key={plan.name}
-            className="bg-white rounded-[20px] p-8 flex-1 min-w-[260px] max-w-[320px] relative"
-            style={{
-              border: plan.recommended
-                ? "2px solid #6C5CE7"
-                : "1px solid #f0f0f5",
-              boxShadow: plan.recommended
-                ? "0 8px 30px rgba(108,92,231,0.12)"
-                : "0 1px 3px rgba(0,0,0,0.04)",
-            }}
-          >
-            {plan.recommended && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-500 text-white px-4 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide">
-                Recommandé
-              </div>
-            )}
-
-            <h3 className="text-xl font-extrabold text-dark-900 mb-1">
-              {plan.name}
-            </h3>
-
-            <div className="mb-5">
-              <span className="text-4xl font-black text-dark-900">
-                {plan.price}
-              </span>
-              <span className="text-sm text-gray-400">{plan.period}</span>
-            </div>
-
-            {plan.features.map((feat, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 mb-2.5 text-sm text-gray-500"
-              >
-                <Icon name="check" size={16} color="#00B894" />
-                {feat}
-              </div>
-            ))}
-
-            <button
-              className="w-full py-3 rounded-[10px] mt-4 font-bold text-sm transition-colors"
+      <div className="flex flex-wrap gap-5 justify-center mb-10">
+        {PLANS.map((plan) => {
+          const isCurrent = currentPlan === plan.id;
+          return (
+            <div
+              key={plan.id}
               style={{
-                border: plan.current ? "1px solid #e8e8f0" : "none",
-                background: plan.current
-                  ? "#fff"
-                  : plan.recommended
-                  ? "#6C5CE7"
-                  : "#f0f0f5",
-                color: plan.current
-                  ? "#8b8da0"
-                  : plan.recommended
-                  ? "#fff"
-                  : "#0F0F1A",
-                cursor: plan.current ? "default" : "pointer",
+                flex: "1 1 250px", maxWidth: 320,
+                background: "#fff",
+                borderRadius: 20,
+                padding: "28px 24px",
+                position: "relative",
+                border: plan.recommended
+                  ? "2px solid #2563EB"
+                  : "1.5px solid #E2E8F0",
+                boxShadow: plan.recommended
+                  ? "0 8px 32px rgba(37,99,235,0.12)"
+                  : "0 1px 4px rgba(0,0,0,0.05)",
+                transition: "box-shadow 0.2s",
               }}
             >
-              {plan.current ? "Plan actuel" : "Choisir ce plan"}
-            </button>
-          </div>
-        ))}
+              {plan.recommended && (
+                <div style={{
+                  position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
+                  background: "#2563EB", color: "#fff",
+                  padding: "4px 16px", borderRadius: 9999,
+                  fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8,
+                  whiteSpace: "nowrap",
+                }}>
+                  Recommandé
+                </div>
+              )}
+
+              <div style={{ marginBottom: 4, fontSize: 12, fontWeight: 600, color: plan.recommended ? "#2563EB" : "#64748B", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                {plan.name}
+              </div>
+              <div style={{ marginBottom: 4 }}>
+                <span style={{ fontSize: 36, fontWeight: 800, color: "#0F172A", letterSpacing: "-1px" }}>
+                  {plan.price}
+                </span>
+                <span style={{ fontSize: 14, color: "#94A3B8", marginLeft: 2 }}>{plan.period}</span>
+              </div>
+              <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 20px" }}>{plan.desc}</p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+                {plan.features.map((feat, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: "50%", background: "#EFF6FF",
+                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                    }}>
+                      <Icon name="check" size={11} color="#2563EB" />
+                    </div>
+                    <span style={{ fontSize: 13, color: "#475569" }}>{feat}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                disabled={isCurrent}
+                style={{
+                  width: "100%", padding: "12px", borderRadius: 12,
+                  border: isCurrent ? "1.5px solid #E2E8F0" : "none",
+                  background: isCurrent
+                    ? "#F8FAFC"
+                    : plan.recommended
+                    ? "#2563EB"
+                    : "#0F172A",
+                  color: isCurrent ? "#94A3B8" : "#fff",
+                  fontWeight: 700, fontSize: 14,
+                  cursor: isCurrent ? "default" : "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                {isCurrent ? "Plan actuel" : `Choisir ${plan.name}`}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {/* FAQ */}
-      <div className="card p-7 mt-8 max-w-2xl mx-auto">
-        <h3 className="text-base font-bold text-dark-900 mb-4">
+      <div className="card p-6 max-w-2xl mx-auto">
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 18 }}>
           Questions fréquentes
         </h3>
-        {[
-          {
-            q: "Puis-je changer de plan à tout moment ?",
-            a: "Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. Le changement est effectif immédiatement.",
-          },
-          {
-            q: "Y a-t-il un engagement ?",
-            a: "Non, tous nos plans sont sans engagement. Vous pouvez annuler à tout moment.",
-          },
-          {
-            q: "Comment fonctionne l'essai gratuit ?",
-            a: "Le plan Starter est gratuit et illimité dans le temps. Vous pouvez tester Riwil sans carte bancaire.",
-          },
-        ].map((faq, i) => (
-          <div key={i} className="mb-4 last:mb-0">
-            <div className="text-sm font-bold text-dark-900 mb-1">{faq.q}</div>
-            <div className="text-[13px] text-gray-400 leading-relaxed">
-              {faq.a}
-            </div>
+        {FAQ.map((faq, i) => (
+          <div
+            key={i}
+            style={{
+              paddingBottom: i < FAQ.length - 1 ? 14 : 0,
+              marginBottom: i < FAQ.length - 1 ? 14 : 0,
+              borderBottom: i < FAQ.length - 1 ? "1px solid #F1F5F9" : "none",
+            }}
+          >
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172A", marginBottom: 5 }}>{faq.q}</div>
+            <div style={{ fontSize: 13, color: "#64748B", lineHeight: 1.6 }}>{faq.a}</div>
           </div>
         ))}
       </div>

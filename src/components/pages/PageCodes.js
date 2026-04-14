@@ -29,8 +29,7 @@ export default function PageCodes() {
 
   const handleQuickValidate = async () => {
     if (!quickCode.trim()) return;
-    setQuickLoading(true);
-    setQuickResult(null);
+    setQuickLoading(true); setQuickResult(null);
     const r = await fetch("/api/user/validations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -58,20 +57,16 @@ export default function PageCodes() {
   return (
     <div className="animate-fade-in">
       <div className="mb-7">
-        <h1 className="text-[28px] font-extrabold text-dark-900 tracking-tight">
-          Validations
-        </h1>
-        <p className="text-gray-400 text-sm mt-1.5">
-          Vérifiez et validez les codes gagnants de vos clients
-        </p>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Validations</h1>
+        <p className="text-slate-400 text-sm mt-1">Vérifiez et validez les codes gagnants de vos clients</p>
       </div>
 
-      {/* ── Validation rapide ── */}
-      <div className="card p-6 mb-6">
-        <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 6px", color: "#0F0F1A" }}>
+      {/* Quick validate */}
+      <div className="card p-6 mb-5">
+        <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 5px", color: "#0F172A" }}>
           Valider un code en caisse
         </h3>
-        <p style={{ fontSize: 13, color: "#718096", margin: "0 0 16px" }}>
+        <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>
           Le client vous présente son code — entrez-le ici pour le valider et lui remettre son cadeau.
         </p>
 
@@ -83,26 +78,23 @@ export default function PageCodes() {
             placeholder="WIN-XXXX-XXXX"
             maxLength={12}
             style={{
-              flex: "1 1 220px", padding: "13px 18px", borderRadius: 12,
-              border: "2px solid #E2E8F0", fontSize: 20, fontWeight: 800,
-              letterSpacing: 4, fontFamily: "'JetBrains Mono', monospace",
+              flex: "1 1 200px", padding: "12px 18px", borderRadius: 12,
+              border: "2px solid #E2E8F0", fontSize: 18, fontWeight: 700,
+              letterSpacing: 3, fontFamily: "'DM Mono', monospace",
               outline: "none", transition: "border-color 0.2s", background: "#fff",
-              boxSizing: "border-box",
+              boxSizing: "border-box", color: "#0F172A",
             }}
-            onFocus={e => e.target.style.borderColor = "#6C5CE7"}
+            onFocus={e => e.target.style.borderColor = "#3B82F6"}
             onBlur={e => e.target.style.borderColor = "#E2E8F0"}
           />
           <button
             onClick={handleQuickValidate}
             disabled={quickLoading || !quickCode.trim()}
+            className="btn-primary"
             style={{
-              padding: "13px 28px", borderRadius: 12, border: "none",
-              background: quickLoading || !quickCode.trim()
-                ? "#b2bec3"
-                : "linear-gradient(135deg, #6C5CE7, #00B894)",
-              color: "#fff", fontWeight: 800, fontSize: 15,
+              padding: "12px 28px", fontSize: 15, borderRadius: 12,
+              opacity: quickLoading || !quickCode.trim() ? 0.5 : 1,
               cursor: quickLoading || !quickCode.trim() ? "not-allowed" : "pointer",
-              fontFamily: "'Inter', sans-serif", transition: "all 0.2s",
             }}
           >
             {quickLoading ? "Vérification…" : "Valider"}
@@ -112,25 +104,25 @@ export default function PageCodes() {
         {quickResult && (
           <div style={{
             marginTop: 14, padding: "14px 18px", borderRadius: 12,
-            background: quickResult.ok ? "#F0FFF4" : "#FFF5F5",
-            border: `1.5px solid ${quickResult.ok ? "#9AE6B4" : "#FEB2B2"}`,
+            background: quickResult.ok ? "#F0FDF4" : "#FEF2F2",
+            border: `1.5px solid ${quickResult.ok ? "#BBF7D0" : "#FECACA"}`,
           }}>
             {quickResult.ok ? (
               <div>
-                <p style={{ fontWeight: 800, color: "#276749", fontSize: 15, margin: "0 0 4px" }}>
-                  ✓ Code valide ! Remettez le cadeau au client.
+                <p style={{ fontWeight: 700, color: "#166534", fontSize: 15, margin: "0 0 3px" }}>
+                  ✓ Code valide — remettez le cadeau au client.
                 </p>
-                <p style={{ color: "#2F855A", fontSize: 13, margin: 0 }}>
+                <p style={{ color: "#15803D", fontSize: 13, margin: 0 }}>
                   Récompense : <strong>{quickResult.rewardName}</strong> — {quickResult.entreprise}
                 </p>
               </div>
             ) : (
               <div>
-                <p style={{ fontWeight: 700, color: "#C53030", fontSize: 14, margin: "0 0 4px" }}>
+                <p style={{ fontWeight: 700, color: "#DC2626", fontSize: 14, margin: "0 0 3px" }}>
                   ✗ {quickResult.error}
                 </p>
                 {quickResult.validatedAt && (
-                  <p style={{ fontSize: 12, color: "#E53E3E", margin: 0 }}>
+                  <p style={{ fontSize: 12, color: "#EF4444", margin: 0 }}>
                     Code déjà utilisé le {new Date(quickResult.validatedAt).toLocaleString("fr-FR")}
                   </p>
                 )}
@@ -140,28 +132,28 @@ export default function PageCodes() {
         )}
       </div>
 
-      {/* ── Filtres ── */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value.toUpperCase())}
           placeholder="Rechercher WIN-XXXX-XXXX…"
           style={{
-            flex: "1 1 200px", padding: "10px 16px", borderRadius: 12,
-            border: "1.5px solid #E2E8F0", fontSize: 14, outline: "none",
-            fontFamily: "'JetBrains Mono', monospace", background: "#fff",
+            flex: "1 1 200px", padding: "9px 14px", borderRadius: 10,
+            border: "1.5px solid #E2E8F0", fontSize: 13, outline: "none",
+            fontFamily: "'DM Mono', monospace", background: "#fff", color: "#0F172A",
             transition: "border-color 0.2s",
           }}
-          onFocus={e => e.target.style.borderColor = "#6C5CE7"}
+          onFocus={e => e.target.style.borderColor = "#3B82F6"}
           onBlur={e => e.target.style.borderColor = "#E2E8F0"}
         />
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
           style={{
-            padding: "10px 16px", borderRadius: 12, border: "1.5px solid #E2E8F0",
-            fontSize: 14, outline: "none", background: "#fff", cursor: "pointer",
-            fontFamily: "'Inter', sans-serif",
+            padding: "9px 14px", borderRadius: 10, border: "1.5px solid #E2E8F0",
+            fontSize: 13, outline: "none", background: "#fff", cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif", color: "#0F172A",
           }}
         >
           <option value="">Tous les codes</option>
@@ -170,14 +162,12 @@ export default function PageCodes() {
         </select>
       </div>
 
-      {/* ── Liste ── */}
+      {/* Table */}
       <div className="card overflow-hidden">
         <div style={{
-          display: "grid", gridTemplateColumns: "1.5fr 2fr 1.2fr 1fr 110px",
-          padding: "12px 24px", background: "#FAFAFA",
-          borderBottom: "1.5px solid #F0F0F5",
-          fontSize: 11, fontWeight: 800, color: "#b2bec3",
-          textTransform: "uppercase", letterSpacing: 1,
+          display: "grid", gridTemplateColumns: "1.5fr 2fr 1.2fr 1fr 100px",
+          padding: "11px 20px", background: "#FAFAFA", borderBottom: "1.5px solid #F1F5F9",
+          fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.8,
         }}>
           <div>Code</div>
           <div>Cadeau gagné</div>
@@ -187,18 +177,23 @@ export default function PageCodes() {
         </div>
 
         {loading && (
-          <div style={{ padding: "40px 24px", textAlign: "center", color: "#b2bec3", fontSize: 14 }}>
+          <div style={{ padding: "40px", textAlign: "center", color: "#94A3B8", fontSize: 14 }}>
             Chargement…
           </div>
         )}
 
         {!loading && spins.length === 0 && (
           <div style={{ padding: "52px 24px", textAlign: "center" }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>🎰</div>
-            <p style={{ fontWeight: 700, color: "#8b8da0", marginBottom: 6 }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: 14, margin: "0 auto 14px",
+              background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ fontSize: 24 }}>🎰</span>
+            </div>
+            <p style={{ fontWeight: 600, color: "#64748B", marginBottom: 5 }}>
               Aucun code {statusFilter === "pending" ? "en attente" : statusFilter === "validated" ? "validé" : "généré"} pour l&apos;instant
             </p>
-            <p style={{ color: "#b2bec3", fontSize: 13 }}>
+            <p style={{ color: "#94A3B8", fontSize: 13 }}>
               Les codes apparaissent ici dès qu&apos;un client tourne la roue.
             </p>
           </div>
@@ -208,55 +203,42 @@ export default function PageCodes() {
           <div
             key={spin._id}
             style={{
-              display: "grid", gridTemplateColumns: "1.5fr 2fr 1.2fr 1fr 110px",
-              padding: "13px 24px", borderBottom: "1px solid #F8F8FC",
+              display: "grid", gridTemplateColumns: "1.5fr 2fr 1.2fr 1fr 100px",
+              padding: "12px 20px", borderBottom: "1px solid #F8FAFC",
               alignItems: "center", fontSize: 13,
-              background: spin.validated ? "#FAFFFE" : "#fff",
-              transition: "background 0.15s",
+              background: spin.validated ? "#F0FDF4" : "#fff",
+              transition: "background 0.12s",
             }}
           >
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontWeight: 700, fontSize: 13, color: "#0F0F1A", letterSpacing: 1,
+              fontFamily: "'DM Mono', monospace",
+              fontWeight: 700, fontSize: 13, color: "#0F172A", letterSpacing: 1,
             }}>
               {spin.winCode}
             </div>
-
-            <div style={{ fontWeight: 600, color: "#2d3436" }}>
-              {spin.rewardName}
-            </div>
-
-            <div style={{ color: "#718096", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontWeight: 600, color: "#1E293B" }}>{spin.rewardName}</div>
+            <div style={{ color: "#64748B", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {spin.entrepriseId?.nom || "—"}
             </div>
-
-            <div style={{ color: "#8b8da0", fontSize: 12 }}>
+            <div style={{ color: "#94A3B8", fontSize: 12 }}>
               {new Date(spin.createdAt).toLocaleDateString("fr-FR")}
               <br />
               <span style={{ fontSize: 11 }}>
                 {new Date(spin.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
               </span>
             </div>
-
             <div style={{ textAlign: "center" }}>
               {spin.validated ? (
-                <span style={{
-                  padding: "5px 12px", borderRadius: 8,
-                  background: "#00B89415", color: "#00B894",
-                  fontWeight: 700, fontSize: 12,
-                }}>
-                  ✓ Validé
-                </span>
+                <span className="badge-success">✓ Validé</span>
               ) : (
                 <button
                   onClick={() => handleValidate(spin.winCode)}
                   disabled={validating === spin.winCode}
+                  className="btn-primary"
                   style={{
-                    padding: "6px 14px", borderRadius: 9, border: "none",
-                    background: validating === spin.winCode ? "#b2bec3" : "#6C5CE7",
-                    color: "#fff", fontWeight: 700, fontSize: 12,
+                    padding: "5px 14px", fontSize: 12, borderRadius: 8,
+                    opacity: validating === spin.winCode ? 0.5 : 1,
                     cursor: validating === spin.winCode ? "not-allowed" : "pointer",
-                    fontFamily: "'Inter', sans-serif", transition: "all 0.2s",
                   }}
                 >
                   {validating === spin.winCode ? "…" : "Valider"}
@@ -268,7 +250,7 @@ export default function PageCodes() {
       </div>
 
       {total > 0 && (
-        <p style={{ fontSize: 13, color: "#b2bec3", textAlign: "right", marginTop: 10 }}>
+        <p style={{ fontSize: 13, color: "#94A3B8", textAlign: "right", marginTop: 10 }}>
           {total} code{total > 1 ? "s" : ""} au total
         </p>
       )}

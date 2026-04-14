@@ -29,12 +29,12 @@ export default function MobileNav() {
             <Icon
               name={item.icon}
               size={20}
-              color={active ? "#6C5CE7" : "#b2bec3"}
+              color={active ? "#2563EB" : "#94A3B8"}
             />
             <span
               className="text-[10px]"
               style={{
-                color: active ? "#6C5CE7" : "#b2bec3",
+                color: active ? "#2563EB" : "#94A3B8",
                 fontWeight: active ? 700 : 500,
               }}
             >

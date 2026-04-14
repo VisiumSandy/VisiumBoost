@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import StatCard from "@/components/StatCard";
+import { useApp } from "@/lib/context";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from "recharts";
 
-export default function PageDashboard() {
+export default function PageDashboard({ user }) {
+  const { setCurrentPage } = useApp();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,111 +27,139 @@ export default function PageDashboard() {
     return { label: d.toLocaleDateString("fr-FR", { weekday: "short" }), count: 0 };
   });
 
+  const firstName = user?.name?.split(" ")[0] || "là";
+
   return (
     <div className="animate-fade-in">
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-extrabold text-dark-900 tracking-tight">
-          Tableau de bord
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          Bonjour, {firstName} 👋
         </h1>
-        <p className="text-gray-400 text-sm mt-1.5">
-          Vue d&apos;ensemble de votre activité
+        <p className="text-slate-400 text-sm mt-1">
+          Voici l&apos;activité de vos établissements
         </p>
       </div>
 
-      {/* Stats grid */}
-      <div className="flex flex-wrap gap-4 mb-7">
-        <StatCard
-          icon="qr"
-          label="Scans de page"
-          value={loading ? "…" : String(s.totalScans ?? 0)}
-          color="#6C5CE7"
-        />
-        <StatCard
-          icon="wheel"
-          label="Roues tournées"
-          value={loading ? "…" : String(s.totalSpins ?? 0)}
-          color="#0984E3"
-        />
-        <StatCard
-          icon="check"
-          label="Codes validés"
-          value={loading ? "…" : String(s.validatedSpins ?? 0)}
-          color="#00B894"
-        />
-        <StatCard
-          icon="trendUp"
-          label="Taux de retrait"
-          value={loading ? "…" : `${s.conversionRate ?? 0}%`}
-          color="#E17055"
-        />
-      </div>
-
-      {!loading && s.totalSpins === 0 && (
+      {/* Empty onboarding */}
+      {!loading && (s.totalSpins ?? 0) === 0 && (
         <div style={{
-          background: "linear-gradient(135deg, #6C5CE715, #00B89410)",
-          border: "1.5px solid #6C5CE730",
+          background: "linear-gradient(135deg, #EFF6FF, #F0F9FF)",
+          border: "1.5px solid #BFDBFE",
           borderRadius: 16, padding: "20px 24px", marginBottom: 24,
-          display: "flex", alignItems: "center", gap: 14,
+          display: "flex", alignItems: "center", gap: 16,
         }}>
-          <span style={{ fontSize: 28 }}>🚀</span>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12,
+            background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 22 }}>🚀</span>
+          </div>
           <div>
-            <p style={{ fontWeight: 800, color: "#0F0F1A", margin: "0 0 4px", fontSize: 15 }}>
-              Aucune activité pour l&apos;instant
+            <p style={{ fontWeight: 700, color: "#1E40AF", margin: "0 0 3px", fontSize: 15 }}>
+              Commencez par configurer votre roue
             </p>
-            <p style={{ color: "#636e72", fontSize: 13, margin: 0 }}>
-              Configurez votre roue dans &quot;Mes entreprises&quot; et partagez votre lien avec vos clients !
+            <p style={{ color: "#3B82F6", fontSize: 13, margin: 0 }}>
+              Ajoutez un établissement, configurez la roue et partagez votre lien avec vos clients.{" "}
+              <button
+                onClick={() => setCurrentPage("clients")}
+                style={{ color: "#2563EB", fontWeight: 700, textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 13 }}
+              >
+                Ajouter un établissement →
+              </button>
             </p>
           </div>
         </div>
       )}
 
-      {/* Codes en attente */}
-      {!loading && s.pendingSpins > 0 && (
+      {/* Pending codes alert */}
+      {!loading && (s.pendingSpins ?? 0) > 0 && (
         <div style={{
-          background: "#FFFBEB", border: "1.5px solid #F6C90080",
-          borderRadius: 16, padding: "16px 20px", marginBottom: 24,
+          background: "#FFFBEB", border: "1.5px solid #FDE68A",
+          borderRadius: 16, padding: "14px 20px", marginBottom: 24,
           display: "flex", alignItems: "center", gap: 12,
         }}>
-          <span style={{ fontSize: 22 }}>⏳</span>
-          <p style={{ fontWeight: 700, color: "#92400E", fontSize: 14, margin: 0 }}>
+          <div style={{ fontSize: 20, flexShrink: 0 }}>⏳</div>
+          <p style={{ fontWeight: 600, color: "#92400E", fontSize: 14, margin: 0 }}>
             <strong>{s.pendingSpins}</strong> code{s.pendingSpins > 1 ? "s" : ""} en attente de validation —{" "}
-            rendez-vous dans l&apos;onglet &quot;Validations&quot; pour les vérifier.
+            <button
+              onClick={() => setCurrentPage("codes")}
+              style={{ color: "#B45309", fontWeight: 700, textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 14 }}
+            >
+              Voir les validations →
+            </button>
           </p>
         </div>
       )}
 
+      {/* Stats */}
+      <div className="flex flex-wrap gap-4 mb-7">
+        <StatCard
+          icon="qr"
+          label="Scans de page"
+          value={loading ? "—" : String(s.totalScans ?? 0)}
+          color="#3B82F6"
+        />
+        <StatCard
+          icon="wheel"
+          label="Roues tournées"
+          value={loading ? "—" : String(s.totalSpins ?? 0)}
+          color="#0EA5E9"
+        />
+        <StatCard
+          icon="check"
+          label="Codes validés"
+          value={loading ? "—" : String(s.validatedSpins ?? 0)}
+          color="#10B981"
+        />
+        <StatCard
+          icon="trendUp"
+          label="Taux de retrait"
+          value={loading ? "—" : `${s.conversionRate ?? 0}%`}
+          color="#F59E0B"
+        />
+      </div>
+
       {/* Chart */}
-      <div className="card p-7">
+      <div className="card p-6">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 className="text-base font-bold text-dark-900">
-            Roues tournées — 7 derniers jours
-          </h3>
+          <div>
+            <h3 className="text-base font-semibold text-slate-900">Activité — 7 derniers jours</h3>
+            <p className="text-slate-400 text-[13px] mt-0.5">Nombre de roues tournées par jour</p>
+          </div>
           <span style={{
-            fontSize: 12, fontWeight: 700, color: "#6C5CE7",
-            background: "#6C5CE715", padding: "4px 10px", borderRadius: 8,
+            fontSize: 12, fontWeight: 600, color: "#2563EB",
+            background: "#EFF6FF", padding: "4px 12px", borderRadius: 20,
           }}>
             Total : {s.totalSpins ?? 0}
           </span>
         </div>
-        <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={weekChart}>
+        <ResponsiveContainer width="100%" height={240}>
+          <AreaChart data={weekChart} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <defs>
-              <linearGradient id="gSpins" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6C5CE7" stopOpacity={0.18} />
-                <stop offset="95%" stopColor="#6C5CE7" stopOpacity={0} />
+              <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%"  stopColor="#3B82F6" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f5" />
-            <XAxis dataKey="label" axisLine={false} tickLine={false}
-              style={{ fontSize: 12, fill: "#8b8da0" }} />
-            <YAxis axisLine={false} tickLine={false}
-              style={{ fontSize: 11, fill: "#8b8da0" }} allowDecimals={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+            <XAxis dataKey="label" axisLine={false} tickLine={false} style={{ fontSize: 12, fill: "#94A3B8" }} />
+            <YAxis axisLine={false} tickLine={false} style={{ fontSize: 11, fill: "#94A3B8" }} allowDecimals={false} />
             <Tooltip
-              contentStyle={{ borderRadius: 12, border: "1px solid #f0f0f5", fontSize: 13, fontFamily: "'Inter', sans-serif" }}
+              contentStyle={{
+                borderRadius: 10, border: "1px solid #E2E8F0",
+                fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+              }}
               formatter={(v) => [v, "Roues tournées"]}
+              labelStyle={{ color: "#475569", fontWeight: 600 }}
             />
-            <Area type="monotone" dataKey="count" stroke="#6C5CE7"
-              strokeWidth={2.5} fill="url(#gSpins)" name="Roues" />
+            <Area
+              type="monotone" dataKey="count"
+              stroke="#3B82F6" strokeWidth={2}
+              fill="url(#gBlue)"
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>

@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import StatCard from "@/components/StatCard";
 import Icon from "@/components/Icon";
 
 export default function PageAffiliation() {
-  const refLink = "https://riwil.app/ref/MON-CODE-123";
   const [copied, setCopied] = useState(false);
+
+  // The referral code would come from the user's profile in a real implementation
+  const refCode = "MON-CODE";
+  const refLink = typeof window !== "undefined"
+    ? `${window.location.origin}/ref/${refCode}`
+    : `/ref/${refCode}`;
 
   const copy = () => {
     navigator.clipboard?.writeText(refLink);
@@ -17,73 +21,92 @@ export default function PageAffiliation() {
   return (
     <div className="animate-fade-in">
       <div className="mb-7">
-        <h1 className="text-[28px] font-extrabold text-dark-900 tracking-tight">
-          Programme d&apos;affiliation
-        </h1>
-        <p className="text-gray-400 text-sm mt-1.5">
-          Parrainez des entreprises et gagnez des commissions
-        </p>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Programme d&apos;affiliation</h1>
+        <p className="text-slate-400 text-sm mt-1">Parrainez des entreprises et gagnez des commissions</p>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-7">
-        <StatCard icon="users" label="Filleuls actifs" value="3" color="#6C5CE7" />
-        <StatCard icon="creditCard" label="Revenus gagnés" value="145 €" trend="+20%" color="#00B894" />
-        <StatCard icon="trendUp" label="Taux conversion" value="18%" color="#E17055" />
+      {/* Coming soon banner */}
+      <div style={{
+        background: "linear-gradient(135deg, #EFF6FF, #F0F9FF)",
+        border: "1.5px solid #BFDBFE",
+        borderRadius: 16, padding: "20px 24px", marginBottom: 24,
+        display: "flex", alignItems: "center", gap: 16,
+      }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 12,
+          background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <Icon name="link" size={22} color="#fff" />
+        </div>
+        <div>
+          <p style={{ fontWeight: 700, color: "#1E40AF", margin: "0 0 3px", fontSize: 15 }}>
+            Programme d&apos;affiliation — Bientôt disponible
+          </p>
+          <p style={{ color: "#3B82F6", fontSize: 13, margin: 0 }}>
+            Le système de parrainage est en cours de déploiement. Votre lien de parrainage est prêt à être partagé.
+          </p>
+        </div>
       </div>
 
-      <div className="card p-7">
-        <h3 className="text-base font-bold text-dark-900 mb-3">
+      {/* Referral link */}
+      <div className="card p-6 mb-5">
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 5 }}>
           Votre lien de parrainage
         </h3>
-        <div className="flex gap-2.5">
+        <p style={{ fontSize: 13, color: "#64748B", marginBottom: 16 }}>
+          Partagez ce lien avec d&apos;autres établissements pour gagner une commission sur chaque abonnement souscrit.
+        </p>
+        <div style={{ display: "flex", gap: 10 }}>
           <input
             value={refLink}
             readOnly
-            className="flex-1 px-4 py-3 rounded-[10px] border border-gray-200 text-sm font-mono outline-none bg-gray-50 text-brand-500"
+            style={{
+              flex: 1, padding: "10px 14px", borderRadius: 10,
+              border: "1.5px solid #E2E8F0", fontSize: 13,
+              fontFamily: "'DM Mono', monospace", background: "#F8FAFC",
+              color: "#2563EB", outline: "none",
+            }}
           />
           <button
             onClick={copy}
-            className="px-6 py-3 rounded-[10px] border-none font-bold text-sm text-white whitespace-nowrap transition-colors"
-            style={{
-              background: copied ? "#00B894" : "#6C5CE7",
-              cursor: "pointer",
-            }}
+            className="btn-primary"
+            style={{ whiteSpace: "nowrap" }}
           >
             {copied ? "✓ Copié !" : "Copier"}
           </button>
         </div>
       </div>
 
-      {/* Referral table */}
-      <div className="card mt-6 overflow-hidden">
-        <div className="px-7 py-4 border-b border-gray-100">
-          <h3 className="text-base font-bold text-dark-900">Vos filleuls</h3>
-        </div>
-        <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr] px-6 py-3 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wide">
-          <div>Entreprise</div>
-          <div>Date</div>
-          <div>Statut</div>
-          <div>Commission</div>
-        </div>
-        {[
-          { name: "Pizzeria Roma", date: "2025-03-12", status: "Actif", commission: "58 €" },
-          { name: "Boulangerie Martin", date: "2025-02-28", status: "Actif", commission: "45 €" },
-          { name: "Garage Auto Plus", date: "2025-01-15", status: "Essai", commission: "42 €" },
-        ].map((r, i) => (
-          <div
-            key={i}
-            className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr] px-6 py-3.5 border-b border-gray-50 items-center text-sm gap-1 sm:gap-0"
-          >
-            <div className="font-semibold text-dark-900">{r.name}</div>
-            <div className="text-gray-400 text-[13px]">{r.date}</div>
-            <div>
-              <span className={r.status === "Actif" ? "badge-success" : "badge-danger"}>
-                {r.status}
-              </span>
+      {/* Commission table */}
+      <div className="card p-6">
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 16 }}>
+          Barème des commissions
+        </h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+          {[
+            { plan: "Starter", price: "29 €/mois", commission: "20%", amount: "~5,80 €/mois" },
+            { plan: "Pro", price: "79 €/mois", commission: "20%", amount: "~15,80 €/mois" },
+          ].map(item => (
+            <div key={item.plan} style={{
+              padding: "16px", borderRadius: 12, border: "1.5px solid #E2E8F0",
+              background: "#FAFAFA",
+            }}>
+              <div style={{ fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{item.plan}</div>
+              <div style={{ fontSize: 13, color: "#64748B", marginBottom: 8 }}>{item.price}</div>
+              <div style={{
+                fontSize: 12, fontWeight: 700, color: "#2563EB",
+                background: "#EFF6FF", padding: "4px 10px", borderRadius: 6, display: "inline-block",
+              }}>
+                {item.commission} → {item.amount}
+              </div>
             </div>
-            <div className="font-semibold text-dark-900">{r.commission}</div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 16 }}>
+          * Les commissions sont versées mensuellement par virement bancaire. Minimum de versement : 50 €.
+        </p>
       </div>
     </div>
   );
