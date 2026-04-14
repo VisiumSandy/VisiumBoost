@@ -23,18 +23,18 @@ const T = {
     ctaBg:"#09090B",
   },
   dark: {
-    bg:"#09090B", bg2:"#111113", bg3:"#18181B",
+    bg:"rgba(9,9,11,0.72)", bg2:"rgba(14,14,18,0.65)", bg3:"rgba(22,22,28,0.6)",
     text:"#FAFAFA", text2:"#A1A1AA", text3:"#71717A",
     border:"rgba(255,255,255,0.08)", border2:"rgba(255,255,255,0.04)",
-    card:"rgba(255,255,255,0.03)", cardBg:"rgba(255,255,255,0.025)",
-    navBg:"rgba(9,9,11,0.88)",
+    card:"rgba(255,255,255,0.04)", cardBg:"rgba(255,255,255,0.025)",
+    navBg:"rgba(9,9,11,0.92)",
     accent:"#3B82F6", accentHex:"59,130,246",
-    badge:"rgba(59,130,246,0.1)", badgeBorder:"rgba(59,130,246,0.3)", badgeText:"#93C5FD",
+    badge:"rgba(59,130,246,0.12)", badgeBorder:"rgba(59,130,246,0.3)", badgeText:"#93C5FD",
     shadow:"0 1px 3px rgba(0,0,0,0.2),0 8px 24px rgba(0,0,0,0.3)",
     shadowLg:"0 20px 60px rgba(0,0,0,0.5)",
     step:"rgba(255,255,255,0.025)",
-    footerBg:"#050507", footerText:"#52525B",
-    ctaBg:"#050507",
+    footerBg:"rgba(5,5,7,0.9)", footerText:"#52525B",
+    ctaBg:"rgba(5,5,7,0.85)",
   },
 };
 
@@ -234,9 +234,65 @@ function AnalyticsCard3D({ t }) {
   );
 }
 
+// ─── Dark Mode 3D Background ──────────────────────────────────────────
+function DarkBg3D() {
+  const shapes = [
+    { w:700, h:700, top:"-15%", left:"-12%",  color:"rgba(37,99,235,0.28)",   dur:14 },
+    { w:800, h:800, top:"15%",  right:"-15%", color:"rgba(139,92,246,0.22)",  dur:18 },
+    { w:600, h:600, top:"50%",  left:"5%",    color:"rgba(6,182,212,0.18)",   dur:22 },
+    { w:500, h:500, top:"65%",  right:"2%",   color:"rgba(37,99,235,0.16)",   dur:16 },
+    { w:550, h:550, top:"35%",  left:"35%",   color:"rgba(139,92,246,0.12)",  dur:20 },
+  ];
+  const geos = [
+    { s:130, top:"12%", left:"5%",   border:"rgba(59,130,246,0.25)",  dur:20, delay:0,  r:0 },
+    { s:90,  top:"38%", right:"4%",  border:"rgba(139,92,246,0.25)",  dur:15, delay:3,  r:1 },
+    { s:65,  top:"58%", left:"12%",  border:"rgba(6,182,212,0.2)",    dur:25, delay:6,  r:2 },
+    { s:110, top:"78%", right:"10%", border:"rgba(59,130,246,0.18)",  dur:18, delay:2,  r:0 },
+    { s:55,  top:"22%", left:"42%",  border:"rgba(245,158,11,0.18)",  dur:22, delay:5,  r:1 },
+    { s:75,  top:"68%", left:"48%",  border:"rgba(139,92,246,0.18)",  dur:19, delay:8,  r:2 },
+  ];
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:-1, pointerEvents:"none", overflow:"hidden" }}>
+      {/* Glow orbs */}
+      {shapes.map((sh, i) => (
+        <motion.div key={i}
+          animate={{ x:[0,i%2===0?30:-25,0], y:[0,i%2===0?-22:18,0], scale:[1,1.1,1] }}
+          transition={{ duration:sh.dur, repeat:Infinity, ease:"easeInOut", delay:i*2.5 }}
+          style={{ position:"absolute", width:sh.w, height:sh.h,
+            top:sh.top, left:sh.left, right:sh.right,
+            borderRadius:"50%",
+            background:`radial-gradient(circle,${sh.color},transparent 65%)`,
+            filter:"blur(80px)" }}
+        />
+      ))}
+      {/* Perspective floor grid */}
+      <div style={{
+        position:"absolute", bottom:0, left:0, right:0, height:"50%",
+        backgroundImage:"linear-gradient(rgba(59,130,246,0.12) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.12) 1px,transparent 1px)",
+        backgroundSize:"54px 54px",
+        transform:"perspective(360px) rotateX(65deg)",
+        transformOrigin:"bottom center",
+        WebkitMaskImage:"linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%)",
+        maskImage:"linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%)",
+      }}/>
+      {/* Floating geometric outlines */}
+      {geos.map((g, i) => (
+        <motion.div key={i}
+          animate={{ y:[0,-32,0], rotate:[0, g.r===0?180:g.r===1?-180:90, 0], opacity:[0.08,0.22,0.08] }}
+          transition={{ duration:g.dur, repeat:Infinity, ease:"easeInOut", delay:g.delay }}
+          style={{ position:"absolute", width:g.s, height:g.s,
+            top:g.top, left:g.left, right:g.right,
+            borderRadius: g.r===0 ? "50%" : g.r===1 ? "18px" : "6px",
+            border:`1.5px solid ${g.border}` }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ─── Fixed 3D Side Objects layer ─────────────────────────────────────
 function SideObjects({ isDark, scrollY, t }) {
-  const phoneY    = useTransform(scrollY, [0, 1200], [20, -180]);
+  const phoneY    = useTransform(scrollY, [0, 1200], [0, -60]);
   const phoneOp   = useTransform(scrollY, [0, 200, 900, 1200], [0, 1, 1, 0]);
   const reviewY   = useTransform(scrollY, [600, 2000], [80, -200]);
   const reviewOp  = useTransform(scrollY, [600, 900, 1700, 2000], [0, 1, 1, 0]);
@@ -248,7 +304,7 @@ function SideObjects({ isDark, scrollY, t }) {
   return (
     <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:50, overflow:"hidden" }} className="side-layer">
       {/* Phone – right */}
-      <motion.div style={{ position:"absolute", right:24, top:"12%", y:phoneY, opacity:phoneOp }} className="side-obj">
+      <motion.div style={{ position:"absolute", right:24, top:"28%", y:phoneY, opacity:phoneOp }} className="side-obj">
         <Phone3D isDark={isDark}/>
       </motion.div>
       {/* Review stack – left */}
@@ -333,7 +389,10 @@ export default function LandingPage() {
   });
 
   return (
-    <div style={{ fontFamily:"'DM Sans',system-ui,sans-serif", background:t.bg, color:t.text, minHeight:"100vh" }}>
+    <div style={{ fontFamily:"'DM Sans',system-ui,sans-serif", background: isDark ? "transparent" : t.bg, color:t.text, minHeight:"100vh", position:"relative" }}>
+      {/* Dark base — sits behind everything including DarkBg3D */}
+      {isDark && <div style={{ position:"fixed", inset:0, zIndex:-2, background:"#09090B" }}/>}
+      {isDark && <DarkBg3D/>}
       <SideObjects isDark={isDark} scrollY={scrollY} t={t}/>
 
       {/* ── NAV ─────────────────────────────────────────────── */}
