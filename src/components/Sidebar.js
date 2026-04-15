@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { id: "dashboard",    icon: "dashboard",   label: "Tableau de bord" },
   { id: "clients",      icon: "users",       label: "Mes entreprises" },
   { id: "wheel",        icon: "wheel",       label: "Ma Roue" },
+  { id: "affiches",     icon: "print",       label: "Affiches" },
   { id: "codes",        icon: "check",       label: "Validations" },
   { id: "affiliation",  icon: "link",        label: "Affiliation" },
   { id: "subscription", icon: "creditCard",  label: "Abonnement" },

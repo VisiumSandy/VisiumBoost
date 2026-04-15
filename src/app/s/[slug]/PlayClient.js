@@ -57,6 +57,15 @@ function resolveTheme(e) {
 }
 
 export default function PlayClient({ entreprise }) {
+  // ── DEBUG — remove after confirming collectFields values ──────────
+  console.log(
+    "[VisiumBoost] entreprise.theme.collectFields (raw from DB):",
+    JSON.stringify(entreprise.theme?.collectFields ?? "undefined"),
+    "| typeof prenom:", typeof entreprise.theme?.collectFields?.prenom,
+    "| value:", entreprise.theme?.collectFields?.prenom,
+  );
+  // ─────────────────────────────────────────────────────────────────
+
   const [step,           setStep]           = useState(1);
   const [reviewClicked,  setReviewClicked]  = useState(false);
   const [result,         setResult]         = useState(null);
@@ -94,7 +103,7 @@ export default function PlayClient({ entreprise }) {
   const btnRadius  = th.btnRadius !== undefined ? th.btnRadius : 16;
 
   const cf = th.collectFields;
-  const hasCollect = cf.prenom === true || cf.email === true || cf.telephone === true;
+  const hasCollect = Object.values(cf).some(v => v === true);
 
   const isTextLight = (() => {
     const hex = tc.replace("#","");

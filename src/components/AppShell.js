@@ -14,12 +14,14 @@ import PageWheel       from "@/components/pages/PageWheel";
 import PageAffiliation from "@/components/pages/PageAffiliation";
 import PageSubscription from "@/components/pages/PageSubscription";
 import PageAccount     from "@/components/pages/PageAccount";
+import PageAffiches    from "@/components/pages/PageAffiches";
 
 const PAGES = {
   dashboard:    PageDashboard,
   clients:      PageClients,
   codes:        PageCodes,
   wheel:        PageWheel,
+  affiches:     PageAffiches,
   affiliation:  PageAffiliation,
   subscription: PageSubscription,
   account:      PageAccount,

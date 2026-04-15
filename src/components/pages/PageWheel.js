@@ -171,7 +171,7 @@ function entrepriseToConfig(e) {
 // ═══════════════════════════════════════════════════════════════
 // LIVE PREVIEW COMPONENT
 // ═══════════════════════════════════════════════════════════════
-function LivePreview({ config, entreprise }) {
+function LivePreview({ config, entreprise, compact = false }) {
   const [device,      setDevice]      = useState("mobile");
   const [pvStep,      setPvStep]      = useState(1);
   const [spinKey,     setSpinKey]     = useState(0);
@@ -363,29 +363,46 @@ function LivePreview({ config, entreprise }) {
       {/* Frame */}
       {device === "mobile" ? (
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <div style={{ background: "#1A1A1A", borderRadius: 44, padding: "14px 10px 16px", boxShadow: "0 28px 80px rgba(0,0,0,0.5)", position: "relative" }}>
-            <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", width: 68, height: 18, background: "#1A1A1A", borderRadius: "0 0 12px 12px", zIndex: 10 }} />
-            <div style={{ width: 300, height: 580, borderRadius: 32, overflow: "hidden", background: pageBg }}>
+          <div style={{
+            background: "#1A1A1A",
+            borderRadius: compact ? 36 : 44,
+            padding: compact ? "12px 8px 14px" : "14px 10px 16px",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+            position: "relative",
+            maxWidth: "100%",
+          }}>
+            <div style={{
+              position: "absolute", top: compact ? 12 : 14, left: "50%",
+              transform: "translateX(-50%)",
+              width: compact ? 56 : 68, height: 16,
+              background: "#1A1A1A", borderRadius: "0 0 10px 10px", zIndex: 10,
+            }} />
+            <div style={{
+              width: compact ? 240 : 300,
+              height: compact ? 480 : 580,
+              borderRadius: compact ? 26 : 32,
+              overflow: "hidden", background: pageBg,
+            }}>
               <div style={{ height: "100%", overflowY: "auto", scrollbarWidth: "none" }}>
                 {pageContent}
               </div>
             </div>
-            <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
-              <div style={{ width: 72, height: 4, borderRadius: 2, background: "#3A3A3A" }} />
+            <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
+              <div style={{ width: compact ? 56 : 72, height: 4, borderRadius: 2, background: "#3A3A3A" }} />
             </div>
           </div>
         </div>
       ) : (
-        <div style={{ borderRadius: 14, overflow: "hidden", border: "1.5px solid #E2E8F0", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
-          <div style={{ background: "#F5F5F7", borderBottom: "1.5px solid #E2E8F0", padding: "9px 12px", display: "flex", alignItems: "center", gap: 9 }}>
-            <div style={{ display: "flex", gap: 4 }}>
-              {["#FF5F57","#FFBD2E","#28C941"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
+        <div style={{ borderRadius: 12, overflow: "hidden", border: "1.5px solid #E2E8F0", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+          <div style={{ background: "#F5F5F7", borderBottom: "1.5px solid #E2E8F0", padding: "7px 10px", display: "flex", alignItems: "center", gap: 7 }}>
+            <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+              {["#FF5F57","#FFBD2E","#28C941"].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />)}
             </div>
-            <div style={{ flex: 1, background: "#E5E7EB", borderRadius: 6, padding: "4px 11px", fontSize: 10, color: "#8896A5", fontFamily: "'DM Mono',monospace" }}>
+            <div style={{ flex: 1, background: "#E5E7EB", borderRadius: 5, padding: "3px 8px", fontSize: 9, color: "#8896A5", fontFamily: "'DM Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               visium-boost.fr/roue/{entreprise?.slug || "mon-etablissement"}
             </div>
           </div>
-          <div style={{ height: 560, overflowY: "auto", scrollbarWidth: "none", background: pageBg }}>
+          <div style={{ height: compact ? 460 : 560, overflowY: "auto", scrollbarWidth: "none", background: pageBg }}>
             {pageContent}
           </div>
         </div>
@@ -428,6 +445,11 @@ export default function PageWheel() {
   const [previewOpen,  setPreviewOpen]  = useState(false);
   const [copiedSlug,   setCopiedSlug]   = useState(null);
   const qrCanvasRefs = useRef({});
+  const tplScrollRef = useRef(null);
+
+  const scrollTpl = (dir) => {
+    tplScrollRef.current?.scrollBy({ left: dir * 104, behavior: "smooth" });
+  };
 
   // ── Load ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -658,7 +680,7 @@ export default function PageWheel() {
 
           {/* ── LEFT PANEL (controls) ─────────────────────── */}
           <div style={{
-            flex: "0 0 43%",
+            flex: "0 0 68%",
             background: "#fff", borderRadius: 20,
             border: "1.5px solid #F0F0F5",
             boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
@@ -670,34 +692,86 @@ export default function PageWheel() {
               {/* ─ Templates row ─ */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 11 }}>
-                  Templates prédéfinis
+                  Templates
                 </div>
-                <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 6, scrollbarWidth: "none" }}>
-                  {TEMPLATES.map(tpl => {
-                    const sel = activeTemplate === tpl.id;
-                    return (
-                      <button key={tpl.id} onClick={() => applyTemplate(tpl)} style={{
-                        flexShrink: 0, width: 90, borderRadius: 12,
-                        border: `2px solid ${sel ? tpl.primaryColor : "#E2E8F0"}`,
-                        background: "#fff", cursor: "pointer", overflow: "hidden",
-                        transition: "all 0.15s", padding: 0,
-                        boxShadow: sel ? `0 2px 12px ${tpl.primaryColor}40` : "none",
-                      }}>
-                        {/* Swatch */}
-                        <div style={{
-                          height: 36, display: "flex", alignItems: "center", justifyContent: "center", gap: 3,
-                          background: tpl.bgType === "gradient" ? tpl.bgGradient : tpl.bg,
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {/* Prev arrow */}
+                  <button onClick={() => scrollTpl(-1)} style={{
+                    flexShrink: 0, width: 28, height: 28, borderRadius: 8,
+                    border: "1.5px solid #E2E8F0", background: "#fff",
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 13, color: "#64748B", transition: "all 0.15s",
+                  }}>‹</button>
+
+                  {/* Scrollable strip */}
+                  <div ref={tplScrollRef} style={{
+                    display: "flex", gap: 7, overflowX: "auto",
+                    paddingBottom: 4, scrollbarWidth: "none", flex: 1,
+                    scrollBehavior: "smooth",
+                  }}>
+                    {/* ── Custom / Personnalisé ── */}
+                    {(() => {
+                      const isCustom = !activeTemplate;
+                      return (
+                        <button onClick={() => setActiveTemplate(null)} style={{
+                          flexShrink: 0, width: 86, borderRadius: 12,
+                          border: `2px solid ${isCustom ? "#2563EB" : "#E2E8F0"}`,
+                          background: "#fff", cursor: "pointer", overflow: "hidden",
+                          transition: "all 0.15s", padding: 0,
+                          boxShadow: isCustom ? "0 2px 12px #2563EB35" : "none",
                         }}>
-                          {tpl.palette.slice(0,4).map((c,i) => <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c, border: "1px solid rgba(255,255,255,0.5)" }} />)}
-                        </div>
-                        {/* Label */}
-                        <div style={{ padding: "6px 4px", textAlign: "center" }}>
-                          <div style={{ fontSize: 9, fontWeight: 800, color: "#0F172A" }}>{tpl.emoji} {tpl.name}</div>
-                          {sel && <div style={{ fontSize: 8, color: tpl.primaryColor, fontWeight: 700, marginTop: 1 }}>✓ Actif</div>}
-                        </div>
-                      </button>
-                    );
-                  })}
+                          <div style={{
+                            height: 36, display: "flex", alignItems: "center", justifyContent: "center", gap: 3,
+                            background: `linear-gradient(135deg, ${config.primaryColor}, ${config.secondaryColor})`,
+                          }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                          </div>
+                          <div style={{ padding: "5px 4px", textAlign: "center" }}>
+                            <div style={{ fontSize: 9, fontWeight: 800, color: "#0F172A" }}>Personnalisé</div>
+                            {isCustom && <div style={{ fontSize: 8, color: "#2563EB", fontWeight: 700, marginTop: 1 }}>✓ Actif</div>}
+                          </div>
+                        </button>
+                      );
+                    })()}
+
+                    {/* ── Predefined templates ── */}
+                    {TEMPLATES.map(tpl => {
+                      const sel = activeTemplate === tpl.id;
+                      return (
+                        <button key={tpl.id} onClick={() => applyTemplate(tpl)} style={{
+                          flexShrink: 0, width: 86, borderRadius: 12,
+                          border: `2px solid ${sel ? tpl.primaryColor : "#E2E8F0"}`,
+                          background: "#fff", cursor: "pointer", overflow: "hidden",
+                          transition: "all 0.15s", padding: 0,
+                          boxShadow: sel ? `0 2px 12px ${tpl.primaryColor}40` : "none",
+                        }}>
+                          <div style={{
+                            height: 36, display: "flex", alignItems: "center", justifyContent: "center", gap: 3,
+                            background: tpl.bgType === "gradient" ? tpl.bgGradient : tpl.bg,
+                          }}>
+                            {tpl.palette.slice(0,4).map((c,i) => (
+                              <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c, border: "1px solid rgba(255,255,255,0.5)" }} />
+                            ))}
+                          </div>
+                          <div style={{ padding: "5px 4px", textAlign: "center" }}>
+                            <div style={{ fontSize: 9, fontWeight: 800, color: "#0F172A" }}>{tpl.emoji} {tpl.name}</div>
+                            {sel && <div style={{ fontSize: 8, color: tpl.primaryColor, fontWeight: 700, marginTop: 1 }}>✓ Actif</div>}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Next arrow */}
+                  <button onClick={() => scrollTpl(1)} style={{
+                    flexShrink: 0, width: 28, height: 28, borderRadius: 8,
+                    border: "1.5px solid #E2E8F0", background: "#fff",
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 13, color: "#64748B", transition: "all 0.15s",
+                  }}>›</button>
                 </div>
               </div>
 
@@ -972,8 +1046,8 @@ export default function PageWheel() {
           </div>
 
           {/* ── RIGHT PANEL (live preview) ──────────────────── */}
-          <div style={{ flex: 1, position: "sticky", top: 80 }}>
-            <LivePreview config={config} entreprise={selectedEntreprise} />
+          <div style={{ flex: 1, position: "sticky", top: 80, minWidth: 0 }}>
+            <LivePreview config={config} entreprise={selectedEntreprise} compact />
           </div>
         </div>
       )}

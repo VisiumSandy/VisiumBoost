@@ -76,7 +76,17 @@ export async function PATCH(req) {
     if (conflict) return NextResponse.json({ error: "Ce slug est déjà utilisé." }, { status: 409 });
   }
 
-  const updated = await Entreprise.findByIdAndUpdate(id, { $set: updates }, { new: true });
+  // DEBUG — log collectFields before and after save
+  if (updates.theme?.collectFields !== undefined) {
+    console.log("[PATCH] collectFields IN :", JSON.stringify(updates.theme.collectFields));
+  }
+
+  const updated = await Entreprise.findByIdAndUpdate(id, { $set: updates }, { new: true, lean: true });
+
+  if (updated?.theme?.collectFields !== undefined) {
+    console.log("[PATCH] collectFields OUT:", JSON.stringify(updated.theme?.collectFields));
+  }
+
   return NextResponse.json({ entreprise: updated });
 }
 
