@@ -5,8 +5,23 @@ import Link from "next/link";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, animate } from "framer-motion";
 
 const E = [0.22, 1, 0.36, 1];
-const FONT_TITLE = "'Special Gothic Expanded One','DM Sans',system-ui,sans-serif";
-const FONT_BODY  = "'DM Sans',system-ui,sans-serif";
+const FONT_TITLE  = "'Special Gothic Expanded One','DM Sans',system-ui,sans-serif";
+const FONT_BODY   = "'DM Sans',system-ui,sans-serif";
+const FONT_ITALIC = "'DM Sans',system-ui,sans-serif";
+
+// Accent span — italic DM Sans + blue gradient
+const G = ({ children }) => (
+  <span style={{
+    fontFamily: FONT_ITALIC,
+    fontStyle: "italic",
+    fontWeight: 700,
+    background: "linear-gradient(135deg,#2563EB 0%,#38BDF8 55%,#818CF8 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+    display: "inline",
+  }}>{children}</span>
+);
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const Ic = {
@@ -383,12 +398,8 @@ export default function LandingPage() {
               style={{ fontFamily:FONT_TITLE, fontSize:"clamp(38px,5.5vw,72px)",
                 fontWeight:400, lineHeight:1.06, letterSpacing:"-0.02em",
                 margin:"0 0 24px", color:text }}>
-              La roue qui{" "}
-              <span style={{
-                background:"linear-gradient(135deg,#2563EB 0%,#06B6D4 50%,#8B5CF6 100%)",
-                WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
-              }}>transforme</span>
-              <br/>vos clients en avis
+              La roue qui <G>transforme</G>
+              <br/>vos clients en <G>avis</G>
             </motion.h1>
 
             <motion.p initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:0.65,ease:E,delay:0.12}}
@@ -518,7 +529,7 @@ export default function LandingPage() {
               textTransform:"uppercase", marginBottom:14 }}>COMMENT ÇA MARCHE</div>
             <h2 style={{ fontFamily:FONT_TITLE, fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400,
               margin:"0 0 16px", letterSpacing:"-0.02em", lineHeight:1.08, color:text }}>
-              Opérationnel en 3 étapes
+              Opérationnel en <G>3 étapes</G>
             </h2>
             <p style={{ color:text2, fontSize:16, maxWidth:400, margin:"0 auto", lineHeight:1.7 }}>
               Pas de développeur. Pas de carte bancaire. Juste vos premiers avis.
@@ -561,7 +572,7 @@ export default function LandingPage() {
               textTransform:"uppercase", marginBottom:14 }}>FONCTIONNALITÉS</div>
             <h2 style={{ fontFamily:FONT_TITLE, fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400,
               margin:0, letterSpacing:"-0.02em", lineHeight:1.08, color:text }}>
-              Tout en un, rien à configurer
+              Tout en un, <G>rien à configurer</G>
             </h2>
           </motion.div>
 
@@ -622,7 +633,7 @@ export default function LandingPage() {
 
           <h2 style={{ fontFamily:FONT_TITLE, fontSize:"clamp(26px,4.5vw,52px)", fontWeight:400,
             margin:"0 0 12px", letterSpacing:"-0.02em", lineHeight:1.08, color:text }}>
-            500+ établissements nous font confiance
+            500+ établissements <G>nous font confiance</G>
           </h2>
           <p style={{ color:text2, fontSize:15, fontWeight:500 }}>
             4.9 / 5 de note moyenne · Avis vérifiés Google
@@ -704,7 +715,7 @@ export default function LandingPage() {
               textTransform:"uppercase", marginBottom:14 }}>TARIFS</div>
             <h2 style={{ fontFamily:FONT_TITLE, fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400,
               margin:"0 0 14px", letterSpacing:"-0.02em", lineHeight:1.08, color:text }}>
-              Simple. Transparent. Sans surprise.
+              Simple. <G>Transparent.</G> Sans surprise.
             </h2>
             <p style={{ color:text2, fontSize:16, maxWidth:360, margin:"0 auto" }}>
               14 jours gratuits sur tous les plans. Sans carte bancaire.
@@ -807,11 +818,7 @@ export default function LandingPage() {
           <motion.h2 {...iv(0.06)} style={{ fontFamily:FONT_TITLE,
             fontSize:"clamp(32px,5.5vw,72px)", fontWeight:400,
             margin:"0 0 20px", lineHeight:1.06, letterSpacing:"-0.02em", color:"#F5F5F7" }}>
-            Prêt à transformer vos clients en{" "}
-            <span style={{ background:"linear-gradient(135deg,#60A5FA,#06B6D4)",
-              WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
-              ambassadeurs ?
-            </span>
+            Prêt à transformer vos clients en <G>ambassadeurs ?</G>
           </motion.h2>
 
           <motion.p {...iv(0.12)} style={{ color:"#6E6E73", fontSize:17, marginBottom:44, lineHeight:1.75 }}>
