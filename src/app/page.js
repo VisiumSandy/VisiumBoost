@@ -470,19 +470,7 @@ export default function LandingPage() {
                 width:"auto",
                 maxWidth:160,
                 objectFit:"contain",
-                opacity: isDark ? 0.55 : 0.7,
-                filter: isDark
-                  ? "brightness(0) invert(1)"
-                  : "brightness(0) opacity(0.45)",
                 flexShrink:0,
-                transition:"opacity 0.3s",
-              }}
-              onMouseEnter={e=>{ e.currentTarget.style.opacity="1"; e.currentTarget.style.filter="none"; }}
-              onMouseLeave={e=>{
-                e.currentTarget.style.opacity = isDark ? "0.55" : "0.7";
-                e.currentTarget.style.filter  = isDark
-                  ? "brightness(0) invert(1)"
-                  : "brightness(0) opacity(0.45)";
               }}
             />
           ))}
