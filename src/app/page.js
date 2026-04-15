@@ -282,7 +282,7 @@ const PLANS = [
   { id:"pro",     name:"Pro",      price:"79",   desc:"Pour les chaînes & agences", features:["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],   cta:"Nous contacter",         href:"/register" },
 ];
 
-const TRUST_LOGOS = ["🍕 Pizzeria Roma","☕ Café Martin","💇 Salon Éclat","🍔 Burger Co.","🥗 Green Bowl","🍷 Bistrot 21"];
+const SLIDER_IMGS = Array.from({length:10},(_,i)=>`/images/slider/slider${i+1}.png`);
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
@@ -446,21 +446,47 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TRUST LOGOS STRIP ── */}
-      <div style={{ borderTop:`1px solid ${border}`, borderBottom:`1px solid ${border}`, background:bg2,
-        padding:"18px 0", overflow:"hidden" }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"clamp(8px,2vw,12px)",
-          padding:"0 20px", flexWrap:"wrap" }}>
-          <span style={{ fontSize:12, color:text3, fontWeight:600, marginRight:8, whiteSpace:"nowrap" }}>
-            Ils nous font confiance :
-          </span>
-          {TRUST_LOGOS.map((l,i) => (
-            <div key={i} style={{ padding:"6px 16px", borderRadius:100, border:`1px solid ${border}`,
-              background:card, fontSize:13, color:text2, fontWeight:600, whiteSpace:"nowrap" }}>
-              {l}
-            </div>
+      {/* ── BRAND SLIDER STRIP ── */}
+      <div style={{ borderTop:`1px solid ${border}`, borderBottom:`1px solid ${border}`,
+        background:bg2, padding:"28px 0", overflow:"hidden", position:"relative" }}>
+        {/* fade edges */}
+        <div style={{ position:"absolute", left:0, top:0, bottom:0, width:120, zIndex:2, pointerEvents:"none",
+          background:`linear-gradient(to right,${bg2},transparent)` }}/>
+        <div style={{ position:"absolute", right:0, top:0, bottom:0, width:120, zIndex:2, pointerEvents:"none",
+          background:`linear-gradient(to left,${bg2},transparent)` }}/>
+
+        <motion.div
+          animate={{ x:["0%","-50%"] }}
+          transition={{ duration:28, repeat:Infinity, ease:"linear" }}
+          style={{ display:"flex", alignItems:"center", gap:56, width:"max-content" }}
+        >
+          {[...SLIDER_IMGS,...SLIDER_IMGS].map((src,i) => (
+            <img
+              key={i}
+              src={src}
+              alt={`partenaire ${(i%10)+1}`}
+              style={{
+                height:48,
+                width:"auto",
+                maxWidth:160,
+                objectFit:"contain",
+                opacity: isDark ? 0.55 : 0.7,
+                filter: isDark
+                  ? "brightness(0) invert(1)"
+                  : "brightness(0) opacity(0.45)",
+                flexShrink:0,
+                transition:"opacity 0.3s",
+              }}
+              onMouseEnter={e=>{ e.currentTarget.style.opacity="1"; e.currentTarget.style.filter="none"; }}
+              onMouseLeave={e=>{
+                e.currentTarget.style.opacity = isDark ? "0.55" : "0.7";
+                e.currentTarget.style.filter  = isDark
+                  ? "brightness(0) invert(1)"
+                  : "brightness(0) opacity(0.45)";
+              }}
+            />
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {/* ── STATS ── */}
