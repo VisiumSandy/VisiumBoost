@@ -95,19 +95,38 @@ export default async function SubdomainPage({ params }) {
 
   // Serialize for client
   const data = {
-    _id: entreprise._id.toString(),
-    nom: entreprise.nom,
+    _id:  entreprise._id.toString(),
+    nom:  entreprise.nom,
     slug: entreprise.slug,
     logo: entreprise.logo || "",
     couleur_principale: entreprise.couleur_principale || "#6C5CE7",
     couleur_secondaire: entreprise.couleur_secondaire || "#00B894",
     lien_avis: entreprise.lien_avis || "",
-    cta_text: entreprise.cta_text || "Laissez-nous un avis et tentez votre chance !",
+    cta_text:  entreprise.cta_text  || "Laissez-nous un avis et tentez votre chance !",
     rewards: (entreprise.rewards || []).map((r) => ({
       id: r.id || r._id?.toString(),
       name: r.name,
       probability: r.probability,
     })),
+    // Theme — new nested object, falls back to legacy flat fields in PlayClient
+    theme: entreprise.theme || {},
+    // Legacy flat fields (backwards compat)
+    wheel_segment_colors: entreprise.wheel_segment_colors || [],
+    wheel_border_color:   entreprise.wheel_border_color   || "",
+    wheel_center_color:   entreprise.wheel_center_color   || "",
+    wheel_center_logo:    entreprise.wheel_center_logo    || "",
+    wheel_font:           entreprise.wheel_font           || "",
+    wheel_size:           entreprise.wheel_size           || 0,
+    page_bg:              entreprise.page_bg              || "",
+    page_bg_type:         entreprise.page_bg_type         || "",
+    page_bg_gradient:     entreprise.page_bg_gradient     || "",
+    page_banner:          entreprise.page_banner          || "",
+    page_title:           entreprise.page_title           || "",
+    page_welcome:         entreprise.page_welcome         || "",
+    page_btn_color:       entreprise.page_btn_color       || "",
+    page_btn_text:        entreprise.page_btn_text        || "",
+    page_thanks:          entreprise.page_thanks          || "",
+    page_text_color:      entreprise.page_text_color      || "",
   };
 
   return <PlayClient entreprise={data} />;

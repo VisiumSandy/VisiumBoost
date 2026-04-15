@@ -4,8 +4,8 @@ import { useState } from "react";
 import SpinWheel from "@/components/SpinWheel";
 import Confetti  from "@/components/Confetti";
 
-// Determine contrast-safe text color for a hex button
-function btnTextColor(hex) {
+// Luminance-based contrast helper
+function autoText(hex) {
   if (!hex) return "#fff";
   const h = hex.replace("#", "");
   if (h.length < 6) return "#fff";
@@ -13,6 +13,41 @@ function btnTextColor(hex) {
   const g = parseInt(h.slice(2,4),16);
   const b = parseInt(h.slice(4,6),16);
   return (0.299*r + 0.587*g + 0.114*b) / 255 > 0.55 ? "#000" : "#fff";
+}
+
+// Read from theme object first, fall back to legacy flat field, then hardcoded fallback
+function resolveTheme(e) {
+  const t = e.theme || {};
+  const F = (key, legacy, fallback) =>
+    (t[key] !== undefined && t[key] !== "" && t[key] !== null) ? t[key]
+    : (e[legacy] !== undefined && e[legacy] !== "" && e[legacy] !== null) ? e[legacy]
+    : fallback;
+
+  return {
+    primaryColor:   e.couleur_principale  || "#3B82F6",
+    secondaryColor: e.couleur_secondaire  || "#0EA5E9",
+    textColor:      F("textColor",   "page_text_color",  "#0F0F1A"),
+    font:           F("font",        "wheel_font",       "DM Sans"),
+    // Wheel
+    segmentColors:  t.segmentColors  || e.wheel_segment_colors || [],
+    borderColor:    F("borderColor", "wheel_border_color", ""),
+    centerColor:    F("centerColor", "wheel_center_color", ""),
+    centerLogo:     F("centerLogo",  "wheel_center_logo",  "") || e.logo || "",
+    wheelSize:      F("wheelSize",   "wheel_size",          360),
+    // Page background
+    bgType:         F("bgType",      "page_bg_type",        "color"),
+    bg:             F("bg",          "page_bg",             ""),
+    bgGradient:     F("bgGradient",  "page_bg_gradient",    ""),
+    // Page content
+    banner:         F("banner",      "page_banner",   ""),
+    title:          F("title",       "page_title",    "") || e.cta_text || "Tournez et gagnez !",
+    welcome:        F("welcome",     "page_welcome",  ""),
+    btnColor:       F("btnColor",    "page_btn_color",""),
+    btnText:        F("btnText",     "page_btn_text", ""),
+    btnRadius:      t.btnRadius !== undefined ? t.btnRadius : 16,
+    thanks:         F("thanks",      "page_thanks",   ""),
+    cardColor:      t.cardColor || "",
+  };
 }
 
 export default function PlayClient({ entreprise }) {
@@ -25,23 +60,25 @@ export default function PlayClient({ entreprise }) {
   const [copied,        setCopied]        = useState(false);
 
   // ── Resolved style values ──────────────────────────────────────────
-  const pc  = entreprise.couleur_principale  || "#3B82F6";
-  const sc  = entreprise.couleur_secondaire  || "#0EA5E9";
-  const tc  = entreprise.page_text_color     || "#0F0F1A";
-  const ff  = entreprise.wheel_font          || "DM Sans";
+  const th = resolveTheme(entreprise);
+  const pc  = th.primaryColor;
+  const sc  = th.secondaryColor;
+  const tc  = th.textColor;
+  const ff  = th.font;
 
-  const pageBg = (entreprise.page_bg_type === "gradient" && entreprise.page_bg_gradient)
-    ? entreprise.page_bg_gradient
-    : (entreprise.page_bg && entreprise.page_bg !== "#ffffff")
-    ? entreprise.page_bg
+  const pageBg = (th.bgType === "gradient" && th.bgGradient)
+    ? th.bgGradient
+    : (th.bg && th.bg !== "#ffffff")
+    ? th.bg
     : `linear-gradient(160deg, ${pc}12 0%, ${sc}08 50%, #F8FAFC 100%)`;
 
-  const btnBgRaw   = entreprise.page_btn_color || pc;
-  const btnTc      = btnTextColor(btnBgRaw);
-  const btnText    = entreprise.page_btn_text  || "⭐ Laisser mon avis Google";
-  const pageTitle  = entreprise.page_title     || entreprise.cta_text || "Tournez et gagnez !";
-  const welcomeMsg = entreprise.page_welcome   || "Laissez-nous un avis Google, puis revenez ici pour tourner la roue et gagner un cadeau !";
-  const thanksMsg  = entreprise.page_thanks    || "";
+  const btnBgRaw = th.btnColor || pc;
+  const btnTc    = autoText(btnBgRaw);
+  const btnText  = th.btnText  || "⭐ Laisser mon avis Google";
+  const pageTitle  = th.title   || "Tournez et gagnez !";
+  const welcomeMsg = th.welcome || "Laissez-nous un avis Google, puis revenez ici pour tourner la roue et gagner un cadeau !";
+  const thanksMsg  = th.thanks  || "";
+  const btnRadius  = th.btnRadius !== undefined ? th.btnRadius : 16;
 
   const isTextLight = (() => {
     const hex = tc.replace("#","");
@@ -49,6 +86,14 @@ export default function PlayClient({ entreprise }) {
     const r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
     return (0.299*r + 0.587*g + 0.114*b) / 255 > 0.55;
   })();
+
+  const subtleColor = `${tc}99`;
+
+  // Card bg / border: use cardColor if set, otherwise derive from text color
+  const cardBg = th.cardColor
+    ? th.cardColor
+    : isTextLight ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)";
+  const cardBorder = isTextLight ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.09)";
 
   // ── Handlers ──────────────────────────────────────────────────────
   const handleReviewClick = () => {
@@ -79,9 +124,10 @@ export default function PlayClient({ entreprise }) {
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
-  const subtleColor   = `${tc}99`;
-  const cardBg        = isTextLight ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)";
-  const cardBorder    = isTextLight ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.09)";
+  // Wheel size — capped to viewport
+  const wheelSize = typeof window !== "undefined"
+    ? Math.min(th.wheelSize || 360, Math.min(window.innerWidth - 40, 460))
+    : (th.wheelSize || 360);
 
   return (
     <div style={{ minHeight: "100dvh", background: pageBg, fontFamily: `'${ff}', 'DM Sans', system-ui, sans-serif` }}>
@@ -116,9 +162,9 @@ export default function PlayClient({ entreprise }) {
       </header>
 
       {/* ── BANNER IMAGE ── */}
-      {entreprise.page_banner && (
+      {th.banner && (
         <div style={{ width: "100%", maxHeight: 200, overflow: "hidden" }}>
-          <img src={entreprise.page_banner} alt="bannière" style={{ width: "100%", height: 200, objectFit: "cover" }} />
+          <img src={th.banner} alt="bannière" style={{ width: "100%", height: 200, objectFit: "cover" }} />
         </div>
       )}
 
@@ -166,7 +212,7 @@ export default function PlayClient({ entreprise }) {
                   target="_blank" rel="noopener noreferrer"
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 10,
-                    padding: "17px 36px", borderRadius: 16, textDecoration: "none",
+                    padding: "17px 36px", borderRadius: btnRadius, textDecoration: "none",
                     background: btnBgRaw,
                     color: btnTc, fontWeight: 800, fontSize: 16,
                     fontFamily: `'${ff}', sans-serif`,
@@ -201,12 +247,12 @@ export default function PlayClient({ entreprise }) {
                 rewards={entreprise.rewards || []}
                 primaryColor={pc}
                 secondaryColor={sc}
-                segmentColors={entreprise.wheel_segment_colors}
-                borderColor={entreprise.wheel_border_color}
-                centerColor={entreprise.wheel_center_color}
-                centerLogoUrl={entreprise.wheel_center_logo || entreprise.logo}
+                segmentColors={th.segmentColors}
+                borderColor={th.borderColor}
+                centerColor={th.centerColor}
+                centerLogoUrl={th.centerLogo}
                 fontFamily={ff}
-                size={Math.min(entreprise.wheel_size || 360, typeof window !== "undefined" ? Math.min(window.innerWidth - 40, 460) : 360)}
+                size={wheelSize}
                 disabled={!reviewClicked}
                 onResult={handleSpinResult}
               />

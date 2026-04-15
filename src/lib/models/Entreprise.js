@@ -23,7 +23,9 @@ const EntrepriseSchema = new mongoose.Schema(
     totalScans: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
-    // ── Wheel customization ──────────────────────────────────────────
+    // ── Theme object (new — supersedes flat wheel_*/page_* fields) ────
+    theme: { type: mongoose.Schema.Types.Mixed, default: {} },
+    // ── Wheel customization (legacy flat fields, kept for backwards compat) ──────────────────────────────────────────
     wheel_segment_colors: { type: [String], default: [] },
     wheel_border_color:   { type: String,  default: "#ffffff" },
     wheel_center_color:   { type: String,  default: "#ffffff" },
