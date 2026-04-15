@@ -201,7 +201,7 @@ function LivePreview({ config, entreprise }) {
 
   const previewRewards = config.rewards.filter(r => r.name).map(r => ({ ...r, probability: r.prob }));
   const cf = theme.collectFields || {};
-  const hasCollect = cf.prenom || cf.email || cf.telephone;
+  const hasCollect = cf.prenom === true || cf.email === true || cf.telephone === true;
 
   const pageContent = (
     <div style={{ background: pageBg, fontFamily: `'${ff}', DM Sans, system-ui, sans-serif`, minHeight: "100%", display: "flex", flexDirection: "column" }}>
@@ -921,7 +921,7 @@ export default function PageWheel() {
                         { key: "email",     label: "Email" },
                         { key: "telephone", label: "Numéro de téléphone" },
                       ].map(({ key, label }) => {
-                        const checked = config.theme.collectFields?.[key] || false;
+                        const checked = config.theme.collectFields?.[key] === true;
                         return (
                           <label key={key} style={{
                             display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
@@ -941,7 +941,7 @@ export default function PageWheel() {
                         );
                       })}
                     </div>
-                    {(config.theme.collectFields?.prenom || config.theme.collectFields?.email || config.theme.collectFields?.telephone) && (
+                    {(config.theme.collectFields?.prenom === true || config.theme.collectFields?.email === true || config.theme.collectFields?.telephone === true) && (
                       <p style={{ fontSize: 11, color: "#3B82F6", marginTop: 8, fontWeight: 600 }}>
                         ✓ Un formulaire apparaîtra avant le code gagnant
                       </p>

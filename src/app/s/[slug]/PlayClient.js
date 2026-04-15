@@ -47,8 +47,12 @@ function resolveTheme(e) {
     btnRadius:      t.btnRadius !== undefined ? t.btnRadius : 16,
     thanks:         F("thanks",      "page_thanks",   ""),
     cardColor:      t.cardColor || "",
-    // Collect fields
-    collectFields:  t.collectFields || { prenom: false, email: false, telephone: false },
+    // Collect fields — always normalize to strict booleans
+    collectFields: {
+      prenom:    (t.collectFields?.prenom    === true),
+      email:     (t.collectFields?.email     === true),
+      telephone: (t.collectFields?.telephone === true),
+    },
   };
 }
 
@@ -89,8 +93,8 @@ export default function PlayClient({ entreprise }) {
   const thanksMsg  = th.thanks  || "";
   const btnRadius  = th.btnRadius !== undefined ? th.btnRadius : 16;
 
-  const cf = th.collectFields || {};
-  const hasCollect = cf.prenom || cf.email || cf.telephone;
+  const cf = th.collectFields;
+  const hasCollect = cf.prenom === true || cf.email === true || cf.telephone === true;
 
   const isTextLight = (() => {
     const hex = tc.replace("#","");

@@ -76,7 +76,7 @@ export async function PATCH(req) {
     if (conflict) return NextResponse.json({ error: "Ce slug est déjà utilisé." }, { status: 409 });
   }
 
-  const updated = await Entreprise.findByIdAndUpdate(id, updates, { new: true });
+  const updated = await Entreprise.findByIdAndUpdate(id, { $set: updates }, { new: true });
   return NextResponse.json({ entreprise: updated });
 }
 
