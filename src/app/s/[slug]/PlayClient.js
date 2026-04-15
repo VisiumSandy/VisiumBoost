@@ -47,17 +47,26 @@ function resolveTheme(e) {
     btnRadius:      t.btnRadius !== undefined ? t.btnRadius : 16,
     thanks:         F("thanks",      "page_thanks",   ""),
     cardColor:      t.cardColor || "",
+    // Collect fields
+    collectFields:  t.collectFields || { prenom: false, email: false, telephone: false },
   };
 }
 
 export default function PlayClient({ entreprise }) {
-  const [step,          setStep]          = useState(1);
-  const [reviewClicked, setReviewClicked] = useState(false);
-  const [result,        setResult]        = useState(null);
-  const [winCode,       setWinCode]       = useState(null);
-  const [generating,    setGenerating]    = useState(false);
-  const [confetti,      setConfetti]      = useState(false);
-  const [copied,        setCopied]        = useState(false);
+  const [step,           setStep]           = useState(1);
+  const [reviewClicked,  setReviewClicked]  = useState(false);
+  const [result,         setResult]         = useState(null);
+  const [winCode,        setWinCode]        = useState(null);
+  const [generating,     setGenerating]     = useState(false);
+  const [confetti,       setConfetti]       = useState(false);
+  const [copied,         setCopied]         = useState(false);
+
+  // Collect form state
+  const [collectPending, setCollectPending] = useState(false);
+  const [pendingReward,  setPendingReward]  = useState(null);
+  const [collectData,    setCollectData]    = useState({ prenom: "", email: "", telephone: "" });
+  const [collectErrors,  setCollectErrors]  = useState({});
+  const [submittingCollect, setSubmittingCollect] = useState(false);
 
   // ── Resolved style values ──────────────────────────────────────────
   const th = resolveTheme(entreprise);
@@ -80,6 +89,9 @@ export default function PlayClient({ entreprise }) {
   const thanksMsg  = th.thanks  || "";
   const btnRadius  = th.btnRadius !== undefined ? th.btnRadius : 16;
 
+  const cf = th.collectFields || {};
+  const hasCollect = cf.prenom || cf.email || cf.telephone;
+
   const isTextLight = (() => {
     const hex = tc.replace("#","");
     if (hex.length < 6) return false;
@@ -89,11 +101,46 @@ export default function PlayClient({ entreprise }) {
 
   const subtleColor = `${tc}99`;
 
-  // Card bg / border: use cardColor if set, otherwise derive from text color
   const cardBg = th.cardColor
     ? th.cardColor
     : isTextLight ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)";
   const cardBorder = isTextLight ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.09)";
+
+  // ── Wheel size ────────────────────────────────────────────────────
+  const wheelSize = typeof window !== "undefined"
+    ? Math.min(th.wheelSize || 360, Math.min(window.innerWidth - 40, 460))
+    : (th.wheelSize || 360);
+
+  // ── Core spin API call ────────────────────────────────────────────
+  const callSpinApi = async (reward, rewardIndex, contactData = {}) => {
+    try {
+      const res = await fetch("/api/play/spin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug:        entreprise.slug,
+          rewardName:  reward.name,
+          rewardIndex,
+          clientName:  contactData.prenom    || "",
+          clientEmail: contactData.email     || "",
+          clientPhone: contactData.telephone || "",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setWinCode(data.winCode);
+        setStep(3);
+        setConfetti(true);
+        setTimeout(() => setConfetti(false), 5500);
+      } else {
+        setWinCode("ERREUR");
+        setStep(3);
+      }
+    } catch {
+      setWinCode("ERREUR");
+      setStep(3);
+    }
+  };
 
   // ── Handlers ──────────────────────────────────────────────────────
   const handleReviewClick = () => {
@@ -103,20 +150,40 @@ export default function PlayClient({ entreprise }) {
 
   const handleSpinResult = async (reward, rewardIndex) => {
     setResult({ rewardName: reward.name, rewardIndex });
-    setGenerating(true);
-    try {
-      const res  = await fetch("/api/play/spin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: entreprise.slug, rewardName: reward.name, rewardIndex }),
-      });
-      const data = await res.json();
-      if (res.ok) { setWinCode(data.winCode); setStep(3); setConfetti(true); setTimeout(() => setConfetti(false), 5500); }
-      else        { setWinCode("ERREUR"); setStep(3); }
-    } catch {
-      setWinCode("ERREUR"); setStep(3);
+
+    if (hasCollect) {
+      // Show collect form first — API call happens after form submit
+      setPendingReward({ reward, rewardIndex });
+      setCollectPending(true);
+      return;
     }
+
+    // No collect fields → call API immediately
+    setGenerating(true);
+    await callSpinApi(reward, rewardIndex, {});
     setGenerating(false);
+  };
+
+  const validateCollect = () => {
+    const errs = {};
+    if (cf.email && collectData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(collectData.email)) {
+      errs.email = "Email invalide";
+    }
+    if (cf.telephone && collectData.telephone && !/^[\d\s\+\-\(\)]{6,20}$/.test(collectData.telephone)) {
+      errs.telephone = "Numéro invalide";
+    }
+    return errs;
+  };
+
+  const handleCollectSubmit = async () => {
+    const errs = validateCollect();
+    if (Object.keys(errs).length > 0) { setCollectErrors(errs); return; }
+    if (!pendingReward) return;
+
+    setSubmittingCollect(true);
+    await callSpinApi(pendingReward.reward, pendingReward.rewardIndex, collectData);
+    setCollectPending(false);
+    setSubmittingCollect(false);
   };
 
   const copyCode = () => {
@@ -124,10 +191,13 @@ export default function PlayClient({ entreprise }) {
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
-  // Wheel size — capped to viewport
-  const wheelSize = typeof window !== "undefined"
-    ? Math.min(th.wheelSize || 360, Math.min(window.innerWidth - 40, 460))
-    : (th.wheelSize || 360);
+  // ── Input style ───────────────────────────────────────────────────
+  const fieldInp = {
+    width: "100%", padding: "14px 16px", borderRadius: 12,
+    border: `1.5px solid ${cardBorder}`, fontSize: 15, outline: "none",
+    background: cardBg, color: tc, boxSizing: "border-box",
+    fontFamily: `'${ff}', sans-serif`,
+  };
 
   return (
     <div style={{ minHeight: "100dvh", background: pageBg, fontFamily: `'${ff}', 'DM Sans', system-ui, sans-serif` }}>
@@ -170,8 +240,89 @@ export default function PlayClient({ entreprise }) {
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "28px 20px 80px" }}>
 
+        {/* ── COLLECT FORM (between spin and result) ── */}
+        {collectPending && step !== 3 && (
+          <div style={{ animation: "fadeUp 0.5s ease" }}>
+            <div style={{ textAlign: "center", marginBottom: 28 }}>
+              <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>📋</div>
+              <h2 style={{ fontSize: 22, fontWeight: 900, color: tc, margin: "0 0 10px", lineHeight: 1.3 }}>
+                Encore une étape !
+              </h2>
+              <p style={{ color: subtleColor, fontSize: 14, lineHeight: 1.7, maxWidth: 340, margin: "0 auto" }}>
+                Renseignez vos coordonnées pour recevoir votre code cadeau.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+              {cf.prenom && (
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: tc, display: "block", marginBottom: 6 }}>
+                    Prénom <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <input
+                    value={collectData.prenom}
+                    onChange={e => setCollectData(p => ({ ...p, prenom: e.target.value }))}
+                    placeholder="Votre prénom"
+                    style={{ ...fieldInp, borderColor: collectErrors.prenom ? "#EF4444" : cardBorder }}
+                  />
+                  {collectErrors.prenom && <p style={{ color: "#EF4444", fontSize: 12, margin: "4px 0 0" }}>{collectErrors.prenom}</p>}
+                </div>
+              )}
+              {cf.email && (
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: tc, display: "block", marginBottom: 6 }}>
+                    Email <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={collectData.email}
+                    onChange={e => { setCollectData(p => ({ ...p, email: e.target.value })); setCollectErrors(p => ({ ...p, email: undefined })); }}
+                    placeholder="votre@email.fr"
+                    style={{ ...fieldInp, borderColor: collectErrors.email ? "#EF4444" : cardBorder }}
+                  />
+                  {collectErrors.email && <p style={{ color: "#EF4444", fontSize: 12, margin: "4px 0 0" }}>{collectErrors.email}</p>}
+                </div>
+              )}
+              {cf.telephone && (
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: tc, display: "block", marginBottom: 6 }}>
+                    Téléphone <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={collectData.telephone}
+                    onChange={e => { setCollectData(p => ({ ...p, telephone: e.target.value })); setCollectErrors(p => ({ ...p, telephone: undefined })); }}
+                    placeholder="06 12 34 56 78"
+                    style={{ ...fieldInp, borderColor: collectErrors.telephone ? "#EF4444" : cardBorder }}
+                  />
+                  {collectErrors.telephone && <p style={{ color: "#EF4444", fontSize: 12, margin: "4px 0 0" }}>{collectErrors.telephone}</p>}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleCollectSubmit}
+              disabled={submittingCollect}
+              style={{
+                width: "100%", padding: "17px", borderRadius: btnRadius, border: "none",
+                background: submittingCollect ? "#b2bec3" : btnBgRaw,
+                color: btnTc, fontWeight: 800, fontSize: 16,
+                fontFamily: `'${ff}', sans-serif`,
+                boxShadow: submittingCollect ? "none" : `0 8px 32px ${btnBgRaw}55`,
+                cursor: submittingCollect ? "not-allowed" : "pointer",
+              }}
+            >
+              {submittingCollect ? "Un instant…" : "Découvrir mon cadeau 🎁"}
+            </button>
+
+            <p style={{ color: subtleColor, fontSize: 11, textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
+              Vos données sont utilisées uniquement pour vous contacter au sujet de votre récompense.
+            </p>
+          </div>
+        )}
+
         {/* ── STEPS 1 & 2 ── */}
-        {step !== 3 && (
+        {!collectPending && step !== 3 && (
           <div style={{ animation: "fadeUp 0.5s ease" }}>
             {/* Step indicators */}
             <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 28 }}>
@@ -257,6 +408,13 @@ export default function PlayClient({ entreprise }) {
                 onResult={handleSpinResult}
               />
             </div>
+
+            {/* Generating spinner shown below wheel after spin (no-collect path only) */}
+            {generating && (
+              <p style={{ textAlign: "center", color: subtleColor, fontSize: 13, marginTop: 16 }}>
+                Génération de votre code…
+              </p>
+            )}
           </div>
         )}
 

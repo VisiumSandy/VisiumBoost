@@ -109,6 +109,7 @@ const DEFAULT_THEME = {
   banner: "",
   title: "", welcome: "", btnColor: "", btnText: "⭐ Laisser mon avis Google",
   btnRadius: 14, thanks: "", textColor: "#0F0F1A", cardColor: "",
+  collectFields: { prenom: false, email: false, telephone: false },
 };
 
 const DEFAULT_CONFIG = {
@@ -162,6 +163,7 @@ function entrepriseToConfig(e) {
       thanks:        F("thanks",       "page_thanks",          ""),
       textColor:     F("textColor",    "page_text_color",      "#0F0F1A"),
       cardColor:     t.cardColor       || "",
+      collectFields: t.collectFields   || { prenom: false, email: false, telephone: false },
     },
   };
 }
@@ -170,12 +172,13 @@ function entrepriseToConfig(e) {
 // LIVE PREVIEW COMPONENT
 // ═══════════════════════════════════════════════════════════════
 function LivePreview({ config, entreprise }) {
-  const [device,   setDevice]   = useState("mobile");
-  const [pvStep,   setPvStep]   = useState(1);
-  const [spinKey,  setSpinKey]  = useState(0);
-  const [winItem,  setWinItem]  = useState(null);
+  const [device,      setDevice]      = useState("mobile");
+  const [pvStep,      setPvStep]      = useState(1);
+  const [spinKey,     setSpinKey]     = useState(0);
+  const [winItem,     setWinItem]     = useState(null);
+  const [pvFormDone,  setPvFormDone]  = useState(false);
 
-  const resetPv = () => { setPvStep(1); setWinItem(null); setSpinKey(k => k+1); };
+  const resetPv = () => { setPvStep(1); setWinItem(null); setSpinKey(k => k+1); setPvFormDone(false); };
 
   const { theme = {} }  = config;
   const pc  = config.primaryColor  || "#3B82F6";
@@ -197,6 +200,8 @@ function LivePreview({ config, entreprise }) {
   const cardBrd  = isOnDark ? "rgba(255,255,255,0.13)" : "rgba(0,0,0,0.08)";
 
   const previewRewards = config.rewards.filter(r => r.name).map(r => ({ ...r, probability: r.prob }));
+  const cf = theme.collectFields || {};
+  const hasCollect = cf.prenom || cf.email || cf.telephone;
 
   const pageContent = (
     <div style={{ background: pageBg, fontFamily: `'${ff}', DM Sans, system-ui, sans-serif`, minHeight: "100%", display: "flex", flexDirection: "column" }}>
@@ -280,8 +285,34 @@ function LivePreview({ config, entreprise }) {
           </div>
         )}
 
-        {/* Step 3 — Result */}
-        {pvStep === 3 && (
+        {/* Step 3 — Collect form (if needed) or Result */}
+        {pvStep === 3 && hasCollect && !pvFormDone && (
+          <div style={{ width: "100%" }}>
+            <div style={{ textAlign: "center", marginBottom: 12 }}>
+              <div style={{ fontSize: 30, lineHeight: 1, marginBottom: 6 }}>📋</div>
+              <h2 style={{ fontSize: 15, fontWeight: 900, color: tc, margin: "0 0 4px", fontFamily: `'${ff}', sans-serif` }}>Encore une étape !</h2>
+              <p style={{ color: subtleTc, fontSize: 11, margin: 0 }}>Renseignez vos coordonnées pour recevoir votre cadeau.</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+              {cf.prenom && (
+                <input disabled placeholder="Prénom" style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${pc}40`, fontSize: 12, background: cardBg, color: tc, boxSizing: "border-box", outline: "none" }} />
+              )}
+              {cf.email && (
+                <input disabled placeholder="Adresse email" style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${pc}40`, fontSize: 12, background: cardBg, color: tc, boxSizing: "border-box", outline: "none" }} />
+              )}
+              {cf.telephone && (
+                <input disabled placeholder="Numéro de téléphone" style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${pc}40`, fontSize: 12, background: cardBg, color: tc, boxSizing: "border-box", outline: "none" }} />
+              )}
+            </div>
+            <button onClick={() => setPvFormDone(true)} style={{
+              width: "100%", padding: "10px", borderRadius: br, border: "none",
+              background: btn, color: btnTc, fontWeight: 800, fontSize: 12,
+              cursor: "pointer", fontFamily: `'${ff}', sans-serif`,
+            }}>Découvrir mon cadeau →</button>
+          </div>
+        )}
+
+        {pvStep === 3 && (!hasCollect || pvFormDone) && (
           <div style={{ textAlign: "center", width: "100%" }}>
             <div style={{ fontSize: 44, lineHeight: 1, marginBottom: 6 }}>🎉</div>
             <h2 style={{ fontSize: 17, fontWeight: 900, color: tc, margin: "0 0 5px", fontFamily: `'${ff}', sans-serif` }}>Félicitations !</h2>
@@ -876,6 +907,45 @@ export default function PageWheel() {
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 6 }}>Message après le spin</div>
                     <input value={config.theme.thanks} onChange={e => updateT("thanks", e.target.value)}
                       placeholder="Merci ! Votre cadeau vous attend en caisse." style={inp} onFocus={focusBlue} onBlur={blurGray} />
+                  </div>
+
+                  {/* Informations à collecter */}
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>Informations à collecter</div>
+                    <p style={{ fontSize: 11, color: "#94A3B8", marginBottom: 10, lineHeight: 1.5 }}>
+                      Cochez les champs à afficher avant de montrer le code gagnant.
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {[
+                        { key: "prenom",    label: "Prénom" },
+                        { key: "email",     label: "Email" },
+                        { key: "telephone", label: "Numéro de téléphone" },
+                      ].map(({ key, label }) => {
+                        const checked = config.theme.collectFields?.[key] || false;
+                        return (
+                          <label key={key} style={{
+                            display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
+                            padding: "9px 12px", borderRadius: 10,
+                            border: `1.5px solid ${checked ? "#2563EB" : "#E2E8F0"}`,
+                            background: checked ? "#EFF6FF" : "#F8FAFC",
+                            transition: "all 0.15s",
+                          }}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={e => updateT("collectFields", { ...(config.theme.collectFields || {}), [key]: e.target.checked })}
+                              style={{ width: 15, height: 15, accentColor: "#2563EB", cursor: "pointer", flexShrink: 0 }}
+                            />
+                            <span style={{ fontSize: 13, fontWeight: checked ? 700 : 500, color: checked ? "#1D4ED8" : "#475569" }}>{label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {(config.theme.collectFields?.prenom || config.theme.collectFields?.email || config.theme.collectFields?.telephone) && (
+                      <p style={{ fontSize: 11, color: "#3B82F6", marginTop: 8, fontWeight: 600 }}>
+                        ✓ Un formulaire apparaîtra avant le code gagnant
+                      </p>
+                    )}
                   </div>
 
                   {/* Couleurs texte / cards */}
