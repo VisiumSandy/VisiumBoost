@@ -480,7 +480,7 @@ export default function LandingPage() {
 
           {/* Main headline */}
           <motion.h1 {...iv(0.06)} style={{
-            fontFamily:"'Calistoga','DM Sans',system-ui",
+            fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
             fontSize:"clamp(48px,8.5vw,108px)",
             fontWeight:400,
             lineHeight:1.02,
@@ -629,7 +629,7 @@ export default function LandingPage() {
             <motion.div key={l} {...iv(i*0.08)}
               style={{ padding:"clamp(24px,4vw,44px) 20px",
                 borderRight: i<3 ? `1px solid ${t.border}` : "none" }}>
-              <div style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+              <div style={{ fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
                 fontSize:"clamp(28px,4vw,48px)", fontWeight:400,
                 color:t.text, letterSpacing:"-0.03em", lineHeight:1, marginBottom:8 }}>{v}</div>
               <div style={{ fontSize:13, color:t.text3, fontWeight:500 }}>{l}</div>
@@ -659,7 +659,7 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.h2 {...il(0.07)} style={{
-              fontFamily:"'Calistoga','DM Sans',system-ui",
+              fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
               fontSize:"clamp(32px,5vw,64px)", fontWeight:400,
               lineHeight:1.06, letterSpacing:"-0.03em",
               color:"#F5F5F7", margin:"0 0 24px",
@@ -706,7 +706,7 @@ export default function LandingPage() {
           <motion.div {...iv()} style={{ textAlign:"center", marginBottom:"clamp(48px,6vw,80px)" }}>
             <div style={{ fontSize:12, color:t.accent, fontWeight:700, letterSpacing:"2px",
               textTransform:"uppercase", marginBottom:16 }}>COMMENT ÇA MARCHE</div>
-            <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+            <h2 style={{ fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
               fontSize:"clamp(32px,5vw,60px)", fontWeight:400, margin:"0 0 16px",
               letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
               Opérationnel en 3 étapes
@@ -752,7 +752,7 @@ export default function LandingPage() {
             <div>
               <div style={{ fontSize:12,color:"#8B5CF6",fontWeight:700,letterSpacing:"2px",
                 textTransform:"uppercase",marginBottom:14 }}>FONCTIONNALITÉS</div>
-              <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+              <h2 style={{ fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
                 fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400, margin:0,
                 letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
                 Tout en un, rien à configurer
@@ -800,7 +800,7 @@ export default function LandingPage() {
           <div style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginBottom:16 }}>
             {[...Array(5)].map((_,i)=><Ic.Star key={i} s={20}/>)}
           </div>
-          <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+          <h2 style={{ fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
             fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400,
             margin:"0 0 14px", letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
             500+ établissements nous font confiance
@@ -856,7 +856,7 @@ export default function LandingPage() {
           <motion.div {...iv()} style={{ textAlign:"center",marginBottom:"clamp(48px,6vw,72px)" }}>
             <div style={{ fontSize:12,color:"#F59E0B",fontWeight:700,letterSpacing:"2px",
               textTransform:"uppercase",marginBottom:16 }}>TARIFS</div>
-            <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+            <h2 style={{ fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
               fontSize:"clamp(32px,5vw,60px)", fontWeight:400,
               margin:"0 0 16px", letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
               Simple, transparent, sans surprise
@@ -902,7 +902,7 @@ export default function LandingPage() {
                     color:plan.highlight?"#60A5FA":t.text3,marginBottom:16 }}>{plan.name}</div>
 
                   <div style={{ display:"flex",alignItems:"baseline",gap:2,marginBottom:4 }}>
-                    <span style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+                    <span style={{ fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
                       fontSize:56,fontWeight:400,letterSpacing:"-0.03em",lineHeight:1,
                       color:plan.highlight?"#F5F5F7":t.text }}>{plan.price}</span>
                     <span style={{ fontSize:20,color:plan.highlight?"#6E6E73":t.text2,marginLeft:2,fontWeight:400 }}>€</span>
@@ -967,7 +967,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.h2 {...iv(0.08)} style={{
-            fontFamily:"'Calistoga','DM Sans',system-ui",
+            fontFamily:"'Special Gothic Expanded One','DM Sans',system-ui",
             fontSize:"clamp(36px,6.5vw,80px)", fontWeight:400,
             margin:"0 0 22px", lineHeight:1.04, letterSpacing:"-0.03em",
             color:"#F5F5F7",
