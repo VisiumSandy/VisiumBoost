@@ -9,32 +9,36 @@ const E = [0.22, 1, 0.36, 1];
 // ─── Theme ───────────────────────────────────────────────────────────
 const T = {
   light: {
-    bg:"#FFFFFF", bg2:"#F8F9FC", bg3:"#F1F5F9",
-    text:"#09090B", text2:"#71717A", text3:"#A1A1AA",
-    border:"#E4E4E7", border2:"#F4F4F5",
+    bg:"#FAFAFA", bg2:"#F2F2F7", bg3:"#FFFFFF",
+    bgDark:"#1D1D1F",
+    text:"#1D1D1F", text2:"#6E6E73", text3:"#98989D",
+    border:"rgba(0,0,0,0.08)", border2:"rgba(0,0,0,0.04)",
     card:"#FFFFFF", cardBg:"rgba(0,0,0,0.02)",
-    navBg:"rgba(255,255,255,0.88)",
+    navBg:"rgba(250,250,250,0.82)",
     accent:"#2563EB", accentHex:"37,99,235",
-    badge:"#EFF6FF", badgeBorder:"rgba(37,99,235,0.25)", badgeText:"#1D4ED8",
-    shadow:"0 1px 3px rgba(0,0,0,0.06),0 8px 24px rgba(0,0,0,0.05)",
-    shadowLg:"0 20px 60px rgba(0,0,0,0.1)",
-    step:"#F8F9FC",
-    footerBg:"#09090B", footerText:"#A1A1AA",
-    ctaBg:"#09090B",
+    badge:"rgba(37,99,235,0.07)", badgeBorder:"rgba(37,99,235,0.18)", badgeText:"#1D4ED8",
+    shadow:"0 2px 8px rgba(0,0,0,0.05),0 12px 32px rgba(0,0,0,0.06)",
+    shadowLg:"0 24px 64px rgba(0,0,0,0.12)",
+    step:"#FFFFFF",
+    footerBg:"#1D1D1F", footerText:"#6E6E73",
+    ctaBg:"#1D1D1F",
+    tile1:"#1D1D1F", tile2:"#2563EB", tile3:"#F2F2F7",
   },
   dark: {
-    bg:"rgba(9,9,11,0.72)", bg2:"rgba(14,14,18,0.65)", bg3:"rgba(22,22,28,0.6)",
-    text:"#FAFAFA", text2:"#A1A1AA", text3:"#71717A",
+    bg:"rgba(10,10,12,0.72)", bg2:"rgba(16,16,20,0.65)", bg3:"rgba(24,24,28,0.6)",
+    bgDark:"rgba(8,8,10,0.9)",
+    text:"#F5F5F7", text2:"#A1A1A6", text3:"#6E6E73",
     border:"rgba(255,255,255,0.08)", border2:"rgba(255,255,255,0.04)",
     card:"rgba(255,255,255,0.04)", cardBg:"rgba(255,255,255,0.025)",
-    navBg:"rgba(9,9,11,0.92)",
+    navBg:"rgba(10,10,12,0.92)",
     accent:"#3B82F6", accentHex:"59,130,246",
     badge:"rgba(59,130,246,0.12)", badgeBorder:"rgba(59,130,246,0.3)", badgeText:"#93C5FD",
-    shadow:"0 1px 3px rgba(0,0,0,0.2),0 8px 24px rgba(0,0,0,0.3)",
-    shadowLg:"0 20px 60px rgba(0,0,0,0.5)",
+    shadow:"0 2px 8px rgba(0,0,0,0.25),0 12px 32px rgba(0,0,0,0.3)",
+    shadowLg:"0 24px 64px rgba(0,0,0,0.5)",
     step:"rgba(255,255,255,0.025)",
-    footerBg:"rgba(5,5,7,0.9)", footerText:"#52525B",
-    ctaBg:"rgba(5,5,7,0.85)",
+    footerBg:"rgba(5,5,7,0.95)", footerText:"#52525B",
+    ctaBg:"rgba(6,6,8,0.9)",
+    tile1:"rgba(255,255,255,0.05)", tile2:"rgba(37,99,235,0.3)", tile3:"rgba(255,255,255,0.03)",
   },
 };
 
@@ -379,292 +383,410 @@ export default function LandingPage() {
   const [isDark, setIsDark] = useState(false);
   const t = T[isDark ? "dark" : "light"];
   const { scrollY } = useScroll();
-  const navBg = useTransform(scrollY,[0,60],[t.bg+"00", t.navBg]);
+  const navY    = useTransform(scrollY,[0,80],[0,0]);
+  const navBdr  = useTransform(scrollY,[0,60],["rgba(0,0,0,0)","rgba(0,0,0,0.07)"]);
 
   const iv = (delay=0) => ({
-    initial:{opacity:0, y:28},
+    initial:{opacity:0, y:32},
     whileInView:{opacity:1, y:0},
-    viewport:{once:true, amount:0.15},
-    transition:{duration:0.65, ease:E, delay},
+    viewport:{once:true, amount:0.12},
+    transition:{duration:0.7, ease:E, delay},
+  });
+  const il = (delay=0) => ({
+    initial:{opacity:0, x:-32},
+    whileInView:{opacity:1, x:0},
+    viewport:{once:true, amount:0.12},
+    transition:{duration:0.7, ease:E, delay},
   });
 
   return (
-    <div style={{ fontFamily:"'DM Sans',system-ui,sans-serif", background: isDark ? "transparent" : t.bg, color:t.text, minHeight:"100vh", position:"relative" }}>
-      {/* Dark base — sits behind everything including DarkBg3D */}
-      {isDark && <div style={{ position:"fixed", inset:0, zIndex:-2, background:"#09090B" }}/>}
+    <div style={{ fontFamily:"'DM Sans',system-ui,sans-serif", background: isDark ? "transparent" : t.bg, color:t.text, minHeight:"100vh", position:"relative", overflowX:"hidden" }}>
+      {isDark && <div style={{ position:"fixed", inset:0, zIndex:-2, background:"#0A0A0C" }}/>}
       {isDark && <DarkBg3D/>}
       <SideObjects isDark={isDark} scrollY={scrollY} t={t}/>
 
-      {/* ── NAV ─────────────────────────────────────────────── */}
-      <motion.nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:100,
+      {/* ── NAV ── */}
+      <motion.nav style={{
+        position:"fixed", top:0, left:0, right:0, zIndex:100,
         display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"0 clamp(20px,5vw,64px)", height:64,
-        backdropFilter:"blur(24px)",
-        borderBottom:`1px solid ${t.border}`,
-        background:isDark ? t.navBg : undefined,
-        backgroundColor:!isDark ? t.navBg : undefined,
+        padding:"0 clamp(24px,5vw,72px)", height:60,
+        backdropFilter:"blur(28px) saturate(180%)",
+        WebkitBackdropFilter:"blur(28px) saturate(180%)",
+        background:t.navBg,
+        borderBottom:`1px solid`,
+        borderColor:navBdr,
+        transition:"border-color 0.3s",
       }}>
-        <Link href="/" style={{ textDecoration:"none" }}>
-          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height:40, objectFit:"contain", filter:isDark?"none":"none" }}/>
+        <Link href="/" style={{ textDecoration:"none", display:"flex", alignItems:"center" }}>
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height:36, objectFit:"contain" }}/>
         </Link>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <button onClick={()=>setIsDark(d=>!d)}
-            style={{ width:38, height:38, borderRadius:10, border:`1px solid ${t.border}`,
-              background:"transparent", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
-            {isDark ? <Ic.Sun s={17} c={t.text2}/> : <Ic.Moon s={17} c={t.text2}/>}
+
+        {/* Center links */}
+        <div className="nav-links" style={{ display:"flex", alignItems:"center", gap:4 }}>
+          {[["Fonctionnalités","#features"],["Tarifs","#pricing"],["Témoignages","#testimonials"]].map(([l,h])=>(
+            <a key={l} href={h} style={{ padding:"7px 14px", borderRadius:8, textDecoration:"none",
+              color:t.text2, fontWeight:500, fontSize:14, transition:"color 0.2s" }}
+              onMouseEnter={e=>e.target.style.color=t.text}
+              onMouseLeave={e=>e.target.style.color=t.text2}>{l}</a>
+          ))}
+        </div>
+
+        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+          <button onClick={()=>setIsDark(d=>!d)} style={{
+            width:36, height:36, borderRadius:9, border:`1px solid ${t.border}`,
+            background:"transparent", cursor:"pointer",
+            display:"flex", alignItems:"center", justifyContent:"center",
+          }}>
+            {isDark ? <Ic.Sun s={16} c={t.text2}/> : <Ic.Moon s={16} c={t.text2}/>}
           </button>
-          <Link href="/login" style={{ padding:"9px 18px", borderRadius:9, textDecoration:"none", color:t.text2, fontWeight:600, fontSize:14 }}>
-            Connexion
-          </Link>
-          <motion.div whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }}>
-            <Link href="/register" style={{ display:"block", padding:"10px 20px", borderRadius:9, textDecoration:"none",
-              background:t.accent, color:"#fff", fontWeight:700, fontSize:14,
-              boxShadow:`0 4px 16px rgba(${t.accentHex},0.35)` }}>
-              Commencer gratuitement
+          <Link href="/login" style={{ padding:"8px 16px", borderRadius:9, textDecoration:"none",
+            color:t.text2, fontWeight:500, fontSize:14 }}>Se connecter</Link>
+          <motion.div whileHover={{scale:1.03}} whileTap={{scale:0.97}}>
+            <Link href="/register" style={{ display:"block", padding:"9px 20px", borderRadius:10,
+              textDecoration:"none", background:t.text, color:isDark?"#0A0A0C":"#FAFAFA",
+              fontWeight:700, fontSize:14, letterSpacing:"-0.2px" }}>
+              Essai gratuit
             </Link>
           </motion.div>
         </div>
       </motion.nav>
 
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section style={{ minHeight:"100dvh", display:"flex", alignItems:"center",
-        padding:"120px clamp(20px,8vw,100px) 80px", position:"relative", overflow:"hidden",
+      {/* ── HERO ── */}
+      <section style={{ minHeight:"100dvh", display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"center", textAlign:"center",
+        padding:"120px clamp(20px,6vw,80px) 80px", position:"relative", overflow:"hidden",
         background:t.bg }}>
-        {/* Subtle gradient bg */}
-        <div style={{ position:"absolute", inset:0, pointerEvents:"none",
-          background:isDark
-            ? "radial-gradient(ellipse 80% 50% at 50% -10%,rgba(37,99,235,0.12),transparent)"
-            : "radial-gradient(ellipse 80% 50% at 50% -10%,rgba(37,99,235,0.06),transparent)" }}/>
-        <div style={{ position:"absolute", inset:0, pointerEvents:"none",
-          backgroundImage:`radial-gradient(${isDark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.03)"} 1px,transparent 1px)`,
-          backgroundSize:"28px 28px" }}/>
 
-        <div style={{ maxWidth:1200, margin:"0 auto", width:"100%", position:"relative", zIndex:1,
-          display:"flex", alignItems:"center", justifyContent:"space-between", gap:60, flexWrap:"wrap" }}>
+        {/* Radial glow behind text */}
+        <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translateX(-50%)",
+          width:900, height:500, pointerEvents:"none",
+          background:`radial-gradient(ellipse, rgba(${t.accentHex},${isDark?0.14:0.07}) 0%, transparent 70%)`,
+          filter:"blur(40px)" }}/>
 
-          {/* Left — text */}
-          <div style={{ flex:"1 1 420px", maxWidth:600 }}>
-            <motion.div {...iv(0)} style={{ marginBottom:24 }}>
-              <span style={{ display:"inline-flex", alignItems:"center", gap:8,
-                background:t.badge, border:`1px solid ${t.badgeBorder}`,
-                borderRadius:100, padding:"6px 16px", color:t.badgeText, fontWeight:600, fontSize:13 }}>
-                <motion.span animate={{ scale:[1,1.5,1] }} transition={{ duration:1.4, repeat:Infinity }}
-                  style={{ width:7, height:7, borderRadius:"50%", background:t.accent, display:"inline-block" }}/>
-                500+ établissements actifs en France
-              </span>
+        {/* Dot grid */}
+        <div style={{ position:"absolute", inset:0, pointerEvents:"none",
+          backgroundImage:`radial-gradient(${isDark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)"} 1px,transparent 1px)`,
+          backgroundSize:"32px 32px" }}/>
+
+        <div style={{ position:"relative", zIndex:1, maxWidth:860, margin:"0 auto" }}>
+          {/* Badge */}
+          <motion.div {...iv(0)} style={{ display:"inline-flex", alignItems:"center", gap:8,
+            background:t.badge, border:`1px solid ${t.badgeBorder}`,
+            borderRadius:100, padding:"6px 18px 6px 8px", marginBottom:32 }}>
+            <span style={{ background:t.accent, borderRadius:100, padding:"3px 10px",
+              fontSize:11, fontWeight:800, color:"#fff", letterSpacing:"0.3px" }}>NOUVEAU</span>
+            <span style={{ color:t.badgeText, fontWeight:600, fontSize:13 }}>14 jours d&apos;essai gratuit — sans CB</span>
+          </motion.div>
+
+          {/* Main headline */}
+          <motion.h1 {...iv(0.06)} style={{
+            fontFamily:"'Calistoga','DM Sans',system-ui",
+            fontSize:"clamp(48px,8.5vw,108px)",
+            fontWeight:400,
+            lineHeight:1.02,
+            letterSpacing:"-0.03em",
+            margin:"0 0 28px",
+            color:t.text,
+          }}>
+            La roue qui{" "}
+            <span style={{
+              background:"linear-gradient(135deg,#2563EB 0%,#06B6D4 50%,#8B5CF6 100%)",
+              WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+              display:"inline-block",
+            }}>transforme</span>
+            <br/>vos clients en avis
+          </motion.h1>
+
+          <motion.p {...iv(0.12)} style={{
+            fontSize:"clamp(16px,2vw,20px)", lineHeight:1.7,
+            color:t.text2, margin:"0 auto 44px", maxWidth:540, fontWeight:400,
+          }}>
+            Gamifiez l&apos;expérience client. Chaque avis Google déclenche un tour de roue — vos clients jouent, vos avis explosent.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div {...iv(0.18)} style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap", marginBottom:64 }}>
+            <motion.div whileHover={{scale:1.04,y:-3}} whileTap={{scale:0.97}}>
+              <Link href="/register" style={{ display:"inline-flex", alignItems:"center", gap:8,
+                padding:"16px 36px", borderRadius:100, textDecoration:"none",
+                background:t.accent, color:"#fff", fontWeight:700, fontSize:16,
+                boxShadow:`0 12px 36px rgba(${t.accentHex},0.42)`,
+                letterSpacing:"-0.2px",
+              }}>
+                Commencer gratuitement
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{scale:1.04,y:-3}} whileTap={{scale:0.97}}>
+              <Link href="/login" style={{ display:"inline-flex", alignItems:"center", gap:8,
+                padding:"16px 32px", borderRadius:100, textDecoration:"none",
+                background:"transparent", border:`1.5px solid ${t.border}`,
+                color:t.text, fontWeight:600, fontSize:16 }}>
+                Voir la démo
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Trust row */}
+          <motion.div {...iv(0.24)} style={{ display:"flex", alignItems:"center", justifyContent:"center",
+            gap:"clamp(16px,3vw,40px)", flexWrap:"wrap" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              {[...Array(5)].map((_,i)=><Ic.Star key={i} s={15}/>)}
+              <span style={{ fontSize:13, color:t.text2, fontWeight:600 }}>4.9 / 5</span>
+            </div>
+            <div style={{ width:1, height:20, background:t.border }}/>
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <Ic.Google s={17}/>
+              <span style={{ fontSize:13, color:t.text2, fontWeight:600 }}>Google Reviews</span>
+            </div>
+            <div style={{ width:1, height:20, background:t.border }}/>
+            <span style={{ fontSize:13, color:t.text2, fontWeight:600 }}>500+ établissements actifs</span>
+          </motion.div>
+        </div>
+
+        {/* Hero product visual */}
+        <motion.div initial={{opacity:0,y:60,scale:0.9}} animate={{opacity:1,y:0,scale:1}}
+          transition={{duration:1.1, ease:E, delay:0.3}}
+          style={{ marginTop:80, position:"relative", zIndex:1, maxWidth:700, width:"100%",
+            display:"flex", justifyContent:"center", alignItems:"center", gap:32, flexWrap:"wrap" }}>
+
+          {/* Big wheel */}
+          <motion.div animate={{y:[0,-14,0]}} transition={{duration:5,repeat:Infinity,ease:"easeInOut"}}
+            style={{ position:"relative", flexShrink:0 }}>
+            <div style={{ width:240, height:240,
+              filter:`drop-shadow(0 40px 60px rgba(${t.accentHex},0.3)) drop-shadow(0 8px 16px rgba(0,0,0,0.2))` }}>
+              <motion.div animate={{rotate:360}} transition={{duration:28,repeat:Infinity,ease:"linear"}}
+                style={{ width:"100%", height:"100%", borderRadius:"50%",
+                  background:`conic-gradient(${CONIC})`,
+                  boxShadow:"inset 0 0 40px rgba(0,0,0,0.25)" }}>
+                {SEG.map((_,i)=>(
+                  <div key={i} style={{ position:"absolute",top:"50%",left:"50%",width:"50%",height:2,
+                    background:"rgba(255,255,255,0.22)",transformOrigin:"0 50%",
+                    transform:`rotate(${(i/SEG.length)*360}deg)` }}/>
+                ))}
+                <div style={{ position:"absolute",top:"50%",left:"50%",width:28,height:28,borderRadius:"50%",
+                  background:"#fff",transform:"translate(-50%,-50%)",
+                  boxShadow:"0 4px 16px rgba(0,0,0,0.25)",zIndex:2 }}/>
+              </motion.div>
+            </div>
+            <div style={{ position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",
+              width:0,height:0,borderLeft:"9px solid transparent",borderRight:"9px solid transparent",
+              borderTop:"22px solid #F59E0B",filter:"drop-shadow(0 2px 6px rgba(245,158,11,0.7))",zIndex:5 }}/>
+          </motion.div>
+
+          {/* Floating stat cards */}
+          <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+            {[
+              { top:true, content:(
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <div style={{ width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#2563EB,#06B6D4)",
+                    display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#fff",fontSize:14,flexShrink:0 }}>M</div>
+                  <div>
+                    <div style={{ fontSize:13,fontWeight:700,color:"#F5F5F7",marginBottom:2 }}>Marie D.</div>
+                    <div style={{ display:"flex",gap:2 }}>{[...Array(5)].map((_,j)=><Ic.Star key={j} s={11}/>)}</div>
+                  </div>
+                  <div style={{ marginLeft:8 }}><Ic.Google s={16}/></div>
+                </div>
+              )},
+              { content:(
+                <div>
+                  <div style={{ fontSize:11,color:"rgba(255,255,255,0.4)",fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:4 }}>Ce mois-ci</div>
+                  <div style={{ fontSize:36,fontWeight:900,color:"#10B981",letterSpacing:"-2px",lineHeight:1 }}>+47</div>
+                  <div style={{ fontSize:12,color:"rgba(255,255,255,0.4)",marginTop:2 }}>nouveaux avis Google</div>
+                </div>
+              )},
+              { content:(
+                <div style={{ display:"flex",alignItems:"center",gap:10 }}>
+                  <div style={{ width:32,height:32,borderRadius:9,background:"rgba(245,158,11,0.18)",
+                    display:"flex",alignItems:"center",justifyContent:"center" }}><Ic.Star s={16}/></div>
+                  <div>
+                    <div style={{ fontSize:14,fontWeight:800,color:"#F5F5F7" }}>−20% gagné</div>
+                    <div style={{ fontSize:11,color:"rgba(255,255,255,0.4)" }}>prochaine visite</div>
+                  </div>
+                </div>
+              )},
+            ].map(({content},i)=>(
+              <motion.div key={i}
+                initial={{opacity:0,x:30}} animate={{opacity:1,x:0}}
+                transition={{duration:0.6,delay:0.5+i*0.15,ease:E}}
+                whileHover={{scale:1.03,y:-3}}
+                style={{ background:"rgba(10,10,30,0.85)", backdropFilter:"blur(20px)",
+                  border:"1px solid rgba(255,255,255,0.1)", borderRadius:18,
+                  padding:"16px 20px", boxShadow:"0 12px 40px rgba(0,0,0,0.3)",
+                  cursor:"default", minWidth:180 }}>
+                {content}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── METRICS STRIP ── */}
+      <section style={{ borderTop:`1px solid ${t.border}`, borderBottom:`1px solid ${t.border}`, background:t.bg2 }}>
+        <div style={{ maxWidth:900, margin:"0 auto", display:"grid",
+          gridTemplateColumns:"repeat(4,1fr)", textAlign:"center" }}>
+          {[["500+","Établissements actifs"],["4.9★","Note Google moyenne"],["98%","Clients satisfaits"],["<5min","Temps de setup"]].map(([v,l],i)=>(
+            <motion.div key={l} {...iv(i*0.08)}
+              style={{ padding:"clamp(24px,4vw,44px) 20px",
+                borderRight: i<3 ? `1px solid ${t.border}` : "none" }}>
+              <div style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+                fontSize:"clamp(28px,4vw,48px)", fontWeight:400,
+                color:t.text, letterSpacing:"-0.03em", lineHeight:1, marginBottom:8 }}>{v}</div>
+              <div style={{ fontSize:13, color:t.text3, fontWeight:500 }}>{l}</div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── DARK FEATURE SPLIT ── */}
+      <section style={{ background:t.bgDark, padding:"clamp(80px,10vw,140px) clamp(20px,6vw,80px)",
+        position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:"-30%", right:"-10%", width:600, height:600, borderRadius:"50%",
+          background:"radial-gradient(circle,rgba(37,99,235,0.15),transparent 70%)", pointerEvents:"none" }}/>
+        <div style={{ position:"absolute", bottom:"-20%", left:"-5%", width:500, height:500, borderRadius:"50%",
+          background:"radial-gradient(circle,rgba(139,92,246,0.1),transparent 70%)", pointerEvents:"none" }}/>
+
+        <div style={{ maxWidth:1100, margin:"0 auto", display:"grid",
+          gridTemplateColumns:"1fr 1fr", gap:"clamp(40px,6vw,100px)", alignItems:"center" }}
+          className="split-grid">
+          <div>
+            <motion.div {...il(0)} style={{ display:"inline-flex", alignItems:"center", gap:8,
+              background:"rgba(37,99,235,0.15)", border:"1px solid rgba(37,99,235,0.25)",
+              borderRadius:100, padding:"5px 16px", marginBottom:24 }}>
+              <div style={{ width:7,height:7,borderRadius:"50%",background:"#3B82F6",
+                boxShadow:"0 0 8px #3B82F6" }}/>
+              <span style={{ color:"#93C5FD",fontWeight:700,fontSize:12,letterSpacing:"0.5px" }}>CONÇU POUR CONVERTIR</span>
             </motion.div>
 
-            <motion.h1 {...iv(0.07)} style={{ fontSize:"clamp(40px,5.5vw,72px)", fontWeight:900,
-              lineHeight:1.08, margin:"0 0 24px", letterSpacing:"-2.5px", color:t.text }}>
-              Transformez chaque client en{" "}
-              <span style={{ background:"linear-gradient(135deg,#2563EB,#06B6D4,#8B5CF6)",
-                WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
-                ambassadeur Google
-              </span>
-            </motion.h1>
+            <motion.h2 {...il(0.07)} style={{
+              fontFamily:"'Calistoga','DM Sans',system-ui",
+              fontSize:"clamp(32px,5vw,64px)", fontWeight:400,
+              lineHeight:1.06, letterSpacing:"-0.03em",
+              color:"#F5F5F7", margin:"0 0 24px",
+            }}>
+              Chaque client qui part est une opportunité manquée
+            </motion.h2>
 
-            <motion.p {...iv(0.14)} style={{ color:t.text2, fontSize:18, lineHeight:1.8, margin:"0 0 40px", maxWidth:500 }}>
-              La roue de la fortune gamifiée qui booste vos avis Google <strong style={{ color:t.text }}>automatiquement</strong>.
-              Configurez en 5 minutes, récoltez des avis à vie.
+            <motion.p {...il(0.13)} style={{ color:"#A1A1A6", fontSize:17, lineHeight:1.75, margin:"0 0 40px", maxWidth:440 }}>
+              VisiumBoost transforme le moment de départ en jeu. Vos clients adorent la roue, vous adorez les avis.
             </motion.p>
 
-            <motion.div {...iv(0.21)} style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:52 }}>
-              <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
-                <Link href="/register" style={{ display:"block", padding:"16px 34px", borderRadius:12, textDecoration:"none",
-                  background:t.accent, color:"#fff", fontWeight:700, fontSize:16,
-                  boxShadow:`0 8px 28px rgba(${t.accentHex},0.4)` }}>
-                  Commencer gratuitement →
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.97 }}>
-                <Link href="/login" style={{ display:"block", padding:"16px 34px", borderRadius:12, textDecoration:"none",
-                  background:"transparent", border:`1.5px solid ${t.border}`,
-                  color:t.text2, fontWeight:600, fontSize:16 }}>
-                  Voir une démo
-                </Link>
-              </motion.div>
-            </motion.div>
-
-            <motion.div {...iv(0.28)} style={{ display:"flex", gap:36, flexWrap:"wrap",
-              paddingTop:32, borderTop:`1px solid ${t.border}` }}>
-              {[["500+","Établissements"],["4.9★","Note moyenne"],["98%","Satisfaction"],["<5min","Setup"]].map(([v,l])=>(
-                <div key={l}>
-                  <div style={{ fontSize:24, fontWeight:800, color:t.text, letterSpacing:"-0.5px" }}>{v}</div>
-                  <div style={{ fontSize:12, color:t.text3, marginTop:2, fontWeight:500 }}>{l}</div>
-                </div>
+            <motion.div {...il(0.18)} style={{ display:"flex", flexDirection:"column", gap:16 }}>
+              {[
+                { c:"#3B82F6", t:"Roue personnalisée en 5 minutes", d:"Logo, couleurs, récompenses — votre identité, votre roue." },
+                { c:"#10B981", t:"Codes anti-fraude automatiques",   d:"Chaque code est unique et ne peut être utilisé qu'une fois." },
+                { c:"#8B5CF6", t:"Analytics en temps réel",          d:"Scans, conversions, avis — tout en un coup d'œil." },
+              ].map((item,i)=>(
+                <motion.div key={i} {...il(0.22+i*0.06)}
+                  style={{ display:"flex", alignItems:"flex-start", gap:16 }}>
+                  <div style={{ width:36,height:36,borderRadius:10,background:`${item.c}18`,
+                    border:`1px solid ${item.c}30`,display:"flex",alignItems:"center",
+                    justifyContent:"center",flexShrink:0,marginTop:2 }}>
+                    <Ic.Check s={16} c={item.c}/>
+                  </div>
+                  <div>
+                    <div style={{ fontSize:15,fontWeight:700,color:"#F5F5F7",marginBottom:3 }}>{item.t}</div>
+                    <div style={{ fontSize:13,color:"#6E6E73",lineHeight:1.6 }}>{item.d}</div>
+                  </div>
+                </motion.div>
               ))}
             </motion.div>
           </div>
 
-          {/* Right — wheel + floating cards */}
-          <motion.div initial={{ opacity:0, scale:0.75 }} animate={{ opacity:1, scale:1 }}
-            transition={{ duration:0.9, ease:E, delay:0.3 }}
-            style={{ flex:"1 1 300px", display:"flex", justifyContent:"center", alignItems:"center",
-              position:"relative", minHeight:400 }}>
-            {/* Wheel */}
-            <motion.div animate={{ y:[0,-18,0] }} transition={{ duration:4, repeat:Infinity, ease:"easeInOut" }}
-              style={{ position:"relative", width:300, height:300,
-                filter:`drop-shadow(0 40px 60px rgba(${t.accentHex},0.35)) drop-shadow(0 10px 20px rgba(0,0,0,0.2))` }}>
-              <motion.div animate={{ rotate:360 }} transition={{ duration:28, repeat:Infinity, ease:"linear" }}
-                style={{ width:"100%", height:"100%", borderRadius:"50%",
-                  background:`conic-gradient(${CONIC})`, position:"relative",
-                  boxShadow:"0 0 0 8px rgba(255,255,255,0.12), inset 0 0 40px rgba(0,0,0,0.3)" }}>
-                {SEG.map((_,i)=>(
-                  <div key={i} style={{ position:"absolute", top:"50%", left:"50%", width:"50%", height:2,
-                    background:"rgba(255,255,255,0.28)", transformOrigin:"0 50%",
-                    transform:`rotate(${(i/SEG.length)*360}deg)` }}/>
-                ))}
-                <div style={{ position:"absolute", top:"50%", left:"50%", width:32, height:32, borderRadius:"50%",
-                  background:"linear-gradient(135deg,#fff,#e2e8f0)", transform:"translate(-50%,-50%)",
-                  boxShadow:"0 4px 16px rgba(0,0,0,0.3)", zIndex:2 }}/>
-              </motion.div>
-              <div style={{ position:"absolute", top:-14, left:"50%", transform:"translateX(-50%)",
-                width:0, height:0, borderLeft:"11px solid transparent", borderRight:"11px solid transparent",
-                borderTop:"26px solid #F59E0B", filter:"drop-shadow(0 2px 6px rgba(245,158,11,0.7))", zIndex:5 }}/>
-            </motion.div>
-
-            {/* Floating cards */}
-            {[
-              { delay:0.6, style:{ top:"2%", left:"-8%", minWidth:160 }, content:(
-                <><div style={{ fontSize:10, color:"#94A3B8", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Dernier avis</div>
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#2563EB,#06B6D4)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:12 }}>M</div>
-                  <div><div style={{ fontSize:13, fontWeight:700, color:"#F8FAFC" }}>Marie D.</div>
-                  <div style={{ display:"flex", gap:1 }}>{[...Array(5)].map((_,j)=><Ic.Star key={j} s={11}/>)}</div></div>
-                </div></>
-              )},
-              { delay:0.9, style:{ bottom:"8%", left:"-14%", minWidth:130 }, content:(
-                <><div style={{ fontSize:10, color:"#94A3B8", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Ce mois-ci</div>
-                <div style={{ fontSize:30, fontWeight:900, color:"#10B981", letterSpacing:"-1px" }}>+47</div>
-                <div style={{ fontSize:11, color:"#64748B" }}>avis Google</div></>
-              )},
-              { delay:1.2, style:{ bottom:"18%", right:"-6%", minWidth:150 }, content:(
-                <><div style={{ fontSize:10, color:"#94A3B8", fontWeight:700, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Cadeau gagné</div>
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <div style={{ width:32, height:32, borderRadius:9, background:"rgba(245,158,11,0.15)", border:"1px solid rgba(245,158,11,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><Ic.Star s={16}/></div>
-                  <div><div style={{ fontSize:14, fontWeight:800, color:"#F8FAFC" }}>−20%</div>
-                  <div style={{ fontSize:11, color:"#64748B" }}>prochaine visite</div></div>
-                </div></>
-              )},
-            ].map(({delay,style,content},i)=>(
-              <motion.div key={i} initial={{ opacity:0, scale:0.85 }} animate={{ opacity:1, scale:1 }}
-                transition={{ duration:0.5, delay, ease:E }}>
-                <motion.div animate={{ y:[0,-10,0] }} transition={{ duration:3+i*0.4, repeat:Infinity, ease:"easeInOut", delay:i*0.3 }}
-                  style={{ position:"absolute", background:"rgba(10,10,30,0.88)", backdropFilter:"blur(24px)",
-                    border:"1px solid rgba(255,255,255,0.13)", borderRadius:18, padding:"14px 18px",
-                    boxShadow:"0 12px 40px rgba(0,0,0,0.35)", zIndex:10, ...style }}>
-                  {content}
-                </motion.div>
-              </motion.div>
-            ))}
+          {/* Right: Phone mockup */}
+          <motion.div {...iv(0.15)} style={{ display:"flex", justifyContent:"center", alignItems:"center" }}>
+            <Phone3D isDark={true}/>
           </motion.div>
         </div>
       </section>
 
-      {/* ── TRUST BAR ────────────────────────────────────────── */}
-      <section style={{ padding:"52px clamp(20px,6vw,80px)", background:t.bg2, borderTop:`1px solid ${t.border}`, borderBottom:`1px solid ${t.border}` }}>
+      {/* ── HOW IT WORKS ── */}
+      <section id="features" style={{ padding:"clamp(80px,10vw,140px) clamp(20px,6vw,80px)", background:t.bg }}>
         <div style={{ maxWidth:1000, margin:"0 auto" }}>
-          <motion.div {...iv()} style={{ textAlign:"center", marginBottom:32 }}>
-            <div style={{ fontSize:12, color:t.text3, fontWeight:600, letterSpacing:1.5, textTransform:"uppercase" }}>
-              Reconnu par les professionnels
-            </div>
-          </motion.div>
-          <motion.div {...iv(0.08)} style={{ display:"flex", alignItems:"center", justifyContent:"center",
-            gap:"clamp(20px,4vw,60px)", flexWrap:"wrap" }}>
-            {[
-              { node:<><Ic.Google s={22}/></>, label:"Google Reviews", sub:"4.9 / 5", starsC:"#F59E0B" },
-              { node:<><Ic.Trustpilot s={22}/></>, label:"Trustpilot", sub:"Excellent", starsC:"#00B67A" },
-            ].map((item,i)=>(
-              <div key={i} style={{ display:"flex", alignItems:"center", gap:12 }}>
-                <div style={{ width:46, height:46, borderRadius:12, border:`1px solid ${t.border}`,
-                  background:t.card, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  {item.node}
-                </div>
-                <div>
-                  <div style={{ fontSize:13, fontWeight:700, color:t.text }}>{item.label}</div>
-                  <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                    {[...Array(5)].map((_,j)=><Ic.Star key={j} s={12} c={item.starsC}/>)}
-                    <span style={{ fontSize:12, color:t.text3, marginLeft:2, fontWeight:600 }}>{item.sub}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div style={{ width:1, height:36, background:t.border }}/>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontSize:26, fontWeight:900, color:t.text, letterSpacing:"-1px" }}>500+</div>
-              <div style={{ fontSize:11, color:t.text3, fontWeight:600 }}>Établissements actifs</div>
-            </div>
-            <div style={{ width:1, height:36, background:t.border }}/>
-            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <div style={{ width:46, height:46, borderRadius:12, border:`1px solid rgba(16,185,129,0.25)`,
-                background:isDark?"rgba(16,185,129,0.08)":"rgba(16,185,129,0.05)",
-                display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <Ic.Shield s={22} c="#10B981"/>
-              </div>
-              <div>
-                <div style={{ fontSize:13, fontWeight:700, color:t.text }}>Données sécurisées</div>
-                <div style={{ fontSize:12, color:t.text3 }}>RGPD · SSL · Anti-fraude</div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ─────────────────────────────────────── */}
-      <section style={{ padding:"100px clamp(20px,6vw,80px)", background:t.bg }}>
-        <div style={{ maxWidth:960, margin:"0 auto" }}>
-          <motion.div {...iv()} style={{ textAlign:"center", marginBottom:64 }}>
-            <div style={{ color:t.accent, fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:12 }}>Comment ça marche</div>
-            <h2 style={{ fontSize:"clamp(28px,4vw,48px)", fontWeight:900, margin:"0 0 14px", letterSpacing:"-1.5px", color:t.text }}>
-              Simple comme bonjour
+          <motion.div {...iv()} style={{ textAlign:"center", marginBottom:"clamp(48px,6vw,80px)" }}>
+            <div style={{ fontSize:12, color:t.accent, fontWeight:700, letterSpacing:"2px",
+              textTransform:"uppercase", marginBottom:16 }}>COMMENT ÇA MARCHE</div>
+            <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+              fontSize:"clamp(32px,5vw,60px)", fontWeight:400, margin:"0 0 16px",
+              letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
+              Opérationnel en 3 étapes
             </h2>
-            <p style={{ color:t.text2, fontSize:16, maxWidth:420, margin:"0 auto", lineHeight:1.75 }}>
-              De la configuration à vos premiers avis en moins de 10 minutes.
+            <p style={{ color:t.text2, fontSize:17, maxWidth:420, margin:"0 auto", lineHeight:1.7 }}>
+              Pas de développeur, pas de carte bancaire. Juste vos premiers avis.
             </p>
           </motion.div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))", gap:20 }}>
+
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:2 }} className="steps-grid">
             {STEPS.map((s,i)=>(
-              <motion.div key={s.n} {...iv(i*0.12)} whileHover={{ y:-6 }}
-                transition={{ type:"spring", stiffness:300, damping:22 }}
-                style={{ background:t.step, border:`1px solid ${t.border}`, borderRadius:20,
-                  padding:"36px 30px", position:"relative", overflow:"hidden", cursor:"default" }}>
-                <div style={{ position:"absolute", top:-40, right:-40, width:120, height:120, borderRadius:"50%",
-                  background:`radial-gradient(circle,${s.ac}20,transparent 70%)` }}/>
-                <div style={{ fontSize:52, fontWeight:900, color:`${s.ac}14`, lineHeight:1, marginBottom:20, letterSpacing:"-2px" }}>{s.n}</div>
-                <div style={{ marginBottom:14 }}><s.Icon s={26} c={s.ac}/></div>
-                <h3 style={{ fontSize:18, fontWeight:800, margin:"0 0 10px", color:t.text }}>{s.title}</h3>
-                <p style={{ fontSize:14, color:t.text2, lineHeight:1.8, margin:0 }}>{s.desc}</p>
+              <motion.div key={s.n} {...iv(i*0.1)}
+                style={{ padding:"clamp(28px,4vw,48px) clamp(24px,3vw,40px)",
+                  borderRight: i<2 ? `1px solid ${t.border}` : "none",
+                  borderTop:`3px solid ${i===0?s.ac:t.border}`,
+                  position:"relative", background:t.bg,
+                  transition:"border-top-color 0.3s" }}
+                onHoverStart={e=>{}} >
+                <div style={{ fontFamily:"'DM Mono',monospace",
+                  fontSize:56, fontWeight:400, color:`${s.ac}18`,
+                  lineHeight:1, marginBottom:24, letterSpacing:"-3px" }}>{s.n}</div>
+                <div style={{ marginBottom:16 }}>
+                  <div style={{ width:48,height:48,borderRadius:14,background:`${s.ac}10`,
+                    border:`1px solid ${s.ac}20`,display:"flex",alignItems:"center",
+                    justifyContent:"center" }}>
+                    <s.Icon s={24} c={s.ac}/>
+                  </div>
+                </div>
+                <h3 style={{ fontSize:20, fontWeight:800, margin:"0 0 10px",
+                  color:t.text, letterSpacing:"-0.3px" }}>{s.title}</h3>
+                <p style={{ fontSize:14, color:t.text2, lineHeight:1.75, margin:0 }}>{s.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES BENTO ───────────────────────────────────── */}
-      <section style={{ padding:"100px clamp(20px,6vw,80px)", background:t.bg2 }}>
-        <div style={{ maxWidth:1060, margin:"0 auto" }}>
-          <motion.div {...iv()} style={{ textAlign:"center", marginBottom:60 }}>
-            <div style={{ color:"#7C3AED", fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:12 }}>Fonctionnalités</div>
-            <h2 style={{ fontSize:"clamp(28px,4vw,48px)", fontWeight:900, margin:"0 0 14px", letterSpacing:"-1.5px", color:t.text }}>Tout ce dont vous avez besoin</h2>
-            <p style={{ color:t.text2, fontSize:16, maxWidth:400, margin:"0 auto" }}>Un outil complet, pensé pour les commerçants.</p>
+      {/* ── FEATURES TILES ── */}
+      <section style={{ padding:"clamp(80px,10vw,140px) clamp(20px,6vw,80px)", background:t.bg2 }}>
+        <div style={{ maxWidth:1080, margin:"0 auto" }}>
+          <motion.div {...iv()} style={{ display:"flex", alignItems:"flex-end",
+            justifyContent:"space-between", marginBottom:"clamp(40px,5vw,64px)", gap:24, flexWrap:"wrap" }}>
+            <div>
+              <div style={{ fontSize:12,color:"#8B5CF6",fontWeight:700,letterSpacing:"2px",
+                textTransform:"uppercase",marginBottom:14 }}>FONCTIONNALITÉS</div>
+              <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+                fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400, margin:0,
+                letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
+                Tout en un, rien à configurer
+              </h2>
+            </div>
+            <p style={{ color:t.text2, fontSize:15, maxWidth:320, lineHeight:1.7, margin:0 }}>
+              Un outil complet pensé pour les restaurateurs, salons et commerçants.
+            </p>
           </motion.div>
+
           <div className="bento-grid">
             {FEATURES.map((f,i)=>(
               <TiltCard key={f.title} className={i===0?"bento-big":""}>
-                <motion.div {...iv(i*0.07)} whileHover={{ boxShadow:t.shadowLg }}
-                  style={{ background:t.card, border:`1px solid ${t.border}`, borderRadius:18,
-                    padding:f.big?"40px 44px":"28px 28px", height:"100%",
-                    position:"relative", overflow:"hidden",
-                    boxShadow:t.shadow, transition:"box-shadow 0.3s ease" }}>
-                  <div style={{ position:"absolute", top:-60, right:-60, width:180, height:180, borderRadius:"50%",
-                    background:`radial-gradient(circle,${f.ac}12,transparent 70%)` }}/>
-                  <div style={{ width:f.big?50:42, height:f.big?50:42, borderRadius:f.big?14:11,
-                    background:`${f.ac}12`, border:`1px solid ${f.ac}28`,
-                    display:"flex", alignItems:"center", justifyContent:"center", marginBottom:f.big?20:14 }}>
-                    <f.Icon s={f.big?24:20} c={f.ac}/>
+                <motion.div {...iv(i*0.07)}
+                  style={{ background:i===0?t.bgDark:i===1?"linear-gradient(135deg,rgba(37,99,235,0.12),rgba(139,92,246,0.08))":t.card,
+                    border:`1px solid ${i===0?"rgba(255,255,255,0.08)":t.border}`,
+                    borderRadius:20, padding:f.big?"44px 48px":"32px 32px",
+                    height:"100%", position:"relative", overflow:"hidden",
+                    boxShadow:t.shadow, cursor:"default" }}>
+
+                  <div style={{ position:"absolute",top:-80,right:-80,width:220,height:220,
+                    borderRadius:"50%",background:`radial-gradient(circle,${f.ac}${i===0?"28":"15"},transparent 70%)`,
+                    pointerEvents:"none" }}/>
+
+                  <div style={{ width:f.big?52:44,height:f.big?52:44,borderRadius:f.big?16:13,
+                    background:`${f.ac}18`,border:`1px solid ${f.ac}30`,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    marginBottom:f.big?22:16 }}>
+                    <f.Icon s={f.big?26:21} c={f.ac}/>
                   </div>
-                  <h3 style={{ fontSize:f.big?20:15, fontWeight:800, margin:"0 0 10px", color:t.text }}>{f.title}</h3>
-                  <p style={{ fontSize:f.big?15:13, color:t.text2, lineHeight:1.75, margin:0 }}>{f.desc}</p>
+
+                  <h3 style={{ fontSize:f.big?22:16,fontWeight:800,margin:"0 0 10px",letterSpacing:"-0.3px",
+                    color:i===0?"#F5F5F7":t.text }}>{f.title}</h3>
+                  <p style={{ fontSize:f.big?15:13,color:i===0?"#6E6E73":t.text2,lineHeight:1.75,margin:0 }}>{f.desc}</p>
                 </motion.div>
               </TiltCard>
             ))}
@@ -672,47 +794,55 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ─────────────────────────────────────── */}
-      <section style={{ padding:"100px 0", background:t.bg, overflow:"hidden" }}>
-        <motion.div {...iv()} style={{ textAlign:"center", marginBottom:60, padding:"0 24px" }}>
-          <div style={{ color:"#0891B2", fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:12 }}>Témoignages</div>
-          <h2 style={{ fontSize:"clamp(28px,4vw,48px)", fontWeight:900, margin:"0 0 18px", letterSpacing:"-1.5px", color:t.text }}>
-            Ils nous font confiance
-          </h2>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-            {[...Array(5)].map((_,i)=><Ic.Star key={i} s={18}/>)}
-            <span style={{ color:t.text3, fontSize:14, fontWeight:600, marginLeft:4 }}>4.9 / 5 · 500+ établissements</span>
+      {/* ── TESTIMONIALS ── */}
+      <section id="testimonials" style={{ padding:"clamp(80px,10vw,120px) 0", background:t.bg, overflow:"hidden" }}>
+        <motion.div {...iv()} style={{ textAlign:"center",marginBottom:"clamp(40px,5vw,60px)",padding:"0 24px" }}>
+          <div style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginBottom:16 }}>
+            {[...Array(5)].map((_,i)=><Ic.Star key={i} s={20}/>)}
           </div>
+          <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+            fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400,
+            margin:"0 0 14px", letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
+            500+ établissements nous font confiance
+          </h2>
+          <p style={{ color:t.text2, fontSize:16, fontWeight:500 }}>
+            4.9 / 5 de note moyenne sur Google Reviews
+          </p>
         </motion.div>
+
         <div style={{ position:"relative" }}>
-          <div style={{ position:"absolute", left:0, top:0, bottom:0, width:120,
-            background:`linear-gradient(to right,${t.bg},transparent)`, zIndex:2, pointerEvents:"none" }}/>
-          <div style={{ position:"absolute", right:0, top:0, bottom:0, width:120,
-            background:`linear-gradient(to left,${t.bg},transparent)`, zIndex:2, pointerEvents:"none" }}/>
-          <motion.div animate={{ x:["0%","-50%"] }} transition={{ duration:36, repeat:Infinity, ease:"linear" }}
-            style={{ display:"flex", gap:18, width:"max-content", padding:"8px 20px" }}>
+          <div style={{ position:"absolute",left:0,top:0,bottom:0,width:160,zIndex:2,pointerEvents:"none",
+            background:`linear-gradient(to right,${isDark?"#0A0A0C":t.bg},transparent)` }}/>
+          <div style={{ position:"absolute",right:0,top:0,bottom:0,width:160,zIndex:2,pointerEvents:"none",
+            background:`linear-gradient(to left,${isDark?"#0A0A0C":t.bg},transparent)` }}/>
+
+          <motion.div animate={{x:["0%","-50%"]}} transition={{duration:40,repeat:Infinity,ease:"linear"}}
+            style={{ display:"flex",gap:16,width:"max-content",padding:"12px 24px" }}>
             {[...TESTIMONIALS,...TESTIMONIALS].map((t2,i)=>(
-              <motion.div key={i} whileHover={{ y:-4, boxShadow:t.shadowLg }} transition={{ type:"spring", stiffness:300, damping:22 }}
-                style={{ width:300, flexShrink:0, background:t.card, border:`1px solid ${t.border}`,
-                  borderRadius:18, padding:"26px 28px", cursor:"default", boxShadow:t.shadow }}>
-                <div style={{ display:"flex", gap:2, marginBottom:14 }}>{[...Array(5)].map((_,j)=><Ic.Star key={j} s={14}/>)}</div>
-                <p style={{ fontSize:13, color:t.text2, lineHeight:1.8, margin:"0 0 20px", fontStyle:"italic" }}>
-                  &ldquo;{t2.q}&rdquo;
-                </p>
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <div style={{ width:36, height:36, borderRadius:"50%",
+              <motion.div key={i}
+                whileHover={{y:-6,boxShadow:t.shadowLg}}
+                transition={{type:"spring",stiffness:300,damping:22}}
+                style={{ width:320,flexShrink:0,background:t.card,
+                  border:`1px solid ${t.border}`,borderRadius:20,
+                  padding:"28px 28px",cursor:"default",boxShadow:t.shadow }}>
+                <div style={{ display:"flex",gap:2,marginBottom:16 }}>
+                  {[...Array(5)].map((_,j)=><Ic.Star key={j} s={14}/>)}
+                </div>
+                <p style={{ fontSize:14,color:t.text2,lineHeight:1.8,margin:"0 0 22px",
+                  fontStyle:"italic",letterSpacing:"0.1px" }}>&ldquo;{t2.q}&rdquo;</p>
+                <div style={{ display:"flex",alignItems:"center",gap:12,
+                  paddingTop:16,borderTop:`1px solid ${t.border}` }}>
+                  <div style={{ width:38,height:38,borderRadius:"50%",flexShrink:0,
                     background:`linear-gradient(135deg,${TC[i%6]},${TC[(i+2)%6]})`,
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                    fontWeight:900, color:"#fff", fontSize:13, flexShrink:0 }}>
-                    {t2.name[0]}
-                  </div>
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontWeight:900,color:"#fff",fontSize:14 }}>{t2.name[0]}</div>
                   <div>
-                    <div style={{ fontWeight:700, fontSize:13, color:t.text }}>{t2.name}</div>
-                    <div style={{ fontSize:11, color:t.text3, display:"flex", alignItems:"center", gap:3 }}>
+                    <div style={{ fontSize:13,fontWeight:700,color:t.text }}>{t2.name}</div>
+                    <div style={{ fontSize:11,color:t.text3,display:"flex",alignItems:"center",gap:3 }}>
                       <Ic.MapPin s={10} c={t.text3}/>{t2.role}
                     </div>
                   </div>
-                  <div style={{ marginLeft:"auto" }}><Ic.Google s={16}/></div>
+                  <div style={{ marginLeft:"auto" }}><Ic.Google s={18}/></div>
                 </div>
               </motion.div>
             ))}
@@ -720,82 +850,93 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── PRICING ──────────────────────────────────────────── */}
-      <section style={{ padding:"100px clamp(20px,6vw,80px)", background:t.bg2 }}>
-        <div style={{ maxWidth:1000, margin:"0 auto" }}>
-          <motion.div {...iv()} style={{ textAlign:"center", marginBottom:64 }}>
-            <div style={{ color:"#D97706", fontWeight:700, fontSize:11, letterSpacing:2.5, textTransform:"uppercase", marginBottom:12 }}>Tarifs</div>
-            <h2 style={{ fontSize:"clamp(28px,4vw,48px)", fontWeight:900, margin:"0 0 14px", letterSpacing:"-1.5px", color:t.text }}>Simple et transparent</h2>
-            <p style={{ color:t.text2, fontSize:16, maxWidth:360, margin:"0 auto" }}>Sans engagement. Annulez quand vous voulez.</p>
+      {/* ── PRICING ── */}
+      <section id="pricing" style={{ padding:"clamp(80px,10vw,140px) clamp(20px,6vw,80px)", background:t.bg2 }}>
+        <div style={{ maxWidth:1020, margin:"0 auto" }}>
+          <motion.div {...iv()} style={{ textAlign:"center",marginBottom:"clamp(48px,6vw,72px)" }}>
+            <div style={{ fontSize:12,color:"#F59E0B",fontWeight:700,letterSpacing:"2px",
+              textTransform:"uppercase",marginBottom:16 }}>TARIFS</div>
+            <h2 style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+              fontSize:"clamp(32px,5vw,60px)", fontWeight:400,
+              margin:"0 0 16px", letterSpacing:"-0.03em", lineHeight:1.08, color:t.text }}>
+              Simple, transparent, sans surprise
+            </h2>
+            <p style={{ color:t.text2, fontSize:16, maxWidth:380, margin:"0 auto" }}>
+              14 jours gratuits sur tous les plans. Sans carte bancaire.
+            </p>
           </motion.div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:20, alignItems:"stretch" }}>
+
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,alignItems:"start" }}
+            className="pricing-grid">
             {PLANS.map((plan,i)=>(
-              <TiltCard key={plan.id} style={{ paddingTop: plan.highlight ? 20 : 0 }}>
-                <motion.div {...iv(i*0.1)} whileHover={{ y:-6 }} transition={{ type:"spring", stiffness:300, damping:22 }}
-                  style={{ borderRadius:22, padding:"36px 32px", position:"relative", height:"100%",
-                    display:"flex", flexDirection:"column",
+              <TiltCard key={plan.id} style={{ paddingTop: plan.highlight ? 22 : 0 }}>
+                <motion.div {...iv(i*0.1)}
+                  style={{ borderRadius:24,padding:"36px 32px",position:"relative",
+                    display:"flex",flexDirection:"column",
                     ...(plan.highlight ? {
-                      background:isDark?"linear-gradient(145deg,#0F172A,#1a1440)":"#0F172A",
-                      border:`1px solid rgba(${t.accentHex},0.45)`,
-                      boxShadow:`0 0 0 1px rgba(${t.accentHex},0.12), 0 24px 60px rgba(${t.accentHex},0.18)`,
+                      background:"#1D1D1F",
+                      border:"1px solid rgba(37,99,235,0.4)",
+                      boxShadow:"0 0 0 1px rgba(37,99,235,0.1),0 28px 64px rgba(37,99,235,0.2)",
                     }:{
-                      background:t.card, border:`1px solid ${t.border}`, boxShadow:t.shadow,
+                      background:t.card,
+                      border:`1px solid ${t.border}`,
+                      boxShadow:t.shadow,
                     }) }}>
 
-                  {/* Glow orb inside card (does not clip) */}
                   {plan.highlight && (
-                    <div style={{ position:"absolute", top:-40, left:"50%", transform:"translateX(-50%)",
-                      width:220, height:120, borderRadius:"50%",
-                      background:`radial-gradient(ellipse,rgba(${t.accentHex},0.22),transparent 70%)`,
-                      pointerEvents:"none" }}/>
+                    <>
+                      <div style={{ position:"absolute",top:-40,left:"50%",transform:"translateX(-50%)",
+                        width:280,height:140,borderRadius:"50%",pointerEvents:"none",
+                        background:"radial-gradient(ellipse,rgba(37,99,235,0.2),transparent 70%)" }}/>
+                      <div style={{ position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",
+                        background:"linear-gradient(135deg,#2563EB,#06B6D4)",color:"#fff",
+                        fontWeight:800,fontSize:11,padding:"4px 22px",borderRadius:100,
+                        whiteSpace:"nowrap",letterSpacing:"0.5px",
+                        boxShadow:"0 4px 16px rgba(37,99,235,0.45)" }}>
+                        LE PLUS POPULAIRE
+                      </div>
+                    </>
                   )}
 
-                  {/* Badge above card */}
-                  {plan.highlight && (
-                    <div style={{ position:"absolute", top:-16, left:"50%", transform:"translateX(-50%)",
-                      background:`linear-gradient(135deg,${t.accent},#06B6D4)`, color:"#fff", fontWeight:700,
-                      fontSize:11, padding:"4px 20px", borderRadius:100, whiteSpace:"nowrap",
-                      letterSpacing:0.5, boxShadow:`0 4px 14px rgba(${t.accentHex},0.45)` }}>
-                      ⚡ Le plus populaire
-                    </div>
-                  )}
+                  <div style={{ fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1.5px",
+                    color:plan.highlight?"#60A5FA":t.text3,marginBottom:16 }}>{plan.name}</div>
 
-                  {/* Plan name */}
-                  <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:1.4,
-                    color:plan.highlight?"#60A5FA":t.text3, marginBottom:12 }}>{plan.name}</div>
-
-                  {/* Price */}
-                  <div style={{ display:"flex", alignItems:"baseline", gap:4, marginBottom:6 }}>
-                    <span style={{ fontSize:54, fontWeight:900, color:plan.highlight?"#F8FAFC":t.text,
-                      letterSpacing:"-2px", lineHeight:1 }}>{plan.price}€</span>
-                    <span style={{ color:plan.highlight?"#64748B":t.text3, fontSize:14 }}>/mois</span>
+                  <div style={{ display:"flex",alignItems:"baseline",gap:2,marginBottom:4 }}>
+                    <span style={{ fontFamily:"'Calistoga','DM Sans',system-ui",
+                      fontSize:56,fontWeight:400,letterSpacing:"-0.03em",lineHeight:1,
+                      color:plan.highlight?"#F5F5F7":t.text }}>{plan.price}</span>
+                    <span style={{ fontSize:20,color:plan.highlight?"#6E6E73":t.text2,marginLeft:2,fontWeight:400 }}>€</span>
+                    <span style={{ fontSize:14,color:plan.highlight?"#6E6E73":t.text3,marginLeft:2 }}>/mois</span>
                   </div>
-                  <p style={{ color:plan.highlight?"#64748B":t.text3, fontSize:13, margin:"0 0 24px", lineHeight:1.5 }}>{plan.desc}</p>
+                  <p style={{ color:plan.highlight?"#6E6E73":t.text3,fontSize:13,margin:"0 0 24px",lineHeight:1.5 }}>{plan.desc}</p>
 
-                  {/* Separator */}
-                  <div style={{ height:1, background:plan.highlight?"rgba(255,255,255,0.08)":t.border, marginBottom:20 }}/>
+                  <div style={{ height:1,background:plan.highlight?"rgba(255,255,255,0.07)":t.border,marginBottom:22 }}/>
 
-                  {/* Features */}
-                  <ul style={{ listStyle:"none", padding:0, margin:"0 0 28px", display:"flex", flexDirection:"column", gap:12, flex:1 }}>
+                  <ul style={{ listStyle:"none",padding:0,margin:"0 0 28px",
+                    display:"flex",flexDirection:"column",gap:13,flex:1 }}>
                     {plan.features.map(feat=>(
-                      <li key={feat} style={{ display:"flex", alignItems:"center", gap:10, fontSize:13,
-                        color:plan.highlight?"#CBD5E1":t.text2 }}>
-                        <span style={{ flexShrink:0 }}><Ic.Check s={14} c={plan.highlight?t.accent:"#10B981"}/></span>
+                      <li key={feat} style={{ display:"flex",alignItems:"center",gap:11,fontSize:14,
+                        color:plan.highlight?"#A1A1A6":t.text2 }}>
+                        <div style={{ width:20,height:20,borderRadius:"50%",flexShrink:0,
+                          background:plan.highlight?"rgba(37,99,235,0.15)":"rgba(16,185,129,0.1)",
+                          display:"flex",alignItems:"center",justifyContent:"center" }}>
+                          <Ic.Check s={12} c={plan.highlight?"#60A5FA":"#10B981"}/>
+                        </div>
                         {feat}
                       </li>
                     ))}
                   </ul>
 
-                  {/* CTA */}
-                  <motion.div whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}>
-                    <Link href={plan.href} style={{ display:"block", textAlign:"center", padding:"14px 20px",
-                      borderRadius:12, textDecoration:"none", fontWeight:700, fontSize:14,
+                  <motion.div whileHover={{scale:1.02}} whileTap={{scale:0.97}}>
+                    <Link href={plan.href} style={{ display:"block",textAlign:"center",
+                      padding:"15px 20px",borderRadius:100,textDecoration:"none",
+                      fontWeight:700,fontSize:14,letterSpacing:"-0.2px",
                       ...(plan.highlight?{
-                        background:`linear-gradient(135deg,${t.accent},#06B6D4)`,
-                        color:"#fff", boxShadow:`0 6px 20px rgba(${t.accentHex},0.4)`,
+                        background:"linear-gradient(135deg,#2563EB,#06B6D4)",
+                        color:"#fff",boxShadow:"0 8px 24px rgba(37,99,235,0.4)",
                       }:{
-                        background:"transparent", color:t.accent,
-                        border:`1.5px solid rgba(${t.accentHex},0.35)`,
+                        background:"transparent",color:t.accent,
+                        border:`1.5px solid rgba(${t.accentHex},0.3)`,
                       }) }}>
                       {plan.cta}
                     </Link>
@@ -807,68 +948,102 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA ──────────────────────────────────────────────── */}
-      <section style={{ padding:"120px clamp(20px,6vw,80px)", background:t.ctaBg, position:"relative", overflow:"hidden" }}>
-        <div style={{ position:"absolute", inset:0, pointerEvents:"none",
-          background:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(37,99,235,0.12),transparent)" }}/>
-        <div style={{ position:"absolute", inset:0, backgroundImage:"radial-gradient(rgba(255,255,255,0.04) 1px,transparent 1px)", backgroundSize:"24px 24px", pointerEvents:"none" }}/>
-        <div style={{ textAlign:"center", position:"relative", zIndex:1, maxWidth:680, margin:"0 auto" }}>
-          <motion.div {...iv()} style={{ fontSize:11, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.accent, marginBottom:18 }}>
-            Rejoindre la communauté
+      {/* ── CTA ── */}
+      <section style={{ background:t.ctaBg, padding:"clamp(100px,12vw,160px) clamp(20px,6vw,80px)",
+        position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute",inset:0,pointerEvents:"none",
+          background:"radial-gradient(ellipse 70% 60% at 50% 50%,rgba(37,99,235,0.11),transparent)" }}/>
+        <div style={{ position:"absolute",inset:0,
+          backgroundImage:"radial-gradient(rgba(255,255,255,0.035) 1px,transparent 1px)",
+          backgroundSize:"28px 28px",pointerEvents:"none" }}/>
+
+        <div style={{ textAlign:"center",position:"relative",zIndex:1,maxWidth:720,margin:"0 auto" }}>
+          <motion.div {...iv(0.04)} style={{ display:"inline-flex",alignItems:"center",gap:8,
+            background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.2)",
+            borderRadius:100,padding:"6px 18px",marginBottom:28 }}>
+            <div style={{ width:7,height:7,borderRadius:"50%",background:"#3B82F6",
+              boxShadow:"0 0 8px #3B82F6",animation:"pulse-dot 1.4s infinite" }}/>
+            <span style={{ color:"#93C5FD",fontWeight:700,fontSize:12,letterSpacing:"0.5px" }}>500+ ÉTABLISSEMENTS ACTIFS</span>
           </motion.div>
-          <motion.h2 {...iv(0.1)} style={{ fontSize:"clamp(32px,5vw,62px)", fontWeight:900,
-            margin:"0 0 20px", lineHeight:1.12, letterSpacing:"-2px", color:"#FAFAFA" }}>
-            Prêt à booster vos{" "}
-            <span style={{ background:"linear-gradient(135deg,#60A5FA,#06B6D4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
-              avis Google
-            </span>{" "}?
+
+          <motion.h2 {...iv(0.08)} style={{
+            fontFamily:"'Calistoga','DM Sans',system-ui",
+            fontSize:"clamp(36px,6.5vw,80px)", fontWeight:400,
+            margin:"0 0 22px", lineHeight:1.04, letterSpacing:"-0.03em",
+            color:"#F5F5F7",
+          }}>
+            Prêt à transformer vos clients en{" "}
+            <span style={{ background:"linear-gradient(135deg,#60A5FA,#06B6D4)",
+              WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+              ambassadeurs ?
+            </span>
           </motion.h2>
-          <motion.p {...iv(0.18)} style={{ color:"#71717A", fontSize:17, marginBottom:40, lineHeight:1.8 }}>
-            Rejoignez 500+ établissements qui récoltent des avis chaque jour.<br/>
-            <strong style={{ color:"#A1A1AA" }}>Aucune carte bancaire requise.</strong>
+
+          <motion.p {...iv(0.14)} style={{ color:"#6E6E73",fontSize:18,marginBottom:44,lineHeight:1.75 }}>
+            Rejoignez 500+ établissements. Aucune carte bancaire requise.<br/>
+            <strong style={{ color:"#A1A1A6" }}>Résultats visibles dès la première semaine.</strong>
           </motion.p>
-          <motion.div {...iv(0.25)}>
-            <motion.div whileHover={{ scale:1.05, y:-3 }} whileTap={{ scale:0.97 }} style={{ display:"inline-block" }}>
-              <Link href="/register" style={{ display:"inline-block", padding:"18px 44px", borderRadius:16,
-                background:`linear-gradient(135deg,${t.accent},#06B6D4)`, color:"#fff", textDecoration:"none",
-                fontWeight:800, fontSize:17, boxShadow:`0 16px 48px rgba(${t.accentHex},0.5)`, letterSpacing:"-0.3px" }}>
-                Commencer gratuitement — Aucune CB
+
+          <motion.div {...iv(0.2)} style={{ display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:36 }}>
+            <motion.div whileHover={{scale:1.05,y:-3}} whileTap={{scale:0.97}}>
+              <Link href="/register" style={{ display:"inline-flex",alignItems:"center",gap:8,
+                padding:"18px 44px",borderRadius:100,textDecoration:"none",
+                background:"linear-gradient(135deg,#2563EB,#06B6D4)",color:"#fff",
+                fontWeight:800,fontSize:17,letterSpacing:"-0.3px",
+                boxShadow:"0 16px 48px rgba(37,99,235,0.45)" }}>
+                Commencer gratuitement
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             </motion.div>
           </motion.div>
-          <motion.div {...iv(0.32)} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:24, marginTop:32, flexWrap:"wrap" }}>
-            {[[Ic.Shield,"RGPD"],[Ic.Check,"Sans engagement"],[Ic.Star,"4.9/5 Google"]].map(([Icon,label],i)=>(
-              <div key={i} style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <Icon s={13} c="#52525B"/><span style={{ fontSize:12, color:"#52525B", fontWeight:600 }}>{label}</span>
+
+          <motion.div {...iv(0.26)} style={{ display:"flex",alignItems:"center",justifyContent:"center",
+            gap:28,flexWrap:"wrap" }}>
+            {[[Ic.Shield,"RGPD"],[Ic.Check,"Sans engagement"],[Ic.Star,"4.9/5"]].map(([Icon,label],i)=>(
+              <div key={i} style={{ display:"flex",alignItems:"center",gap:7 }}>
+                <Icon s={14} c="#52525B"/>
+                <span style={{ fontSize:13,color:"#52525B",fontWeight:600 }}>{label}</span>
               </div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* ── FOOTER ───────────────────────────────────────────── */}
-      <footer style={{ background:t.footerBg, padding:"40px clamp(20px,6vw,80px)", borderTop:"1px solid rgba(255,255,255,0.04)" }}>
-        <div style={{ maxWidth:1060, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:20 }}>
-          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height:34, objectFit:"contain" }}/>
-          <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
+      {/* ── FOOTER ── */}
+      <footer style={{ background:t.footerBg,
+        borderTop:`1px solid rgba(255,255,255,0.05)` }}>
+        <div style={{ maxWidth:1100,margin:"0 auto",
+          padding:"clamp(32px,4vw,52px) clamp(20px,6vw,80px)",
+          display:"flex",justifyContent:"space-between",alignItems:"center",
+          flexWrap:"wrap",gap:20 }}>
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height:32,objectFit:"contain" }}/>
+          <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
             {[["Connexion","/login"],["Créer un compte","/register"],["Dashboard","/dashboard"]].map(([label,href])=>(
-              <Link key={label} href={href} style={{ color:t.footerText, textDecoration:"none", fontSize:13, fontWeight:500 }}>{label}</Link>
+              <Link key={label} href={href} style={{ color:t.footerText,textDecoration:"none",
+                fontSize:13,fontWeight:500,padding:"6px 12px",borderRadius:8,
+                transition:"color 0.2s" }}>{label}</Link>
             ))}
           </div>
-          <div style={{ fontSize:13, color:isDark?"#27272A":"#3F3F46" }}>© 2026 VisiumBoost</div>
+          <div style={{ fontSize:13,color:"#3F3F46" }}>© 2026 VisiumBoost</div>
         </div>
       </footer>
 
       <style>{`
         * { box-sizing:border-box; }
-        body { transition: background-color 0.35s ease, color 0.35s ease; }
-        .bento-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+        body { transition:background-color 0.4s ease, color 0.4s ease; }
+        .bento-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
         .bento-big  { grid-column:1/3; }
         .side-layer { display:none; }
         .side-obj   { display:block; }
+        .split-grid { grid-template-columns:1fr 1fr; }
+        .steps-grid { grid-template-columns:repeat(3,1fr); }
+        .pricing-grid { grid-template-columns:repeat(3,1fr); }
+        .nav-links  { display:flex; }
         @media(min-width:1480px) { .side-layer { display:block; } }
-        @media(max-width:920px) { .bento-grid { grid-template-columns:repeat(2,1fr); } .bento-big { grid-column:1/-1; } }
-        @media(max-width:540px) { .bento-grid { grid-template-columns:1fr; } .bento-big { grid-column:1; } }
+        @media(max-width:1024px) { .split-grid { grid-template-columns:1fr !important; } }
+        @media(max-width:880px)  { .steps-grid { grid-template-columns:1fr !important; } .pricing-grid { grid-template-columns:1fr !important; } .nav-links { display:none !important; } }
+        @media(max-width:720px)  { .bento-grid { grid-template-columns:1fr !important; } .bento-big { grid-column:1 !important; } }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.5)} }
       `}</style>
     </div>
   );

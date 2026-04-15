@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="fr">
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:wght@400;500&family=Calistoga&display=swap"
           rel="stylesheet"
         />
       </head>

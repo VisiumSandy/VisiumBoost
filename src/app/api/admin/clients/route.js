@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import Code from "@/lib/models/Code";
+import Entreprise from "@/lib/models/Entreprise";
 
 function requireAdmin() {
   const user = getCurrentUser();
@@ -49,10 +50,17 @@ export async function PATCH(req) {
 
   try {
     await connectDB();
-    const { userId, plan, active } = await req.json();
+    const { userId, plan, active, name, email, businessName, phone, googleLink, trialEndsAt, renewTrial } = await req.json();
     const update = {};
-    if (plan !== undefined) update.plan = plan;
-    if (active !== undefined) update.active = active;
+    if (plan         !== undefined) update.plan         = plan;
+    if (active       !== undefined) update.active       = active;
+    if (name         !== undefined) update.name         = name;
+    if (email        !== undefined) update.email        = email.toLowerCase().trim();
+    if (businessName !== undefined) update.businessName = businessName;
+    if (phone        !== undefined) update.phone        = phone;
+    if (googleLink   !== undefined) update.googleLink   = googleLink;
+    if (trialEndsAt  !== undefined) update.trialEndsAt  = trialEndsAt ? new Date(trialEndsAt) : null;
+    if (renewTrial) update.trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 
     const user = await User.findByIdAndUpdate(userId, update, { new: true }).select("-password");
     return NextResponse.json({ user });
@@ -71,6 +79,7 @@ export async function DELETE(req) {
     const { userId } = await req.json();
     await User.findByIdAndDelete(userId);
     await Code.deleteMany({ userId });
+    await Entreprise.deleteMany({ userId });
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
