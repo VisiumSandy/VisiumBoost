@@ -2,178 +2,223 @@
 
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 
-export default function SpinWheel({ rewards, primaryColor, secondaryColor, onResult }) {
-  const canvasRef = useRef(null);
+const DEFAULT_PALETTE = [
+  "#6C5CE7", "#00B894", "#FDCB6E", "#E17055",
+  "#0984E3", "#E84393", "#74B9FF", "#55EFC4",
+];
+
+/**
+ * SpinWheel — shared component for dashboard preview + public page.
+ *
+ * Props:
+ *   rewards[]          { name, probability|prob }
+ *   primaryColor       base color 1
+ *   secondaryColor     base color 2
+ *   onResult(rw, idx)  callback when spin ends
+ *   segmentColors[]    per-segment color overrides (index-aligned with rewards)
+ *   borderColor        outer ring + pointer color
+ *   centerColor        hub fill
+ *   centerLogoUrl      image overlaid at center
+ *   fontFamily         CSS font for segment labels
+ *   size               canvas px (default 360)
+ *   disabled           grayed overlay + block spin
+ */
+export default function SpinWheel({
+  rewards = [],
+  primaryColor  = "#6C5CE7",
+  secondaryColor = "#00B894",
+  onResult,
+  segmentColors,
+  borderColor,
+  centerColor,
+  centerLogoUrl,
+  fontFamily,
+  size = 360,
+  disabled = false,
+}) {
+  const canvasRef  = useRef(null);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState(null);
-  const angleRef = useRef(0);
+  const [done,     setDone]     = useState(false);
+  const angleRef   = useRef(0);
 
-  const segColors = useMemo(() => {
-    const base = [
-      primaryColor || "#6C5CE7",
-      secondaryColor || "#00B894",
-      "#FDCB6E", "#E17055", "#0984E3", "#E84393", "#74B9FF", "#55EFC4",
-    ];
-    return rewards.map((_, i) => base[i % base.length]);
-  }, [rewards, primaryColor, secondaryColor]);
+  // ── Resolved per-segment colors ──────────────────────────────────────
+  const resolvedColors = useMemo(() => {
+    const base = [primaryColor, secondaryColor, ...DEFAULT_PALETTE];
+    return rewards.map((_, i) =>
+      (segmentColors?.[i] && segmentColors[i] !== "") ? segmentColors[i] : base[i % base.length]
+    );
+  }, [rewards, segmentColors, primaryColor, secondaryColor]);
 
+  // ── Canvas draw ──────────────────────────────────────────────────────
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    const W = canvas.width;
-    const H = canvas.height;
-    const cx = W / 2;
-    const cy = H / 2;
-    const R = Math.min(cx, cy) - 16;
+    const W   = canvas.width;
+    const cx  = W / 2;
+    const R   = cx - 20;
 
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, W);
+    if (rewards.length === 0) return;
 
-    // Shadow
+    const n   = rewards.length;
+    const arc = (Math.PI * 2) / n;
+    const ff  = fontFamily ? `'${fontFamily}', sans-serif` : "'DM Sans', sans-serif";
+
+    // Shadow ring
     ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,0.15)";
-    ctx.shadowBlur = 24;
+    ctx.shadowColor   = "rgba(0,0,0,0.14)";
+    ctx.shadowBlur    = 28;
     ctx.shadowOffsetY = 8;
-    ctx.beginPath();
-    ctx.arc(cx, cy, R + 4, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cx, R + 7, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff"; ctx.fill();
     ctx.restore();
 
-    const n = rewards.length || 1;
-    const arc = (Math.PI * 2) / n;
+    // Outer border ring
+    const bc = (borderColor && borderColor !== "#ffffff") ? borderColor : null;
+    if (bc) {
+      ctx.beginPath(); ctx.arc(cx, cx, R + 7, 0, Math.PI * 2);
+      ctx.fillStyle = bc; ctx.fill();
+    }
 
+    // Segments
     rewards.forEach((rw, i) => {
       const a0 = angleRef.current + i * arc;
+      ctx.beginPath(); ctx.moveTo(cx, cx); ctx.arc(cx, cx, R, a0, a0 + arc); ctx.closePath();
+      ctx.fillStyle = resolvedColors[i]; ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.lineWidth = 2; ctx.stroke();
 
-      // Segment
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, R, a0, a0 + arc);
-      ctx.closePath();
-      ctx.fillStyle = segColors[i];
-      ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.4)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Text
+      // Label
       ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(a0 + arc / 2);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 13px 'DM Sans', sans-serif";
-      const label = rw.name.length > 14 ? rw.name.slice(0, 14) + "…" : rw.name;
+      ctx.translate(cx, cx); ctx.rotate(a0 + arc / 2);
+      ctx.textAlign = "right"; ctx.fillStyle = "#fff";
+      ctx.font = `bold 13px ${ff}`;
+      ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 4;
+      const label = (rw.name || "").length > 14 ? rw.name.slice(0, 14) + "…" : (rw.name || "");
       ctx.fillText(label, R - 16, 5);
       ctx.restore();
     });
 
-    // Center circle
-    ctx.beginPath();
-    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
+    // Center hub
+    ctx.beginPath(); ctx.arc(cx, cx, 28, 0, Math.PI * 2);
+    ctx.fillStyle = (centerColor && centerColor !== "#ffffff") ? centerColor : "#fff";
     ctx.fill();
-    ctx.strokeStyle = primaryColor || "#6C5CE7";
-    ctx.lineWidth = 3;
-    ctx.stroke();
+    ctx.strokeStyle = bc || primaryColor || "#6C5CE7"; ctx.lineWidth = 3; ctx.stroke();
 
-    // Pointer (right side)
+    // Pointer
+    const pointerColor = bc || "#E17055";
     ctx.save();
-    ctx.translate(cx + R - 6, cy);
-    ctx.beginPath();
-    ctx.moveTo(16, 0);
-    ctx.lineTo(-6, -12);
-    ctx.lineTo(-6, 12);
-    ctx.closePath();
-    ctx.fillStyle = "#E17055";
+    ctx.translate(cx + R + 5, cx);
+    ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-6, -13); ctx.lineTo(-6, 13); ctx.closePath();
+    ctx.fillStyle = pointerColor;
+    ctx.shadowColor = "rgba(0,0,0,0.25)"; ctx.shadowBlur = 6;
     ctx.fill();
     ctx.restore();
-  }, [rewards, segColors, primaryColor]);
 
+    // Disabled overlay
+    if (disabled && !spinning) {
+      ctx.save(); ctx.globalAlpha = 0.35;
+      ctx.fillStyle = "#000";
+      ctx.beginPath(); ctx.arc(cx, cx, R + 7, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  }, [rewards, resolvedColors, primaryColor, borderColor, centerColor, fontFamily, disabled, spinning]);
+
+  useEffect(() => { draw(); }, [draw]);
+
+  // Sync canvas size
   useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    c.width  = size;
+    c.height = size;
     draw();
-  }, [draw]);
+  }, [size, draw]);
 
+  // ── Spin logic ───────────────────────────────────────────────────────
   const spin = () => {
-    if (spinning || rewards.length === 0) return;
+    if (spinning || done || disabled || rewards.length === 0) return;
     setSpinning(true);
-    setResult(null);
 
-    // Weighted random selection
     const rand = Math.random() * 100;
-    let acc = 0;
-    let winIdx = 0;
+    let acc = 0, winIdx = 0;
     for (let i = 0; i < rewards.length; i++) {
-      acc += rewards[i].prob;
-      if (rand <= acc) {
-        winIdx = i;
-        break;
-      }
+      acc += (rewards[i].probability ?? rewards[i].prob ?? 0);
+      if (rand <= acc) { winIdx = i; break; }
     }
 
-    const n = rewards.length;
-    const arc = (Math.PI * 2) / n;
-    const targetAngle = -(winIdx * arc + arc / 2);
-    const fullSpins = Math.PI * 2 * (6 + Math.random() * 3);
-    const totalRot = fullSpins + (targetAngle - (angleRef.current % (Math.PI * 2)));
+    const arc    = (Math.PI * 2) / rewards.length;
+    const target = -(winIdx * arc + arc / 2);
+    const spins  = 6 + Math.random() * 4;
+    const total  = Math.PI * 2 * spins + (target - (angleRef.current % (Math.PI * 2)));
+    const dur    = 5000;
+    const start  = Date.now();
+    const startA = angleRef.current;
+    const ease   = t => 1 - Math.pow(1 - t, 4);
 
-    const duration = 4500;
-    const startTime = Date.now();
-    const startAngle = angleRef.current;
-
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const t = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - t, 4); // easeOutQuart
-
-      angleRef.current = startAngle + totalRot * ease;
+    const anim = () => {
+      const t = Math.min((Date.now() - start) / dur, 1);
+      angleRef.current = startA + total * ease(t);
       draw();
-
-      if (t < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setSpinning(false);
-        setResult(rewards[winIdx]);
-        onResult?.(rewards[winIdx]);
-      }
+      if (t < 1) requestAnimationFrame(anim);
+      else { setSpinning(false); setDone(true); onResult?.(rewards[winIdx], winIdx); }
     };
-
-    requestAnimationFrame(animate);
+    requestAnimationFrame(anim);
   };
 
-  return (
-    <div className="flex flex-col items-center gap-5">
-      <canvas
-        ref={canvasRef}
-        width={360}
-        height={360}
-        className="max-w-full"
-      />
+  const btnBg = disabled || spinning
+    ? "#b2bec3"
+    : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
 
-      {!result ? (
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+      <div style={{ position: "relative", display: "inline-block" }}>
+        <canvas
+          ref={canvasRef}
+          width={size}
+          height={size}
+          style={{
+            maxWidth: "100%", display: "block",
+            cursor: disabled || done ? "default" : (spinning ? "wait" : "pointer"),
+            transition: "opacity 0.3s",
+          }}
+          onClick={spin}
+        />
+        {/* Center logo overlay */}
+        {centerLogoUrl && (
+          <img
+            src={centerLogoUrl}
+            alt=""
+            style={{
+              position: "absolute",
+              top: "50%", left: "50%",
+              transform: "translate(-50%,-50%)",
+              width:  Math.round(size * 0.135),
+              height: Math.round(size * 0.135),
+              borderRadius: "50%",
+              objectFit: "contain",
+              pointerEvents: "none",
+            }}
+          />
+        )}
+      </div>
+
+      {!done && (
         <button
           onClick={spin}
-          disabled={spinning}
-          className="px-10 py-3.5 rounded-xl border-none font-bold text-base text-white transition-all duration-200"
+          disabled={spinning || disabled}
           style={{
-            background: spinning ? "#b2bec3" : (primaryColor || "#6C5CE7"),
-            cursor: spinning ? "wait" : "pointer",
-            boxShadow: spinning ? "none" : `0 4px 20px ${primaryColor || "#6C5CE7"}44`,
+            padding: "15px 38px", borderRadius: 14, border: "none",
+            cursor: spinning || disabled ? "not-allowed" : "pointer",
+            background: btnBg,
+            color: "#fff", fontWeight: 800, fontSize: 16,
+            fontFamily: fontFamily ? `'${fontFamily}', sans-serif` : "'DM Sans', sans-serif",
+            boxShadow: disabled || spinning ? "none" : `0 6px 24px ${primaryColor}55`,
+            transition: "all 0.2s",
           }}
         >
-          {spinning ? "La roue tourne…" : "🎰 Tourner la roue !"}
+          {spinning ? "La roue tourne…" : disabled ? "Laissez d'abord un avis →" : "🎡 Tourner la roue !"}
         </button>
-      ) : (
-        <div className="text-center p-5 rounded-2xl bg-gradient-to-br from-brand-500/[0.15] to-success/[0.15]">
-          <div className="text-[40px] mb-2">🎉</div>
-          <div className="text-[22px] font-extrabold" style={{ color: primaryColor || "#6C5CE7" }}>
-            Félicitations !
-          </div>
-          <div className="text-base text-gray-500 mt-1">
-            Vous avez gagné : <strong>{result.name}</strong>
-          </div>
-        </div>
       )}
     </div>
   );

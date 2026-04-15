@@ -23,6 +23,24 @@ const EntrepriseSchema = new mongoose.Schema(
     totalScans: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
+    // ── Wheel customization ──────────────────────────────────────────
+    wheel_segment_colors: { type: [String], default: [] },
+    wheel_border_color:   { type: String,  default: "#ffffff" },
+    wheel_center_color:   { type: String,  default: "#ffffff" },
+    wheel_center_logo:    { type: String,  default: "" },
+    wheel_font:           { type: String,  default: "DM Sans" },
+    wheel_size:           { type: Number,  default: 360 },
+    // ── Page customization ───────────────────────────────────────────
+    page_bg:          { type: String, default: "#ffffff" },
+    page_bg_type:     { type: String, default: "color" },   // "color" | "gradient"
+    page_bg_gradient: { type: String, default: "" },
+    page_banner:      { type: String, default: "" },
+    page_title:       { type: String, default: "" },
+    page_welcome:     { type: String, default: "" },
+    page_btn_color:   { type: String, default: "" },
+    page_btn_text:    { type: String, default: "" },
+    page_thanks:      { type: String, default: "" },
+    page_text_color:  { type: String, default: "#0F0F1A" },
   },
   { timestamps: true }
 );
