@@ -156,7 +156,8 @@ export default function PlayClient({ entreprise }) {
   };
 
   // ── Handlers ──────────────────────────────────────────────────────
-  const handleReviewClick = () => {
+  const handleReviewClick = (e) => {
+    e.preventDefault();
     setReviewClicked(true);
     if (entreprise.lien_avis) window.open(entreprise.lien_avis, "_blank", "noopener,noreferrer");
   };

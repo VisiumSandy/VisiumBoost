@@ -149,8 +149,13 @@ export default function SpinWheel({
 
     const arc    = (Math.PI * 2) / rewards.length;
     const target = -(winIdx * arc + arc / 2);
-    const spins  = 6 + Math.random() * 4;
-    const total  = Math.PI * 2 * spins + (target - (angleRef.current % (Math.PI * 2)));
+
+    // Integer spins only — fractional spins shift the landing segment
+    const fullSpins  = 6 + Math.floor(Math.random() * 4); // 6, 7, 8 or 9
+    const currentMod = angleRef.current % (Math.PI * 2);
+    // Always-positive delta in [0, 2π) to reach target from current position
+    const delta = (target - currentMod + Math.PI * 4) % (Math.PI * 2);
+    const total = fullSpins * Math.PI * 2 + delta;
     const dur    = 5000;
     const start  = Date.now();
     const startA = angleRef.current;
