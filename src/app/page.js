@@ -459,12 +459,12 @@ export default function LandingPage() {
 
       {/* ── BRAND SLIDER STRIP ── */}
       <div style={{ borderTop:`1px solid ${border}`, borderBottom:`1px solid ${border}`,
-        background:bg2, padding:"28px 0", overflow:"hidden", position:"relative" }}>
+        background:"#FFFFFF", padding:"28px 0", overflow:"hidden", position:"relative" }}>
         {/* fade edges */}
         <div style={{ position:"absolute", left:0, top:0, bottom:0, width:120, zIndex:2, pointerEvents:"none",
-          background:`linear-gradient(to right,${bg2},transparent)` }}/>
+          background:"linear-gradient(to right,#FFFFFF,transparent)" }}/>
         <div style={{ position:"absolute", right:0, top:0, bottom:0, width:120, zIndex:2, pointerEvents:"none",
-          background:`linear-gradient(to left,${bg2},transparent)` }}/>
+          background:"linear-gradient(to left,#FFFFFF,transparent)" }}/>
 
         <motion.div
           animate={{ x:["0%","-50%"] }}
