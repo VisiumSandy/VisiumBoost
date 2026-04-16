@@ -21,7 +21,9 @@
       "Bash(cmd:*)",
       "Bash(powershell:*)",
       "Bash(rtk git:*)",
-      "Bash(node -e \"require\\('stripe'\\)\")"
+      "Bash(node -e \"require\\('stripe'\\)\")",
+      "Bash(node -e \"const fm = require\\('framer-motion'\\); console.log\\(Object.keys\\(fm\\).filter\\(k=>k.includes\\('Motion'\\)||k.includes\\('Presence'\\)||k.includes\\('motion'\\)\\)\\)\")",
+      "Bash(node -e \"const fm = require\\('framer-motion'\\); console.log\\('useMotionValueEvent' in fm, 'AnimatePresence' in fm\\)\")"
     ]
   }
 }

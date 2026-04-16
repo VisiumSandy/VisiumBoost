@@ -475,21 +475,32 @@ const FEATURES_DATA = [
 function ScrollFeatures() {
   const containerRef = useRef(null);
   const [activeIdx, setActiveIdx] = useState(0);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
 
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.min(Math.floor(v * FEATURES_DATA.length), FEATURES_DATA.length - 1);
-    setActiveIdx(idx);
-  });
+  useEffect(() => {
+    const onScroll = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rect   = el.getBoundingClientRect();
+      const total  = el.offsetHeight - window.innerHeight;
+      if (total <= 0) return;
+      const scrolled  = Math.max(0, -rect.top);
+      const progress  = Math.min(1, scrolled / total);
+      const idx = Math.min(
+        Math.floor(progress * FEATURES_DATA.length),
+        FEATURES_DATA.length - 1
+      );
+      setActiveIdx(idx);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const f = FEATURES_DATA[activeIdx];
 
   return (
-    <div ref={containerRef} style={{ height:`${FEATURES_DATA.length * 90}vh`, position:"relative" }}>
-      <div style={{ position:"sticky", top:0, height:"100vh", overflow:"hidden",
+    <div ref={containerRef} style={{ height:`${FEATURES_DATA.length * 90}vh`, position:"relative", background:"#060A18" }}>
+      <div style={{ position:"sticky", top:0, height:"100vh",
         background:"#060A18", display:"flex", alignItems:"center", justifyContent:"center" }}>
 
         {/* Animated bg glow */}
@@ -741,7 +752,7 @@ export default function LandingPage() {
   const navBg = isDark ? "rgba(9,9,18,0.92)"  : "rgba(250,250,250,0.88)";
 
   return (
-    <div style={{ fontFamily:FONT_BODY, background:bg, color:text, minHeight:"100vh", overflowX:"hidden" }}>
+    <div style={{ fontFamily:FONT_BODY, background:bg, color:text, minHeight:"100vh", overflowX:"clip" }}>
 
       {/* ── NAV ── */}
       <motion.nav style={{
