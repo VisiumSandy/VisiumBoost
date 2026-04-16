@@ -6,6 +6,7 @@ export async function GET(req) {
   if (q.length < 2) return NextResponse.json({ results: [] });
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  console.log("[places/search] KEY:", apiKey ? `OK (${apiKey.slice(0, 6)}...)` : "MISSING");
   if (!apiKey) {
     return NextResponse.json({ error: "GOOGLE_PLACES_API_KEY non configurée dans les variables d'environnement." }, { status: 500 });
   }
