@@ -6,7 +6,6 @@ export async function GET(req) {
   if (q.length < 2) return NextResponse.json({ results: [] });
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-  console.log("[places/search] KEY:", apiKey ? `OK (${apiKey.slice(0, 6)}...)` : "MISSING");
   if (!apiKey) {
     return NextResponse.json({ error: "GOOGLE_PLACES_API_KEY non configurée dans les variables d'environnement." }, { status: 500 });
   }
@@ -19,7 +18,6 @@ export async function GET(req) {
     const res = await fetch(url, { next: { revalidate: 0 } });
     const data = await res.json();
 
-    console.log("[places/search] Google status:", data.status, "| error_message:", data.error_message || "none");
     if (data.status === "REQUEST_DENIED") {
       return NextResponse.json({ error: "Clé API Google invalide ou non autorisée.", detail: data.error_message || "" }, { status: 400 });
     }
