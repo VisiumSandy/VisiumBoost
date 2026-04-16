@@ -499,7 +499,7 @@ function ScrollFeatures() {
   const f = FEATURES_DATA[activeIdx];
 
   return (
-    <div ref={containerRef} style={{ height:`${FEATURES_DATA.length * 90}vh`, position:"relative", background:"#060A18" }}>
+    <div ref={containerRef} style={{ height:`${FEATURES_DATA.length * 35}vh`, position:"relative", background:"#060A18" }}>
       <div style={{ position:"sticky", top:0, height:"100vh",
         background:"#060A18", display:"flex", alignItems:"center", justifyContent:"center" }}>
 
@@ -1280,6 +1280,7 @@ export default function LandingPage() {
           .stats-grid   { grid-template-columns:repeat(2,1fr) !important; }
         }
         @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.6)} }
+        html { scroll-behavior: smooth; }
       `}</style>
     </div>
   );
