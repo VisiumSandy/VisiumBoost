@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform, useMotionValue, useSpring, animate } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, animate, AnimatePresence, useMotionValueEvent } from "framer-motion";
 
 const E = [0.22, 1, 0.36, 1];
 const FONT_TITLE  = "'Special Gothic Expanded One','DM Sans',system-ui,sans-serif";
@@ -209,6 +209,425 @@ function Counter({ to, suffix="", duration=1.8 }) {
     return () => obs.disconnect();
   }, [to, duration]);
   return <span ref={ref}>{val}{suffix}</span>;
+}
+
+// ─── Feature Illustrations ────────────────────────────────────────────────────
+const FeatIcons = {
+  Wheel: () => (
+    <svg viewBox="0 0 240 240" width="220" height="220">
+      <defs>
+        <radialGradient id="wg" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.25"/>
+          <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      {/* Glow bg */}
+      <circle cx="120" cy="120" r="110" fill="url(#wg)"/>
+      {/* Segments */}
+      {[["#3B82F6",0],["#818CF8",45],["#06B6D4",90],["#F59E0B",135],["#10B981",180],["#EF4444",225],["#8B5CF6",270],["#38BDF8",315]].map(([c,a],i)=>{
+        const r=90, a1=(a-22.5)*Math.PI/180, a2=(a+22.5)*Math.PI/180;
+        const x1=120+r*Math.cos(a1), y1=120+r*Math.sin(a1);
+        const x2=120+r*Math.cos(a2), y2=120+r*Math.sin(a2);
+        return <path key={i} d={`M120,120 L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z`} fill={c} opacity="0.9" filter="url(#glow)"/>;
+      })}
+      {/* Dividers */}
+      {[0,45,90,135,180,225,270,315].map((a,i)=>{
+        const rad=a*Math.PI/180;
+        return <line key={i} x1="120" y1="120" x2={120+90*Math.cos(rad)} y2={120+90*Math.sin(rad)} stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>;
+      })}
+      {/* Outer ring */}
+      <circle cx="120" cy="120" r="90" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="3"/>
+      <circle cx="120" cy="120" r="96" fill="none" stroke="rgba(59,130,246,0.3)" strokeWidth="2"/>
+      {/* Hub */}
+      <circle cx="120" cy="120" r="22" fill="#0F172A" stroke="#3B82F6" strokeWidth="2.5"/>
+      <circle cx="120" cy="120" r="10" fill="#3B82F6"/>
+      {/* Pointer */}
+      <polygon points="222,120 210,112 210,128" fill="#F59E0B" filter="url(#glow)"/>
+      {/* Labels */}
+      {[["Café",22.5],["−20%",67.5],["Dessert",112.5],["−10%",157.5]].map(([t,a],i)=>{
+        const rad=a*Math.PI/180;
+        return <text key={i} x={120+68*Math.cos(rad)} y={120+68*Math.sin(rad)+4} fill="white" fontSize="9" fontWeight="800" textAnchor="middle" opacity="0.9">{t}</text>;
+      })}
+    </svg>
+  ),
+
+  Shield: () => (
+    <svg viewBox="0 0 240 240" width="220" height="220">
+      <defs>
+        <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#2563EB"/><stop offset="100%" stopColor="#818CF8"/>
+        </linearGradient>
+        <filter id="sg2"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      {/* Outer glow shield */}
+      <path d="M120,28 L190,58 L190,128 C190,168 120,200 120,200 C120,200 50,168 50,128 L50,58 Z" fill="rgba(37,99,235,0.12)" stroke="rgba(37,99,235,0.3)" strokeWidth="1"/>
+      {/* Main shield */}
+      <path d="M120,42 L178,68 L178,126 C178,160 120,188 120,188 C120,188 62,160 62,126 L62,68 Z" fill="url(#sg)" opacity="0.9" filter="url(#sg2)"/>
+      {/* Inner shield highlight */}
+      <path d="M120,54 L166,76 L166,124 C166,152 120,176 120,176 C120,176 74,152 74,124 L74,76 Z" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5"/>
+      {/* Circuit lines */}
+      <line x1="88" y1="106" x2="105" y2="106" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+      <line x1="105" y1="106" x2="105" y2="118" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+      <line x1="88" y1="126" x2="152" y2="126" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+      <circle cx="88" cy="106" r="3" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="152" cy="126" r="3" fill="rgba(255,255,255,0.6)"/>
+      {/* Big checkmark */}
+      <polyline points="96,118 112,134 148,98" stroke="white" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Lock top badge */}
+      <circle cx="168" cy="74" r="20" fill="#0F172A" stroke="rgba(99,102,241,0.5)" strokeWidth="1.5"/>
+      <rect x="161" y="73" width="14" height="11" rx="2" fill="#818CF8"/>
+      <path d="M163,73 L163,68 C163,64.7 176.3,64.7 176.3,68 L176.3,73" fill="none" stroke="#818CF8" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  ),
+
+  Analytics: () => (
+    <svg viewBox="0 0 240 240" width="220" height="220">
+      <defs>
+        <linearGradient id="bg1" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.2"/>
+        </linearGradient>
+        <linearGradient id="bg2" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#818CF8" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="#818CF8" stopOpacity="0.2"/>
+        </linearGradient>
+        <linearGradient id="bg3" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.2"/>
+        </linearGradient>
+      </defs>
+      {/* Grid lines */}
+      {[170,145,120,95,70].map((y,i)=>(
+        <line key={i} x1="40" y1={y} x2="210" y2={y} stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
+      ))}
+      {/* Bars */}
+      <rect x="52"  y="155" width="24" height="15" rx="5" fill="url(#bg3)"/>
+      <rect x="88"  y="130" width="24" height="40" rx="5" fill="url(#bg1)"/>
+      <rect x="124" y="115" width="24" height="55" rx="5" fill="url(#bg2)"/>
+      <rect x="160" y="80"  width="24" height="90" rx="5" fill="url(#bg1)"/>
+      {/* Trend line */}
+      <polyline points="64,152 100,128 136,112 172,78" fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="0"/>
+      {/* Trend dots */}
+      {[[64,152],[100,128],[136,112],[172,78]].map(([x,y],i)=>(
+        <circle key={i} cx={x} cy={y} r="4" fill="#38BDF8" stroke="#0F172A" strokeWidth="2"/>
+      ))}
+      {/* +234% badge */}
+      <rect x="148" y="46" width="68" height="26" rx="8" fill="#10B981" opacity="0.95"/>
+      <text x="182" y="64" fill="white" fontSize="13" fontWeight="900" textAnchor="middle">+234%</text>
+      {/* Axis */}
+      <line x1="40" y1="170" x2="215" y2="170" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
+      <line x1="40" y1="60"  x2="40"  y2="175" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
+      {/* Floating number */}
+      <rect x="46" y="44" width="58" height="22" rx="6" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.4)" strokeWidth="1"/>
+      <text x="75" y="60" fill="#93C5FD" fontSize="12" fontWeight="700" textAnchor="middle">47 avis</text>
+    </svg>
+  ),
+
+  QR: () => (
+    <svg viewBox="0 0 240 240" width="220" height="220">
+      <defs>
+        <linearGradient id="qrg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#2563EB"/><stop offset="100%" stopColor="#06B6D4"/>
+        </linearGradient>
+      </defs>
+      {/* Card bg */}
+      <rect x="40" y="30" width="160" height="180" rx="20" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5"/>
+      {/* Top-left corner square */}
+      <rect x="62" y="52" width="42" height="42" rx="6" fill="none" stroke="url(#qrg)" strokeWidth="3"/>
+      <rect x="70" y="60" width="26" height="26" rx="3" fill="url(#qrg)"/>
+      {/* Top-right corner square */}
+      <rect x="136" y="52" width="42" height="42" rx="6" fill="none" stroke="url(#qrg)" strokeWidth="3"/>
+      <rect x="144" y="60" width="26" height="26" rx="3" fill="url(#qrg)"/>
+      {/* Bottom-left corner square */}
+      <rect x="62" y="126" width="42" height="42" rx="6" fill="none" stroke="url(#qrg)" strokeWidth="3"/>
+      <rect x="70" y="134" width="26" height="26" rx="3" fill="url(#qrg)"/>
+      {/* Inner QR dots */}
+      {[[144,126],[156,126],[168,126],[144,138],[168,138],[156,150],[144,162],[156,162],[168,162]].map(([x,y],i)=>(
+        <rect key={i} x={x} y={y} width="9" height="9" rx="2" fill="rgba(255,255,255,0.7)"/>
+      ))}
+      {/* Scan line */}
+      <line x1="55" y1="120" x2="185" y2="120" stroke="rgba(56,189,248,0.7)" strokeWidth="1.5" strokeDasharray="4 3"/>
+      {/* Scan glow */}
+      <rect x="55" y="116" width="130" height="8" rx="3" fill="rgba(56,189,248,0.08)"/>
+      {/* Domain label */}
+      <rect x="54" y="184" width="132" height="18" rx="5" fill="rgba(37,99,235,0.2)"/>
+      <text x="120" y="197" fill="#93C5FD" fontSize="10" fontWeight="700" textAnchor="middle">cafe.visium-boost.fr</text>
+    </svg>
+  ),
+
+  Network: () => (
+    <svg viewBox="0 0 240 240" width="220" height="220">
+      <defs>
+        <radialGradient id="ng" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#818CF8" stopOpacity="0.2"/>
+          <stop offset="100%" stopColor="transparent"/>
+        </radialGradient>
+      </defs>
+      <circle cx="120" cy="120" r="100" fill="url(#ng)"/>
+      {/* Connection lines */}
+      {[[120,80,70,150],[120,80,170,150],[70,150,170,150],[70,150,120,185],[170,150,120,185]].map(([x1,y1,x2,y2],i)=>(
+        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(99,102,241,0.4)" strokeWidth="1.5" strokeDasharray="5 3"/>
+      ))}
+      {/* Buildings */}
+      {[[105,54,30,40],[55,130,30,40],[155,130,30,40],[107,164,26,36]].map(([x,y,w,h],i)=>(
+        <g key={i}>
+          <rect x={x} y={y} width={w} height={h} rx="5" fill={["#2563EB","#818CF8","#06B6D4","#10B981"][i]} opacity="0.9"/>
+          <rect x={x+w*0.1} y={y+h*0.55} width={w*0.3} height={h*0.45} rx="2" fill="rgba(0,0,0,0.3)"/>
+          <rect x={x+w*0.6} y={y+h*0.55} width={w*0.3} height={h*0.45} rx="2" fill="rgba(0,0,0,0.3)"/>
+          <rect x={x+w*0.1} y={y+h*0.2} width={w*0.35} height={h*0.25} rx="2" fill="rgba(255,255,255,0.3)"/>
+          <rect x={x+w*0.55} y={y+h*0.2} width={w*0.35} height={h*0.25} rx="2" fill="rgba(255,255,255,0.3)"/>
+        </g>
+      ))}
+      {/* Center hub dot */}
+      <circle cx="120" cy="120" r="10" fill="#3B82F6" opacity="0.5"/>
+      <circle cx="120" cy="120" r="5"  fill="#93C5FD"/>
+      {/* Node dots on buildings */}
+      {[[120,52],[70,128],[170,128],[120,162]].map(([cx,cy],i)=>(
+        <circle key={i} cx={cx} cy={cy} r="5" fill="white" opacity="0.9"/>
+      ))}
+    </svg>
+  ),
+
+  Speed: () => (
+    <svg viewBox="0 0 240 240" width="220" height="220">
+      <defs>
+        <linearGradient id="spg" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#2563EB"/><stop offset="100%" stopColor="#06B6D4"/>
+        </linearGradient>
+        <filter id="glw"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      {/* Clock face */}
+      <circle cx="120" cy="120" r="88" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.25)" strokeWidth="2"/>
+      <circle cx="120" cy="120" r="78" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5"/>
+      {/* Clock ticks */}
+      {[0,30,60,90,120,150,180,210,240,270,300,330].map((a,i)=>{
+        const r=68, r2=i%3===0?58:62, rad=a*Math.PI/180;
+        return <line key={i} x1={120+r*Math.cos(rad)} y1={120+r*Math.sin(rad)} x2={120+r2*Math.cos(rad)} y2={120+r2*Math.sin(rad)} stroke="rgba(255,255,255,0.25)" strokeWidth={i%3===0?2:1}/>;
+      })}
+      {/* Progress arc 0→300° → 5min of 60 = fast! Draw 300/360 of circle */}
+      <path d="M120,52 A68,68 0 1,1 52.7,154" fill="none" stroke="url(#spg)" strokeWidth="5" strokeLinecap="round"/>
+      {/* Hour hand */}
+      <line x1="120" y1="120" x2="120" y2="68" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+      {/* Minute hand — at 5min = 30deg */}
+      <line x1="120" y1="120" x2="154" y2="104" stroke="#38BDF8" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="120" cy="120" r="6" fill="#3B82F6" stroke="white" strokeWidth="2"/>
+      {/* Lightning bolt */}
+      <polygon points="126,56 118,78 126,78 114,104 122,80 114,80" fill="#F59E0B" filter="url(#glw)" opacity="0.9"/>
+      {/* 5 min badge */}
+      <rect x="82" y="148" width="76" height="28" rx="10" fill="url(#spg)"/>
+      <text x="120" y="167" fill="white" fontSize="13" fontWeight="900" textAnchor="middle">5 minutes</text>
+    </svg>
+  ),
+};
+
+const FEATURES_DATA = [
+  {
+    id:0, label:"01", color:"#3B82F6", grad:"135deg,#1e3a8a,#1d4ed8",
+    Icon: FeatIcons.Wheel,
+    title: "Roue 100% personnalisable",
+    subtitle: "Votre marque, votre expérience",
+    desc: "Couleurs, récompenses, logo, probabilités par segment. Configurez tout en quelques secondes sans aucune compétence technique.",
+    tags:["Drag & drop","Live preview","Export PDF"],
+  },
+  {
+    id:1, label:"02", color:"#818CF8", grad:"135deg,#1e1b4b,#3730a3",
+    Icon: FeatIcons.Shield,
+    title: "Anti-fraude intégré",
+    subtitle: "Zéro triche, 100% sécurisé",
+    desc: "Chaque client reçoit un code unique à usage unique. Impossible de jouer sans avoir laissé un vrai avis Google vérifié.",
+    tags:["Codes uniques","Vérification IP","Expiration auto"],
+  },
+  {
+    id:2, label:"03", color:"#06B6D4", grad:"135deg,#0c4a6e,#0284c7",
+    Icon: FeatIcons.Analytics,
+    title: "Analytics temps réel",
+    subtitle: "Toutes vos métriques en un coup d'œil",
+    desc: "Suivez scans, conversions, avis générés et ROI depuis votre dashboard. Graphiques live, exportables en CSV.",
+    tags:["Dashboard live","Export CSV","Historique 12 mois"],
+  },
+  {
+    id:3, label:"04", color:"#38BDF8", grad:"135deg,#0c3b5e,#0369a1",
+    Icon: FeatIcons.QR,
+    title: "QR Code prêt à imprimer",
+    subtitle: "En ligne en 30 secondes",
+    desc: "Générez et téléchargez un QR code HD imprimable ou numérique. Lien personnalisé café.visium-boost.fr prêt à l'emploi.",
+    tags:["PNG / SVG / PDF","URL personnalisée","Sticker A4 inclus"],
+  },
+  {
+    id:4, label:"05", color:"#10B981", grad:"135deg,#064e3b,#047857",
+    Icon: FeatIcons.Network,
+    title: "Multi-établissements",
+    subtitle: "Un dashboard pour toute votre chaîne",
+    desc: "Gérez tous vos restaurants, salons ou points de vente depuis une seule interface. Statistiques consolidées ou par site.",
+    tags:["Jusqu'à illimité","Stats consolidées","Rôles équipe"],
+  },
+  {
+    id:5, label:"06", color:"#F59E0B", grad:"135deg,#451a03,#b45309",
+    Icon: FeatIcons.Speed,
+    title: "Setup en 5 minutes",
+    subtitle: "Guidé pas à pas, sans dev",
+    desc: "Créez votre roue, imprimez le QR et récoltez vos premiers avis le jour même. Aucune installation, aucun code.",
+    tags:["Onboarding guidé","Support 7j/7","Sans engagement"],
+  },
+];
+
+function ScrollFeatures() {
+  const containerRef = useRef(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const idx = Math.min(Math.floor(v * FEATURES_DATA.length), FEATURES_DATA.length - 1);
+    setActiveIdx(idx);
+  });
+
+  const f = FEATURES_DATA[activeIdx];
+
+  return (
+    <div ref={containerRef} style={{ height:`${FEATURES_DATA.length * 90}vh`, position:"relative" }}>
+      <div style={{ position:"sticky", top:0, height:"100vh", overflow:"hidden",
+        background:"#060A18", display:"flex", alignItems:"center", justifyContent:"center" }}>
+
+        {/* Animated bg glow */}
+        <AnimatePresence mode="wait">
+          <motion.div key={`bg-${activeIdx}`}
+            initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+            transition={{ duration:0.6 }}
+            style={{ position:"absolute", inset:0, pointerEvents:"none",
+              background:`radial-gradient(ellipse 60% 60% at 70% 50%, ${f.color}18 0%, transparent 70%)` }}
+          />
+        </AnimatePresence>
+
+        {/* Dot grid */}
+        <div style={{ position:"absolute", inset:0, pointerEvents:"none",
+          backgroundImage:"radial-gradient(rgba(255,255,255,0.04) 1px,transparent 1px)",
+          backgroundSize:"28px 28px" }}/>
+
+        <div style={{ maxWidth:1200, width:"100%", padding:"0 clamp(24px,5vw,80px)",
+          display:"grid", gridTemplateColumns:"1fr 1fr", gap:"clamp(40px,5vw,80px)",
+          alignItems:"center", zIndex:1 }} className="hero-grid">
+
+          {/* LEFT — text */}
+          <div>
+            {/* Progress dots */}
+            <div style={{ display:"flex", gap:8, marginBottom:36 }}>
+              {FEATURES_DATA.map((_,i) => (
+                <div key={i} style={{
+                  height:3, borderRadius:100,
+                  background: i===activeIdx ? f.color : "rgba(255,255,255,0.12)",
+                  transition:"all 0.4s cubic-bezier(0.4,0,0.2,1)",
+                  width: i===activeIdx ? 32 : 12,
+                }}/>
+              ))}
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div key={activeIdx}
+                initial={{ opacity:0, y:32 }}
+                animate={{ opacity:1, y:0 }}
+                exit={{ opacity:0, y:-24 }}
+                transition={{ duration:0.5, ease:[0.22,1,0.36,1] }}
+              >
+                {/* Label */}
+                <div style={{ display:"inline-flex", alignItems:"center", gap:8, marginBottom:20,
+                  background:`${f.color}18`, border:`1px solid ${f.color}30`,
+                  borderRadius:100, padding:"5px 14px 5px 8px" }}>
+                  <div style={{ width:20, height:20, borderRadius:"50%", background:f.color,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontSize:10, fontWeight:900, color:"#fff" }}>{f.label}</div>
+                  <span style={{ fontSize:12, fontWeight:700, color:f.color, letterSpacing:"0.5px" }}>
+                    {f.subtitle.toUpperCase()}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h2 style={{ fontFamily:FONT_TITLE, fontSize:"clamp(28px,4vw,52px)",
+                  fontWeight:400, lineHeight:1.08, letterSpacing:"-0.02em",
+                  color:"#F8FAFC", margin:"0 0 16px" }}>
+                  {f.title.split(" ").map((w,i) =>
+                    i >= f.title.split(" ").length - 1
+                      ? <span key={i} style={{ background:`linear-gradient(135deg,${f.color},#38BDF8)`,
+                          WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+                          fontFamily:FONT_ITALIC, fontStyle:"italic" }}>{w} </span>
+                      : <span key={i}>{w} </span>
+                  )}
+                </h2>
+
+                {/* Desc */}
+                <p style={{ fontSize:"clamp(14px,1.5vw,17px)", color:"#94A3B8",
+                  lineHeight:1.8, margin:"0 0 28px", maxWidth:460 }}>
+                  {f.desc}
+                </p>
+
+                {/* Tags */}
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  {f.tags.map((tag,i) => (
+                    <div key={i} style={{ padding:"6px 14px", borderRadius:100,
+                      background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)",
+                      fontSize:13, fontWeight:600, color:"#94A3B8",
+                      display:"flex", alignItems:"center", gap:6 }}>
+                      <div style={{ width:6, height:6, borderRadius:"50%", background:f.color }}/>
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* RIGHT — 3D illustration card */}
+          <div style={{ display:"flex", justifyContent:"center", alignItems:"center" }}>
+            <AnimatePresence mode="wait">
+              <motion.div key={`card-${activeIdx}`}
+                initial={{ opacity:0, scale:0.88, rotateY:-12 }}
+                animate={{ opacity:1, scale:1, rotateY:0 }}
+                exit={{ opacity:0, scale:0.92, rotateY:12 }}
+                transition={{ duration:0.55, ease:[0.22,1,0.36,1] }}
+                style={{ transformStyle:"preserve-3d", perspective:900 }}
+              >
+                <div style={{
+                  width:340, height:340, borderRadius:32,
+                  background:`linear-gradient(${f.grad})`,
+                  border:`1px solid ${f.color}30`,
+                  boxShadow:`0 0 0 1px ${f.color}15, 0 32px 80px rgba(0,0,0,0.6), 0 0 60px ${f.color}20`,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  position:"relative", overflow:"hidden",
+                }}>
+                  {/* Inner highlight */}
+                  <div style={{ position:"absolute", top:0, left:0, right:0, height:"50%", borderRadius:"32px 32px 0 0",
+                    background:"linear-gradient(to bottom,rgba(255,255,255,0.06),transparent)",
+                    pointerEvents:"none" }}/>
+                  {/* Corner glow */}
+                  <div style={{ position:"absolute", top:-40, right:-40, width:160, height:160,
+                    borderRadius:"50%", background:`radial-gradient(circle,${f.color}30,transparent 70%)`,
+                    filter:"blur(20px)", pointerEvents:"none" }}/>
+                  <f.Icon/>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Scroll hint (shown only on first feature) */}
+        {activeIdx === 0 && (
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:1}}
+            style={{ position:"absolute", bottom:32, left:"50%", transform:"translateX(-50%)",
+              display:"flex", flexDirection:"column", alignItems:"center", gap:8 }}>
+            <span style={{ fontSize:12, color:"rgba(255,255,255,0.3)", fontWeight:600, letterSpacing:1 }}>
+              DÉFILER POUR EXPLORER
+            </span>
+            <motion.div animate={{y:[0,6,0]}} transition={{duration:1.4,repeat:Infinity,ease:"easeInOut"}}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            </motion.div>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ─── TiltCard ─────────────────────────────────────────────────────────────────
@@ -564,45 +983,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FEATURES BENTO ── */}
-      <section style={{ padding:"clamp(80px,10vw,130px) clamp(20px,6vw,80px)", background:bg }}>
-        <div style={{ maxWidth:1080, margin:"0 auto" }}>
-          <motion.div {...iv()} style={{ textAlign:"center", marginBottom:"clamp(40px,5vw,64px)" }}>
-            <div style={{ fontSize:11, color:"#8B5CF6", fontWeight:800, letterSpacing:"2.5px",
-              textTransform:"uppercase", marginBottom:14 }}>FONCTIONNALITÉS</div>
-            <h2 style={{ fontFamily:FONT_TITLE, fontSize:"clamp(28px,4.5vw,56px)", fontWeight:400,
-              margin:0, letterSpacing:"-0.02em", lineHeight:1.08, color:text }}>
-              Tout en un, <G>rien à configurer</G>
-            </h2>
-          </motion.div>
-
-          <div className="bento-grid">
-            {FEATURES.map((f,i) => (
-              <TiltCard key={f.title} className={i===0?"bento-big":""}>
-                <motion.div {...iv(i*0.07)}
-                  style={{ background: i===0 ? (isDark?"#111827":"#0F172A") : card,
-                    border:`1px solid ${i===0?"rgba(255,255,255,0.08)":border}`,
-                    borderRadius:20, padding:f.big?"44px 48px":"32px",
-                    height:"100%", position:"relative", overflow:"hidden",
-                    boxShadow: isDark?"0 4px 24px rgba(0,0,0,0.3)":"0 2px 16px rgba(0,0,0,0.05)",
-                    cursor:"default" }}>
-                  <div style={{ position:"absolute", top:-60, right:-60, width:180, height:180,
-                    borderRadius:"50%", background:`radial-gradient(circle,${f.ac}${i===0?"22":"12"},transparent 70%)`,
-                    pointerEvents:"none" }}/>
-                  <div style={{ width:f.big?52:44, height:f.big?52:44, borderRadius:f.big?16:13,
-                    background:`${f.ac}18`, border:`1px solid ${f.ac}28`,
-                    display:"flex", alignItems:"center", justifyContent:"center", marginBottom:f.big?22:16 }}>
-                    <f.icon s={f.big?26:20} c={f.ac}/>
-                  </div>
-                  <h3 style={{ fontSize:f.big?21:16, fontWeight:800, margin:"0 0 10px",
-                    letterSpacing:"-0.3px", color:i===0?"#F5F5F7":text }}>{f.title}</h3>
-                  <p style={{ fontSize:f.big?15:13, color:i===0?"#6E6E73":text2, lineHeight:1.75, margin:0 }}>{f.desc}</p>
-                </motion.div>
-              </TiltCard>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── FEATURES STICKY SCROLL ── */}
+      <ScrollFeatures/>
 
       {/* ── TESTIMONIALS ── */}
       <section id="testimonials" style={{ padding:"clamp(80px,10vw,120px) 0", background:bg2, overflow:"hidden" }}>
