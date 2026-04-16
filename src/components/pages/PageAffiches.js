@@ -155,7 +155,10 @@ function LogoBadge({ logo, nom, size, color, bg, border }) {
 // ══════════════════════════════════════════════════════════════════
 function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const pc = primaryColor || "#2563EB";
-  const qSize = Math.round(W * 0.5);
+  const sc = Math.min(1, W / 595, H / 842);
+  const qSize = showWheel
+    ? Math.round(Math.min(W * 0.38, (W - 80 * sc) / 1.85))
+    : Math.round(Math.min(W * 0.45, H * 0.34));
   const headLines = (headline || "LAISSEZ UN AVIS GOOGLE").split("\n");
 
   return (
@@ -169,11 +172,11 @@ function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       <div style={{ width: "100%", height: 8, background: pc, flexShrink: 0 }} />
 
       {/* Top section — establishment + headline */}
-      <div style={{ padding: "28px 44px 0", flexShrink: 0 }}>
+      <div style={{ padding: `${Math.round(28*sc)}px 44px 0`, flexShrink: 0 }}>
         {/* Logo + name row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
-          <LogoBadge logo={logo} nom={nom} size={44} color={pc} bg={`${pc}20`} border={`2px solid ${pc}60`} />
-          <div style={{ fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.7)", letterSpacing: 1, textTransform: "uppercase" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: Math.round(28*sc) }}>
+          <LogoBadge logo={logo} nom={nom} size={Math.round(44*sc)} color={pc} bg={`${pc}20`} border={`2px solid ${pc}60`} />
+          <div style={{ fontSize: Math.round(14*sc), fontWeight: 700, color: "rgba(255,255,255,0.7)", letterSpacing: 1, textTransform: "uppercase" }}>
             {nom || "Mon Établissement"}
           </div>
         </div>
@@ -181,7 +184,7 @@ function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
         {/* BIG HEADLINE */}
         {headLines.map((line, i) => (
           <div key={i} style={{
-            fontSize: line.length > 16 ? 52 : 62,
+            fontSize: Math.round((line.length > 16 ? 52 : 62) * sc),
             fontWeight: 900,
             color: i === headLines.length - 1 ? pc : "#FFFFFF",
             lineHeight: 1.0,
@@ -193,7 +196,7 @@ function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
         ))}
 
         {/* Sub-headline */}
-        <div style={{ fontSize: 22, fontWeight: 600, color: "rgba(255,255,255,0.55)", marginTop: 14, lineHeight: 1.3 }}>
+        <div style={{ fontSize: Math.round(22*sc), fontWeight: 600, color: "rgba(255,255,255,0.55)", marginTop: Math.round(14*sc), lineHeight: 1.3 }}>
           {subheadline || "et tentez de gagner un cadeau !"}
         </div>
 
@@ -207,7 +210,7 @@ function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       {/* QR section — centered */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px", gap: showWheel ? 24 : 0 }}>
         {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={pc} />}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
           <div style={{
             background: "#fff", padding: 18, borderRadius: 16,
             boxShadow: `0 0 0 4px ${pc}30, 0 8px 40px rgba(0,0,0,0.5)`,
@@ -242,7 +245,10 @@ function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
 // ══════════════════════════════════════════════════════════════════
 function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const gold = "#C9A84C";
-  const qSize = Math.round(W * 0.46);
+  const sc = Math.min(1, W / 595, H / 842);
+  const qSize = showWheel
+    ? Math.round(Math.min(W * 0.38, (W - 80 * sc) / 1.85))
+    : Math.round(Math.min(W * 0.45, H * 0.34));
   const headLines = (headline || "OFFREZ-VOUS\nUN CADEAU").split("\n");
 
   return (
@@ -271,12 +277,12 @@ function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       ))}
 
       {/* Diamond top ornament */}
-      <div style={{ marginTop: 44, width: 22, height: 22, border: `1px solid ${gold}`, transform: "rotate(45deg)", flexShrink: 0 }} />
+      <div style={{ marginTop: Math.round(44*sc), width: 22, height: 22, border: `1px solid ${gold}`, transform: "rotate(45deg)", flexShrink: 0 }} />
 
       {/* Logo + name */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 20, marginBottom: 20, padding: "0 52px", flexShrink: 0 }}>
-        <LogoBadge logo={logo} nom={nom} size={56} color={gold} bg="#111" border={`1.5px solid ${gold}80`} />
-        <div style={{ marginTop: 12, fontSize: 12, color: gold, letterSpacing: 5, textTransform: "uppercase", textAlign: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: Math.round(20*sc), marginBottom: Math.round(20*sc), padding: "0 52px", flexShrink: 0 }}>
+        <LogoBadge logo={logo} nom={nom} size={Math.round(56*sc)} color={gold} bg="#111" border={`1.5px solid ${gold}80`} />
+        <div style={{ marginTop: 12, fontSize: Math.round(12*sc), color: gold, letterSpacing: 5, textTransform: "uppercase", textAlign: "center" }}>
           {nom || "MON ÉTABLISSEMENT"}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
@@ -290,7 +296,7 @@ function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       <div style={{ padding: "0 48px", textAlign: "center", flexShrink: 0 }}>
         {headLines.map((line, i) => (
           <div key={i} style={{
-            fontSize: line.length > 14 ? 48 : 56,
+            fontSize: Math.round((line.length > 14 ? 48 : 56) * sc),
             fontWeight: 700,
             color: gold,
             lineHeight: 1.08,
@@ -301,7 +307,7 @@ function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
             {line || "\u00A0"}
           </div>
         ))}
-        <div style={{ fontSize: 16, color: `${gold}99`, fontStyle: "italic", marginTop: 12, letterSpacing: 1.5 }}>
+        <div style={{ fontSize: Math.round(16*sc), color: `${gold}99`, fontStyle: "italic", marginTop: 12, letterSpacing: 1.5 }}>
           {subheadline || "laissez un avis Google pour participer"}
         </div>
       </div>
@@ -309,7 +315,7 @@ function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       {/* QR */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: showWheel ? 24 : 0 }}>
         {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={gold} />}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
           <div style={{
             padding: 16, background: "#111",
             border: `1.5px solid ${gold}50`,
@@ -340,7 +346,10 @@ function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
 // ══════════════════════════════════════════════════════════════════
 function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const pc = primaryColor || "#2563EB";
-  const qSize = Math.round(W * 0.48);
+  const sc = Math.min(1, W / 595, H / 842);
+  const qSize = showWheel
+    ? Math.round(Math.min(W * 0.38, (W - 80 * sc) / 1.85))
+    : Math.round(Math.min(W * 0.45, H * 0.34));
   const headLines = (headline || "GAGNEZ\nUN CADEAU !").split("\n");
 
   return (
@@ -356,21 +365,21 @@ function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, su
       <div style={{ position: "absolute", bottom: -60, left: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(0,0,0,0.15)", pointerEvents: "none" }} />
 
       {/* Top section */}
-      <div style={{ padding: "36px 44px 0", flexShrink: 0, position: "relative", zIndex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 30 }}>
-          <LogoBadge logo={logo} nom={nom} size={46} color="#fff" bg="rgba(255,255,255,0.15)" border="2px solid rgba(255,255,255,0.4)" />
+      <div style={{ padding: `${Math.round(36*sc)}px 44px 0`, flexShrink: 0, position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: Math.round(30*sc) }}>
+          <LogoBadge logo={logo} nom={nom} size={Math.round(46*sc)} color="#fff" bg="rgba(255,255,255,0.15)" border="2px solid rgba(255,255,255,0.4)" />
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.9)", letterSpacing: 0.5 }}>
+            <div style={{ fontSize: Math.round(14*sc), fontWeight: 700, color: "rgba(255,255,255,0.9)", letterSpacing: 0.5 }}>
               {nom || "Mon Établissement"}
             </div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>Expérience client</div>
+            <div style={{ fontSize: Math.round(11*sc), color: "rgba(255,255,255,0.55)", marginTop: 1 }}>Expérience client</div>
           </div>
         </div>
 
         {/* BIG HEADLINE */}
         {headLines.map((line, i) => (
           <div key={i} style={{
-            fontSize: line.length > 12 ? 60 : 72,
+            fontSize: Math.round((line.length > 12 ? 60 : 72) * sc),
             fontWeight: 900,
             color: "#FFFFFF",
             lineHeight: 0.95,
@@ -382,7 +391,7 @@ function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, su
         ))}
 
         <div style={{
-          marginTop: 18, fontSize: 20, fontWeight: 600,
+          marginTop: Math.round(18*sc), fontSize: Math.round(20*sc), fontWeight: 600,
           color: "rgba(255,255,255,0.80)", lineHeight: 1.4,
         }}>
           {subheadline || "Laissez un avis Google et tentez votre chance"}
@@ -402,7 +411,7 @@ function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, su
       {/* QR */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1, gap: showWheel ? 24 : 0 }}>
         {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={pc} />}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
           <div style={{
             background: "#fff", padding: 16, borderRadius: 20,
             boxShadow: "0 12px 60px rgba(0,0,0,0.4), 0 0 0 6px rgba(255,255,255,0.2)",
@@ -430,7 +439,10 @@ function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, su
 // ══════════════════════════════════════════════════════════════════
 function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const accent = primaryColor || "#B8966E";
-  const qSize = Math.round(W * 0.48);
+  const sc = Math.min(1, W / 595, H / 842);
+  const qSize = showWheel
+    ? Math.round(Math.min(W * 0.38, (W - 80 * sc) / 1.85))
+    : Math.round(Math.min(W * 0.45, H * 0.34));
   const headLines = (headline || "LAISSEZ UN\nAVIS GOOGLE").split("\n");
 
   return (
@@ -456,9 +468,9 @@ function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, s
       ))}
 
       {/* Logo + name */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "42px 48px 0", flexShrink: 0 }}>
-        <LogoBadge logo={logo} nom={nom} size={60} color={accent} bg={`${accent}10`} border={`2px solid ${accent}50`} />
-        <div style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: "#374151", letterSpacing: 3, textTransform: "uppercase", textAlign: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: `${Math.round(42*sc)}px 48px 0`, flexShrink: 0 }}>
+        <LogoBadge logo={logo} nom={nom} size={Math.round(60*sc)} color={accent} bg={`${accent}10`} border={`2px solid ${accent}50`} />
+        <div style={{ marginTop: 10, fontSize: Math.round(13*sc), fontWeight: 700, color: "#374151", letterSpacing: 3, textTransform: "uppercase", textAlign: "center" }}>
           {nom || "Mon Établissement"}
         </div>
         {/* Ornament */}
@@ -470,10 +482,10 @@ function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, s
       </div>
 
       {/* BIG HEADLINE */}
-      <div style={{ padding: "24px 52px 0", textAlign: "center", flexShrink: 0 }}>
+      <div style={{ padding: `${Math.round(24*sc)}px 52px 0`, textAlign: "center", flexShrink: 0 }}>
         {headLines.map((line, i) => (
           <div key={i} style={{
-            fontSize: line.length > 14 ? 46 : 54,
+            fontSize: Math.round((line.length > 14 ? 46 : 54) * sc),
             fontWeight: 700,
             color: "#1E293B",
             lineHeight: 1.1,
@@ -482,7 +494,7 @@ function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, s
             {line || "\u00A0"}
           </div>
         ))}
-        <div style={{ fontSize: 18, fontStyle: "italic", color: accent, marginTop: 12, lineHeight: 1.4 }}>
+        <div style={{ fontSize: Math.round(18*sc), fontStyle: "italic", color: accent, marginTop: 12, lineHeight: 1.4 }}>
           {subheadline || "et tentez de gagner un cadeau"}
         </div>
       </div>
@@ -490,7 +502,7 @@ function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, s
       {/* QR */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: showWheel ? 24 : 0 }}>
         {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={accent} />}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
           <div style={{
             padding: 16, background: "#fff",
             boxShadow: `0 4px 24px ${accent}20, 0 1px 8px rgba(0,0,0,0.08)`,
@@ -522,7 +534,10 @@ function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, s
 // ══════════════════════════════════════════════════════════════════
 function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const pc = primaryColor || "#00F5A0";
-  const qSize = Math.round(W * 0.48);
+  const sc = Math.min(1, W / 595, H / 842);
+  const qSize = showWheel
+    ? Math.round(Math.min(W * 0.38, (W - 80 * sc) / 1.85))
+    : Math.round(Math.min(W * 0.45, H * 0.34));
   const headLines = (headline || "TOURNEZ\nLA ROUE !").split("\n");
 
   return (
@@ -544,10 +559,10 @@ function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       <div style={{ position: "absolute", top: "30%", left: "50%", transform: "translate(-50%,-50%)", width: 300, height: 300, borderRadius: "50%", background: `${pc}08`, filter: "blur(60px)", pointerEvents: "none" }} />
 
       {/* Top */}
-      <div style={{ padding: "32px 44px 0", flexShrink: 0, position: "relative", zIndex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 26 }}>
-          <LogoBadge logo={logo} nom={nom} size={42} color={pc} bg={`${pc}15`} border={`2px solid ${pc}50`} />
-          <div style={{ fontSize: 13, fontWeight: 700, color: `${pc}CC`, letterSpacing: 2, textTransform: "uppercase" }}>
+      <div style={{ padding: `${Math.round(32*sc)}px 44px 0`, flexShrink: 0, position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: Math.round(26*sc) }}>
+          <LogoBadge logo={logo} nom={nom} size={Math.round(42*sc)} color={pc} bg={`${pc}15`} border={`2px solid ${pc}50`} />
+          <div style={{ fontSize: Math.round(13*sc), fontWeight: 700, color: `${pc}CC`, letterSpacing: 2, textTransform: "uppercase" }}>
             {nom || "Mon Établissement"}
           </div>
         </div>
@@ -555,7 +570,7 @@ function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
         {/* BIG HEADLINE */}
         {headLines.map((line, i) => (
           <div key={i} style={{
-            fontSize: line.length > 10 ? 64 : 76,
+            fontSize: Math.round((line.length > 10 ? 64 : 76) * sc),
             fontWeight: 900,
             color: pc,
             lineHeight: 0.95,
@@ -566,7 +581,7 @@ function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
           </div>
         ))}
 
-        <div style={{ fontSize: 18, fontWeight: 600, color: "rgba(255,255,255,0.55)", marginTop: 16, lineHeight: 1.4 }}>
+        <div style={{ fontSize: Math.round(18*sc), fontWeight: 600, color: "rgba(255,255,255,0.55)", marginTop: Math.round(16*sc), lineHeight: 1.4 }}>
           {subheadline || "Laissez un avis Google et tentez votre chance"}
         </div>
 
@@ -577,7 +592,7 @@ function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       {/* QR */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1, gap: showWheel ? 24 : 0 }}>
         {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={pc} />}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
           <div style={{
             background: "#fff", padding: 14, borderRadius: 12,
             boxShadow: `0 0 0 3px ${pc}40, 0 0 40px ${pc}25`,
@@ -610,7 +625,10 @@ function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
 function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const chalk = "#EAE4D9";
   const bg = "#1B2B38";
-  const qSize = Math.round(W * 0.46);
+  const sc = Math.min(1, W / 595, H / 842);
+  const qSize = showWheel
+    ? Math.round(Math.min(W * 0.38, (W - 80 * sc) / 1.85))
+    : Math.round(Math.min(W * 0.45, H * 0.34));
   const headLines = (headline || "LAISSEZ\nUN AVIS !").split("\n");
 
   return (
@@ -629,9 +647,9 @@ function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, sub
       ))}
 
       {/* Logo + name */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "42px 48px 0", flexShrink: 0 }}>
-        <LogoBadge logo={logo} nom={nom} size={58} color={chalk} bg={`${chalk}08`} border={`2px dashed ${chalk}60`} />
-        <div style={{ marginTop: 12, fontSize: 13, color: chalk, letterSpacing: 4, textTransform: "uppercase", opacity: 0.85, textAlign: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: `${Math.round(42*sc)}px 48px 0`, flexShrink: 0 }}>
+        <LogoBadge logo={logo} nom={nom} size={Math.round(58*sc)} color={chalk} bg={`${chalk}08`} border={`2px dashed ${chalk}60`} />
+        <div style={{ marginTop: 12, fontSize: Math.round(13*sc), color: chalk, letterSpacing: 4, textTransform: "uppercase", opacity: 0.85, textAlign: "center" }}>
           {nom || "Mon Établissement"}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12 }}>
@@ -642,10 +660,10 @@ function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, sub
       </div>
 
       {/* BIG HEADLINE */}
-      <div style={{ padding: "24px 52px 0", textAlign: "center", flexShrink: 0 }}>
+      <div style={{ padding: `${Math.round(24*sc)}px 52px 0`, textAlign: "center", flexShrink: 0 }}>
         {headLines.map((line, i) => (
           <div key={i} style={{
-            fontSize: line.length > 10 ? 58 : 70,
+            fontSize: Math.round((line.length > 10 ? 58 : 70) * sc),
             fontWeight: 700,
             color: chalk,
             lineHeight: 1.0,
@@ -656,7 +674,7 @@ function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, sub
             {line || "\u00A0"}
           </div>
         ))}
-        <div style={{ fontSize: 17, color: chalk, opacity: 0.65, fontStyle: "italic", marginTop: 12, lineHeight: 1.4 }}>
+        <div style={{ fontSize: Math.round(17*sc), color: chalk, opacity: 0.65, fontStyle: "italic", marginTop: 12, lineHeight: 1.4 }}>
           {subheadline || "et tentez de gagner un cadeau"}
         </div>
       </div>
@@ -664,7 +682,7 @@ function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, sub
       {/* QR */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: showWheel ? 24 : 0 }}>
         {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={chalk} />}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
           <div style={{
             padding: 14, border: `2px dashed ${chalk}60`,
             background: `${chalk}05`,
