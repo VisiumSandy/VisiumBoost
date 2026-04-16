@@ -35,6 +35,101 @@ function QrPlaceholder({ size, color = "#CBD5E1" }) {
   );
 }
 
+// ── Decorative Fortune Wheel ─────────────────────────────────────
+function WheelDecor({ size, primaryColor }) {
+  const pc = primaryColor || "#2563EB";
+  const N = 8;
+  const deg = 360 / N;
+
+  // Alternating: full color / semi-transparent white
+  const seg = Array.from({ length: N }, (_, i) =>
+    `${i % 2 === 0 ? pc : "rgba(255,255,255,0.85)"} ${i * deg}deg ${(i + 1) * deg}deg`
+  ).join(", ");
+
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      {/* Outer shadow ring */}
+      <div style={{
+        position: "absolute", inset: -3, borderRadius: "50%",
+        boxShadow: `0 0 0 3px ${pc}40, 0 6px 28px rgba(0,0,0,0.28)`,
+        pointerEvents: "none",
+      }} />
+
+      {/* Wheel disc */}
+      <div style={{
+        width: size, height: size, borderRadius: "50%",
+        background: `conic-gradient(${seg})`,
+        position: "relative", overflow: "hidden",
+      }}>
+        {/* Segment dividers */}
+        {Array.from({ length: N }).map((_, i) => (
+          <div key={i} style={{
+            position: "absolute",
+            top: "50%", left: "50%",
+            width: "50%", height: 2,
+            background: "rgba(255,255,255,0.7)",
+            transformOrigin: "0 50%",
+            transform: `rotate(${i * deg}deg)`,
+            marginTop: -1,
+          }} />
+        ))}
+
+        {/* Stars in colored segments */}
+        {Array.from({ length: N / 2 }).map((_, i) => {
+          const angleDeg = i * deg * 2 + deg / 2;
+          const angleRad = (angleDeg - 90) * (Math.PI / 180);
+          const r = size * 0.33;
+          const x = size / 2 + r * Math.cos(angleRad);
+          const y = size / 2 + r * Math.sin(angleRad);
+          return (
+            <div key={i} style={{
+              position: "absolute",
+              left: x, top: y,
+              transform: "translate(-50%,-50%)",
+              fontSize: size * 0.09,
+              color: "rgba(255,255,255,0.9)",
+              lineHeight: 1,
+              pointerEvents: "none",
+            }}>★</div>
+          );
+        })}
+      </div>
+
+      {/* Outer border ring */}
+      <div style={{
+        position: "absolute", inset: 0, borderRadius: "50%",
+        border: `${size * 0.03}px solid rgba(255,255,255,0.5)`,
+        pointerEvents: "none",
+      }} />
+
+      {/* Center hub */}
+      <div style={{
+        position: "absolute", top: "50%", left: "50%",
+        width: size * 0.22, height: size * 0.22,
+        borderRadius: "50%", background: "#fff",
+        transform: "translate(-50%,-50%)",
+        boxShadow: `0 2px 10px rgba(0,0,0,0.25), 0 0 0 2px ${pc}50`,
+        zIndex: 2,
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <div style={{ width: size * 0.09, height: size * 0.09, borderRadius: "50%", background: pc }} />
+      </div>
+
+      {/* Pointer triangle (top) */}
+      <div style={{
+        position: "absolute", top: -size * 0.06, left: "50%",
+        transform: "translateX(-50%)",
+        width: 0, height: 0,
+        borderLeft: `${size * 0.06}px solid transparent`,
+        borderRight: `${size * 0.06}px solid transparent`,
+        borderTop: `${size * 0.1}px solid #fff`,
+        filter: `drop-shadow(0 2px 3px rgba(0,0,0,0.3))`,
+        zIndex: 3,
+      }} />
+    </div>
+  );
+}
+
 // ── Logo badge ────────────────────────────────────────────────────
 function LogoBadge({ logo, nom, size, color, bg, border }) {
   return (
@@ -58,7 +153,7 @@ function LogoBadge({ logo, nom, size, color, bg, border }) {
 // ══════════════════════════════════════════════════════════════════
 // 1. BOLD — Noir + blanc, typographie énorme
 // ══════════════════════════════════════════════════════════════════
-function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText }) {
+function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const pc = primaryColor || "#2563EB";
   const qSize = Math.round(W * 0.5);
   const headLines = (headline || "LAISSEZ UN AVIS GOOGLE").split("\n");
@@ -110,19 +205,21 @@ function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       </div>
 
       {/* QR section — centered */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 44px" }}>
-        <div style={{
-          background: "#fff", padding: 18, borderRadius: 16,
-          boxShadow: `0 0 0 4px ${pc}30, 0 8px 40px rgba(0,0,0,0.5)`,
-        }}>
-          {qrDataUrl
-            ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block" }} />
-            : <QrPlaceholder size={qSize} color="#0F172A" />
-          }
-        </div>
-
-        <div style={{ marginTop: 20, fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.75)", textAlign: "center" }}>
-          {customText || "Scannez pour participer →"}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px", gap: showWheel ? 24 : 0 }}>
+        {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={pc} />}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{
+            background: "#fff", padding: 18, borderRadius: 16,
+            boxShadow: `0 0 0 4px ${pc}30, 0 8px 40px rgba(0,0,0,0.5)`,
+          }}>
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block" }} />
+              : <QrPlaceholder size={qSize} color="#0F172A" />
+            }
+          </div>
+          <div style={{ marginTop: 20, fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.75)", textAlign: "center" }}>
+            {customText || "Scannez pour participer →"}
+          </div>
         </div>
       </div>
 
@@ -143,7 +240,7 @@ function PosterBold({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
 // ══════════════════════════════════════════════════════════════════
 // 2. LUXE — Noir + or
 // ══════════════════════════════════════════════════════════════════
-function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText }) {
+function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const gold = "#C9A84C";
   const qSize = Math.round(W * 0.46);
   const headLines = (headline || "OFFREZ-VOUS\nUN CADEAU").split("\n");
@@ -210,19 +307,22 @@ function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       </div>
 
       {/* QR */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <div style={{
-          padding: 16, background: "#111",
-          border: `1.5px solid ${gold}50`,
-          boxShadow: `0 0 40px ${gold}18`,
-        }}>
-          {qrDataUrl
-            ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block", filter: "invert(1) sepia(1) saturate(1.5) hue-rotate(5deg) brightness(0.75)" }} />
-            : <QrPlaceholder size={qSize} color={gold} />
-          }
-        </div>
-        <div style={{ fontSize: 13, color: `${gold}AA`, fontStyle: "italic", letterSpacing: 2, marginTop: 14, textAlign: "center" }}>
-          {customText || "Scannez le QR code pour participer"}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: showWheel ? 24 : 0 }}>
+        {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={gold} />}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{
+            padding: 16, background: "#111",
+            border: `1.5px solid ${gold}50`,
+            boxShadow: `0 0 40px ${gold}18`,
+          }}>
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block", filter: "invert(1) sepia(1) saturate(1.5) hue-rotate(5deg) brightness(0.75)" }} />
+              : <QrPlaceholder size={qSize} color={gold} />
+            }
+          </div>
+          <div style={{ fontSize: 13, color: `${gold}AA`, fontStyle: "italic", letterSpacing: 2, marginTop: 14, textAlign: "center" }}>
+            {customText || "Scannez le QR code pour participer"}
+          </div>
         </div>
       </div>
 
@@ -238,7 +338,7 @@ function PosterLuxe({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
 // ══════════════════════════════════════════════════════════════════
 // 3. GRADIENT — Dégradé bleu-violet moderne
 // ══════════════════════════════════════════════════════════════════
-function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText }) {
+function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const pc = primaryColor || "#2563EB";
   const qSize = Math.round(W * 0.48);
   const headLines = (headline || "GAGNEZ\nUN CADEAU !").split("\n");
@@ -300,18 +400,21 @@ function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, su
       </div>
 
       {/* QR */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-        <div style={{
-          background: "#fff", padding: 16, borderRadius: 20,
-          boxShadow: "0 12px 60px rgba(0,0,0,0.4), 0 0 0 6px rgba(255,255,255,0.2)",
-        }}>
-          {qrDataUrl
-            ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block", borderRadius: 6 }} />
-            : <QrPlaceholder size={qSize} color="#7C3AED" />
-          }
-        </div>
-        <div style={{ marginTop: 18, fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.9)", textAlign: "center" }}>
-          {customText || "Scannez pour participer →"}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1, gap: showWheel ? 24 : 0 }}>
+        {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={pc} />}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{
+            background: "#fff", padding: 16, borderRadius: 20,
+            boxShadow: "0 12px 60px rgba(0,0,0,0.4), 0 0 0 6px rgba(255,255,255,0.2)",
+          }}>
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block", borderRadius: 6 }} />
+              : <QrPlaceholder size={qSize} color="#7C3AED" />
+            }
+          </div>
+          <div style={{ marginTop: 18, fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.9)", textAlign: "center" }}>
+            {customText || "Scannez pour participer →"}
+          </div>
         </div>
       </div>
 
@@ -325,7 +428,7 @@ function PosterGradient({ W, H, nom, logo, qrDataUrl, primaryColor, headline, su
 // ══════════════════════════════════════════════════════════════════
 // 4. CLASSIQUE — Blanc, serif, élégant
 // ══════════════════════════════════════════════════════════════════
-function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText }) {
+function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const accent = primaryColor || "#B8966E";
   const qSize = Math.round(W * 0.48);
   const headLines = (headline || "LAISSEZ UN\nAVIS GOOGLE").split("\n");
@@ -385,20 +488,23 @@ function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, s
       </div>
 
       {/* QR */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <div style={{
-          padding: 16, background: "#fff",
-          boxShadow: `0 4px 24px ${accent}20, 0 1px 8px rgba(0,0,0,0.08)`,
-          border: `1px solid ${accent}25`,
-          borderRadius: 10,
-        }}>
-          {qrDataUrl
-            ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block" }} />
-            : <QrPlaceholder size={qSize} color={accent} />
-          }
-        </div>
-        <div style={{ marginTop: 16, fontSize: 14, fontStyle: "italic", color: "#374151", textAlign: "center", maxWidth: W - 80 }}>
-          {customText || "Scannez le QR code pour participer"}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: showWheel ? 24 : 0 }}>
+        {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={accent} />}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{
+            padding: 16, background: "#fff",
+            boxShadow: `0 4px 24px ${accent}20, 0 1px 8px rgba(0,0,0,0.08)`,
+            border: `1px solid ${accent}25`,
+            borderRadius: 10,
+          }}>
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block" }} />
+              : <QrPlaceholder size={qSize} color={accent} />
+            }
+          </div>
+          <div style={{ marginTop: 16, fontSize: 14, fontStyle: "italic", color: "#374151", textAlign: "center", maxWidth: W - 80 }}>
+            {customText || "Scannez le QR code pour participer"}
+          </div>
         </div>
       </div>
 
@@ -414,7 +520,7 @@ function PosterClassique({ W, H, nom, logo, qrDataUrl, primaryColor, headline, s
 // ══════════════════════════════════════════════════════════════════
 // 5. NEON — Fond sombre, texte lumineux
 // ══════════════════════════════════════════════════════════════════
-function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText }) {
+function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const pc = primaryColor || "#00F5A0";
   const qSize = Math.round(W * 0.48);
   const headLines = (headline || "TOURNEZ\nLA ROUE !").split("\n");
@@ -469,22 +575,25 @@ function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
       </div>
 
       {/* QR */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
-        <div style={{
-          background: "#fff", padding: 14, borderRadius: 12,
-          boxShadow: `0 0 0 3px ${pc}40, 0 0 40px ${pc}25`,
-        }}>
-          {qrDataUrl
-            ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block" }} />
-            : <QrPlaceholder size={qSize} color="#0A0A1E" />
-          }
-        </div>
-        <div style={{
-          marginTop: 18, fontSize: 14, fontWeight: 700,
-          color: pc, textAlign: "center",
-          textShadow: `0 0 12px ${pc}60`,
-        }}>
-          {customText || "Scannez pour participer →"}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1, gap: showWheel ? 24 : 0 }}>
+        {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={pc} />}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{
+            background: "#fff", padding: 14, borderRadius: 12,
+            boxShadow: `0 0 0 3px ${pc}40, 0 0 40px ${pc}25`,
+          }}>
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block" }} />
+              : <QrPlaceholder size={qSize} color="#0A0A1E" />
+            }
+          </div>
+          <div style={{
+            marginTop: 18, fontSize: 14, fontWeight: 700,
+            color: pc, textAlign: "center",
+            textShadow: `0 0 12px ${pc}60`,
+          }}>
+            {customText || "Scannez pour participer →"}
+          </div>
         </div>
       </div>
 
@@ -498,7 +607,7 @@ function PosterNeon({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subhea
 // ══════════════════════════════════════════════════════════════════
 // 6. ARDOISE — Tableau noir, craie
 // ══════════════════════════════════════════════════════════════════
-function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText }) {
+function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, subheadline, customText, showWheel }) {
   const chalk = "#EAE4D9";
   const bg = "#1B2B38";
   const qSize = Math.round(W * 0.46);
@@ -553,18 +662,21 @@ function PosterArdoise({ W, H, nom, logo, qrDataUrl, primaryColor, headline, sub
       </div>
 
       {/* QR */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <div style={{
-          padding: 14, border: `2px dashed ${chalk}60`,
-          background: `${chalk}05`,
-        }}>
-          {qrDataUrl
-            ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block", filter: "invert(1) opacity(0.9)" }} />
-            : <QrPlaceholder size={qSize} color={chalk} />
-          }
-        </div>
-        <div style={{ marginTop: 16, fontSize: 14, color: chalk, opacity: 0.75, textAlign: "center", lineHeight: 1.5 }}>
-          {customText || "Scannez le QR code pour participer"}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: showWheel ? 24 : 0 }}>
+        {showWheel && <WheelDecor size={Math.round(qSize * 0.82)} primaryColor={chalk} />}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{
+            padding: 14, border: `2px dashed ${chalk}60`,
+            background: `${chalk}05`,
+          }}>
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="QR" style={{ width: qSize, height: qSize, display: "block", filter: "invert(1) opacity(0.9)" }} />
+              : <QrPlaceholder size={qSize} color={chalk} />
+            }
+          </div>
+          <div style={{ marginTop: 16, fontSize: 14, color: chalk, opacity: 0.75, textAlign: "center", lineHeight: 1.5 }}>
+            {customText || "Scannez le QR code pour participer"}
+          </div>
         </div>
       </div>
 
@@ -604,6 +716,7 @@ export default function PageAffiches() {
   const [customText,   setCustomText]   = useState("Scannez le QR code pour participer");
   const [qrDataUrl,    setQrDataUrl]    = useState("");
   const [qrThumb,      setQrThumb]      = useState("");
+  const [showWheel,    setShowWheel]    = useState(false);
   const [downloading,  setDownloading]  = useState(false);
   const [loading,      setLoading]      = useState(true);
 
@@ -698,6 +811,7 @@ export default function PageAffiches() {
     headline,
     subheadline,
     customText,
+    showWheel,
   };
 
   if (loading) return (
@@ -942,6 +1056,59 @@ export default function PageAffiches() {
                       ))}
                     </div>
                   </div>
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: 1, background: "#F1F5F9" }} />
+
+                {/* === ROUE === */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 10 }}>
+                    🎡 Roue de la fortune
+                  </div>
+                  <button
+                    onClick={() => setShowWheel(v => !v)}
+                    style={{
+                      width: "100%", padding: "11px 14px", borderRadius: 12,
+                      border: `1.5px solid ${showWheel ? "#2563EB" : "#E2E8F0"}`,
+                      background: showWheel ? "#EFF6FF" : "#F8FAFC",
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      {/* Mini wheel preview */}
+                      <div style={{
+                        width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+                        background: `conic-gradient(${primaryColor} 0deg 45deg, rgba(255,255,255,0.85) 45deg 90deg, ${primaryColor} 90deg 135deg, rgba(255,255,255,0.85) 135deg 180deg, ${primaryColor} 180deg 225deg, rgba(255,255,255,0.85) 225deg 270deg, ${primaryColor} 270deg 315deg, rgba(255,255,255,0.85) 315deg 360deg)`,
+                        border: "2px solid #E2E8F0",
+                        position: "relative",
+                      }}>
+                        <div style={{ position: "absolute", top: "50%", left: "50%", width: 8, height: 8, borderRadius: "50%", background: "#fff", transform: "translate(-50%,-50%)", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: showWheel ? "#1D4ED8" : "#374151" }}>
+                          Afficher la roue
+                        </div>
+                        <div style={{ fontSize: 10, color: "#94A3B8" }}>À côté du QR code</div>
+                      </div>
+                    </div>
+                    {/* Toggle pill */}
+                    <div style={{
+                      width: 38, height: 22, borderRadius: 11,
+                      background: showWheel ? "#2563EB" : "#E2E8F0",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0,
+                    }}>
+                      <div style={{
+                        position: "absolute", top: 3,
+                        left: showWheel ? 19 : 3,
+                        width: 16, height: 16, borderRadius: "50%",
+                        background: "#fff", transition: "left 0.2s",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+                      }} />
+                    </div>
+                  </button>
                 </div>
 
                 {/* Divider */}
