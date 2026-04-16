@@ -575,7 +575,7 @@ const PLANS = [
   { id:"pro",     name:"Pro",      price:"79",   desc:"Pour les chaînes & agences", features:["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],                cta:"Nous contacter",         href:"/register" },
 ];
 
-const SLIDER_IMGS = Array.from({length:10},(_,i)=>`/images/slider/slider${i+1}.png`);
+const SLIDER_IMGS = Array.from({length:10},(_,i)=>`/images/slider${i+1}.png`);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // MAIN PAGE
