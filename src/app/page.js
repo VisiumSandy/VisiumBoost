@@ -123,7 +123,7 @@ const SEG = [
 const CONIC = SEG.map(([c],i,a)=>`${c} ${(i/a.length)*100}% ${((i+1)/a.length)*100}%`).join(",");
 
 // ── 3D Hero Wheel ──────────────────────────────────────────────────────────────
-function HeroWheel3D() {
+function HeroWheel3D({ isDark = false }) {
   const [angle, setAngle]   = useState(0);
   const [spinning, setSpin] = useState(false);
   const [won, setWon]       = useState(null);
@@ -141,8 +141,11 @@ function HeroWheel3D() {
       setAngle(cur);
       if (t < 1) { rafRef.current = requestAnimationFrame(tick); }
       else {
-        const norm = ((cur % 360) + 360) % 360;
-        const idx  = Math.floor(((360 - norm + 360/SEG.length/2) % 360) / (360/SEG.length)) % SEG.length;
+        const norm    = ((cur % 360) + 360) % 360;
+        const segSize = 360 / SEG.length;
+        // Pointer is on the LEFT side of the wheel (270° from top, clockwise)
+        const α = ((270 - norm) % 360 + 360) % 360;
+        const idx = Math.floor(α / segSize) % SEG.length;
         setWon(SEG[idx][1]); setSpin(false);
       }
     };
@@ -196,11 +199,23 @@ function HeroWheel3D() {
       {won && (
         <motion.div initial={{opacity:0,y:10,scale:0.9}} animate={{opacity:1,y:0,scale:1}}
           transition={{duration:0.4,ease:E}}
-          style={{background:"rgba(10,10,20,0.92)",backdropFilter:"blur(16px)",
-            border:"1.5px solid rgba(245,158,11,0.4)",borderRadius:16,
-            padding:"14px 24px",textAlign:"center"}}>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",fontWeight:700,letterSpacing:1,marginBottom:4}}>VOUS AVEZ GAGNÉ</div>
-          <div style={{fontSize:20,fontWeight:900,color:"#F59E0B"}}>{won} 🎉</div>
+          style={{
+            background: isDark ? "rgba(6,9,26,0.72)" : "rgba(255,255,255,0.72)",
+            backdropFilter:"blur(20px) saturate(180%)",
+            WebkitBackdropFilter:"blur(20px) saturate(180%)",
+            border: isDark ? "1.5px solid rgba(245,158,11,0.35)" : "1.5px solid rgba(245,158,11,0.4)",
+            borderRadius:18, padding:"16px 28px", textAlign:"center",
+            boxShadow: isDark
+              ? "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)"
+              : "0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+          }}>
+          <div style={{
+            fontSize:11, fontWeight:800, letterSpacing:1, marginBottom:6,
+            color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)",
+          }}>VOUS AVEZ GAGNÉ</div>
+          <div style={{fontSize:22,fontWeight:900,color:"#F59E0B",textShadow:"0 0 20px rgba(245,158,11,0.4)"}}>
+            {won} 🎉
+          </div>
         </motion.div>
       )}
       {!won && !spinning && (
@@ -210,7 +225,11 @@ function HeroWheel3D() {
           Tourner la démo
         </button>
       )}
-      {spinning && <div style={{fontSize:14,color:"rgba(255,255,255,0.5)",fontWeight:600}}>La roue tourne…</div>}
+      {spinning && (
+        <div style={{fontSize:14,fontWeight:600,color:isDark?"rgba(255,255,255,0.5)":"rgba(0,0,0,0.4)"}}>
+          La roue tourne…
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -575,7 +594,8 @@ const PLANS = [
   { id:"pro",     name:"Pro",      price:"79",   desc:"Pour les chaînes & agences", features:["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],                cta:"Nous contacter",         href:"/register" },
 ];
 
-const SLIDER_IMGS = Array.from({length:10}, (_,i) => `/images/slider${i+1}.png`);
+const SLIDER_IMGS_DARK  = Array.from({length:10}, (_,i) => `/images/slider_sombre/slider${i+1}.png`);
+const SLIDER_IMGS_LIGHT = Array.from({length:10}, (_,i) => `/images/slider/slider${i+1}.png`);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // MAIN PAGE
@@ -721,7 +741,7 @@ export default function LandingPage() {
 
           {/* RIGHT */}
           <div style={{ display:"flex", justifyContent:"center", alignItems:"center" }}>
-            <HeroWheel3D/>
+            <HeroWheel3D isDark={isDark}/>
           </div>
         </div>
       </section>
@@ -738,11 +758,13 @@ export default function LandingPage() {
           background:`linear-gradient(to left,${isDark?"#06091A":bg2},transparent)` }}/>
         <motion.div animate={{x:["0%","-50%"]}} transition={{duration:28,repeat:Infinity,ease:"linear"}}
           style={{ display:"flex", alignItems:"center", gap:56, width:"max-content" }}>
-          {[...SLIDER_IMGS,...SLIDER_IMGS].map((src,i) => (
-            <img key={i} src={src} alt={`partenaire ${(i%10)+1}`}
-              style={{ height:44, width:"auto", maxWidth:160, objectFit:"contain", flexShrink:0,
-                filter:isDark?"brightness(0.6) invert(0)":"none", opacity:isDark?0.55:0.7 }}/>
-          ))}
+          {(() => {
+            const imgs = isDark ? SLIDER_IMGS_DARK : SLIDER_IMGS_LIGHT;
+            return [...imgs,...imgs].map((src,i) => (
+              <img key={i} src={src} alt={`partenaire ${(i%10)+1}`}
+                style={{ height:44, width:"auto", maxWidth:160, objectFit:"contain", flexShrink:0, opacity:0.75 }}/>
+            ));
+          })()}
         </motion.div>
       </div>
 
