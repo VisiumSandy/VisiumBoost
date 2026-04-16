@@ -852,7 +852,12 @@ export default function LandingPage() {
                 fontSize:13, fontWeight:500, padding:"6px 12px", borderRadius:8 }}>{label}</Link>
             ))}
           </div>
-          <div style={{ fontSize:12, color:"#374151" }}>© 2026 VisiumBoost — Tous droits réservés</div>
+          <div style={{ display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
+            <span style={{ fontSize:12, color:"#374151" }}>© 2026 VisiumBoost — Tous droits réservés</span>
+            <Link href="/mentions-legales" style={{ fontSize:12, color:"#52525B", textDecoration:"none",
+              borderBottom:"1px solid #374151", paddingBottom:1,
+              transition:"color 0.2s" }}>Mentions légales</Link>
+          </div>
         </div>
       </footer>
 
