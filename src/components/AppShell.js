@@ -15,6 +15,7 @@ import PageAffiliation from "@/components/pages/PageAffiliation";
 import PageSubscription from "@/components/pages/PageSubscription";
 import PageAccount     from "@/components/pages/PageAccount";
 import PageAffiches    from "@/components/pages/PageAffiches";
+import PageStats       from "@/components/pages/PageStats";
 
 const PAGES = {
   dashboard:    PageDashboard,
@@ -22,6 +23,7 @@ const PAGES = {
   codes:        PageCodes,
   wheel:        PageWheel,
   affiches:     PageAffiches,
+  stats:        PageStats,
   affiliation:  PageAffiliation,
   subscription: PageSubscription,
   account:      PageAccount,

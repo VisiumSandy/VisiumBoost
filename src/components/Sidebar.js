@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { id: "wheel",        icon: "wheel",       label: "Ma Roue" },
   { id: "affiches",     icon: "print",       label: "Affiches" },
   { id: "codes",        icon: "check",       label: "Validations" },
+  { id: "stats",        icon: "barChart",    label: "Statistiques" },
   { id: "affiliation",  icon: "link",        label: "Affiliation" },
   { id: "subscription", icon: "creditCard",  label: "Abonnement" },
   { id: "account",      icon: "user",        label: "Mon compte" },
@@ -27,7 +28,7 @@ const PLAN_BADGE = {
 
 export default function Sidebar({ user, hasAccess, daysLeft }) {
   const router = useRouter();
-  const { currentPage, setCurrentPage, sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const { currentPage, setCurrentPage, sidebarCollapsed, setSidebarCollapsed, pendingValidations } = useApp();
   const isAdmin = user?.role === "admin";
   const plan = PLAN_BADGE[user?.plan] || PLAN_BADGE.free;
   const trialLeft = daysLeft ?? trialDaysLeft(user);
@@ -166,9 +167,35 @@ export default function Sidebar({ user, hasAccess, daysLeft }) {
                 pointerEvents: locked ? "none" : undefined,
               }}
             >
-              <Icon name={item.icon} size={18} color={active ? "#60A5FA" : "#475569"} />
+              <div style={{ position: "relative", flexShrink: 0 }}>
+                <Icon name={item.icon} size={18} color={active ? "#60A5FA" : "#475569"} />
+                {/* Collapsed badge */}
+                {sidebarCollapsed && item.id === "codes" && pendingValidations > 0 && (
+                  <span style={{
+                    position: "absolute", top: -4, right: -4,
+                    background: "#EF4444", color: "#fff",
+                    fontSize: 9, fontWeight: 800, borderRadius: 99,
+                    minWidth: 14, height: 14, display: "flex",
+                    alignItems: "center", justifyContent: "center", padding: "0 3px",
+                    lineHeight: 1,
+                  }}>
+                    {pendingValidations > 99 ? "99" : pendingValidations}
+                  </span>
+                )}
+              </div>
               {!sidebarCollapsed && (
                 <span style={{ color: active ? "#93C5FD" : "#94A3B8", flex: 1 }}>{item.label}</span>
+              )}
+              {!sidebarCollapsed && item.id === "codes" && pendingValidations > 0 && (
+                <span style={{
+                  background: "#EF4444", color: "#fff",
+                  fontSize: 10, fontWeight: 700, borderRadius: 99,
+                  minWidth: 18, height: 18, display: "flex",
+                  alignItems: "center", justifyContent: "center", padding: "0 5px",
+                  lineHeight: 1, flexShrink: 0,
+                }}>
+                  {pendingValidations > 99 ? "99+" : pendingValidations}
+                </span>
               )}
               {!sidebarCollapsed && locked && (
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round">

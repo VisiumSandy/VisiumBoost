@@ -1,8 +1,181 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/Icon";
 import ImageUpload from "@/components/ImageUpload";
+
+/* ── Google Places autocomplete ── */
+function PlacesField({ value, onChange }) {
+  const [query, setQuery]       = useState("");
+  const [results, setResults]   = useState([]);
+  const [loading, setLoading]   = useState(false);
+  const [open, setOpen]         = useState(false);
+  const [apiError, setApiError] = useState(false);
+  const [mode, setMode]         = useState("search"); // "search" | "manual"
+  const timerRef = useRef(null);
+  const wrapRef  = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const search = async (q) => {
+    if (!q || q.trim().length < 2) { setResults([]); setOpen(false); return; }
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/places/search?q=${encodeURIComponent(q)}`);
+      const d = await r.json();
+      if (d.error) { setApiError(true); setResults([]); setOpen(false); }
+      else { setResults(d.results || []); setOpen(true); setApiError(false); }
+    } catch { setApiError(true); }
+    setLoading(false);
+  };
+
+  const handleInput = (v) => {
+    setQuery(v);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => search(v), 450);
+  };
+
+  const selectPlace = (p) => {
+    const url = `https://search.google.com/local/writereview?placeid=${p.placeId}`;
+    onChange(url);
+    setOpen(false);
+    setQuery("");
+  };
+
+  const inp = {
+    width: "100%", padding: "10px 13px", borderRadius: 10,
+    border: "1.5px solid #E2E8F0", fontSize: 14, outline: "none",
+    background: "#fff", boxSizing: "border-box", transition: "border-color 0.2s",
+    fontFamily: "'DM Sans', sans-serif", color: "#0F172A",
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+        <label style={{ fontSize: 12, fontWeight: 600, color: "#64748B" }}>
+          Lien avis Google
+        </label>
+        <div style={{ display: "flex", gap: 0, border: "1.5px solid #E2E8F0", borderRadius: 8, overflow: "hidden" }}>
+          {[["search", "Rechercher"], ["manual", "URL directe"]].map(([m, lbl]) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              style={{
+                padding: "3px 10px", fontSize: 11, fontWeight: 600, border: "none", cursor: "pointer",
+                background: mode === m ? "#2563EB" : "#fff",
+                color:      mode === m ? "#fff"    : "#64748B",
+                transition: "all 0.15s",
+              }}
+            >
+              {lbl}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {mode === "search" ? (
+        <div ref={wrapRef} style={{ position: "relative" }}>
+          <div style={{ position: "relative" }}>
+            <input
+              value={query}
+              onChange={e => handleInput(e.target.value)}
+              placeholder="Rechercher votre établissement sur Google Maps…"
+              style={{ ...inp, paddingLeft: 36 }}
+              onFocus={e => e.target.style.borderColor = "#3B82F6"}
+              onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+            />
+            <div style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+              {loading
+                ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #E2E8F0", borderTopColor: "#3B82F6", animation: "spin 0.6s linear infinite" }} />
+                : <Icon name="search" size={14} color="#94A3B8" />
+              }
+            </div>
+          </div>
+
+          {apiError && (
+            <p style={{ fontSize: 11, color: "#F59E0B", marginTop: 4, fontWeight: 600 }}>
+              Clé API Google non configurée — utilisez "URL directe" pour saisir manuellement.
+            </p>
+          )}
+
+          {open && results.length > 0 && (
+            <div style={{
+              position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 50,
+              background: "#fff", border: "1.5px solid #E2E8F0", borderRadius: 12,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.12)", overflow: "hidden",
+            }}>
+              {results.map((p) => (
+                <button
+                  key={p.placeId}
+                  type="button"
+                  onClick={() => selectPlace(p)}
+                  style={{
+                    width: "100%", textAlign: "left", padding: "10px 14px",
+                    background: "none", border: "none", cursor: "pointer",
+                    borderBottom: "1px solid #F1F5F9", display: "flex", alignItems: "flex-start", gap: 10,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#F8FAFC"}
+                  onMouseLeave={e => e.currentTarget.style.background = "none"}
+                >
+                  <Icon name="mapPin" size={15} color="#3B82F6" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {p.name}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#94A3B8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {p.address}
+                    </div>
+                  </div>
+                  {p.rating && (
+                    <span style={{ marginLeft: "auto", fontSize: 11, color: "#F59E0B", fontWeight: 700, flexShrink: 0 }}>
+                      ★ {p.rating}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {value && (
+            <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{
+                flex: 1, background: "#EFF6FF", borderRadius: 8, padding: "5px 10px",
+                fontSize: 11, color: "#2563EB", fontWeight: 600,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              }}>
+                ✓ {value}
+              </div>
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: "#94A3B8", fontSize: 16 }}
+                title="Supprimer"
+              >
+                ×
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder="https://search.google.com/local/writereview?placeid=…"
+          style={inp}
+          onFocus={e => e.target.style.borderColor = "#3B82F6"}
+          onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+        />
+      )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
 
 const CUSTOM_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "";
@@ -153,16 +326,9 @@ export default function PageClients() {
             </div>
 
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 5 }}>
-                Lien avis Google
-              </label>
-              <input
+              <PlacesField
                 value={form.lien_avis}
-                onChange={e => setForm(p => ({ ...p, lien_avis: e.target.value }))}
-                placeholder="https://g.page/r/..."
-                style={inp}
-                onFocus={e => e.target.style.borderColor = "#3B82F6"}
-                onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+                onChange={url => setForm(p => ({ ...p, lien_avis: url }))}
               />
             </div>
 
