@@ -41,35 +41,167 @@ export default function PageDashboard({ user }) {
         </p>
       </div>
 
-      {/* Empty onboarding */}
+      {/* Empty state onboarding — shown when user has never spun the wheel */}
       {!loading && (s.totalSpins ?? 0) === 0 && (
         <div style={{
-          background: "linear-gradient(135deg, #EFF6FF, #F0F9FF)",
-          border: "1.5px solid #BFDBFE",
-          borderRadius: 16, padding: "20px 24px", marginBottom: 24,
-          display: "flex", alignItems: "center", gap: 16,
+          background: "#fff",
+          border: "1.5px solid #E2E8F0",
+          borderRadius: 20,
+          padding: "32px 28px 28px",
+          marginBottom: 28,
+          boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
         }}>
+          {/* Header */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+              border: "1px solid #BFDBFE", borderRadius: 20,
+              padding: "4px 14px", marginBottom: 14,
+            }}>
+              <span style={{ fontSize: 14 }}>👋</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#2563EB", letterSpacing: "0.5px" }}>
+                Bienvenue, {firstName} !
+              </span>
+            </div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", margin: "0 0 6px", letterSpacing: "-0.3px" }}>
+              3 étapes pour récupérer vos premiers avis
+            </h2>
+            <p style={{ fontSize: 13, color: "#94A3B8", margin: 0, lineHeight: 1.6 }}>
+              Suivez ce guide pour mettre en place votre roue en moins de 5 minutes.
+            </p>
+          </div>
+
+          {/* Steps */}
           <div style={{
-            width: 44, height: 44, borderRadius: 12,
-            background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: 14,
+            marginBottom: 24,
           }}>
-            <span style={{ fontSize: 22 }}>🚀</span>
+            {[
+              {
+                step: "1",
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 8v4l3 3"/>
+                  </svg>
+                ),
+                color: "#EFF6FF",
+                borderColor: "#BFDBFE",
+                iconBg: "#DBEAFE",
+                title: "Créez votre roue",
+                desc: "Ajoutez votre établissement et configurez les récompenses.",
+                action: "clients",
+                cta: "Ajouter un établissement →",
+              },
+              {
+                step: "2",
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                    <rect x="14" y="14" width="3" height="3"/>
+                  </svg>
+                ),
+                color: "#F0F9FF",
+                borderColor: "#BAE6FD",
+                iconBg: "#E0F2FE",
+                title: "Imprimez l'affiche QR",
+                desc: "Générez votre QR code et affichez-le en caisse.",
+                action: "wheel",
+                cta: "Configurer la roue →",
+              },
+              {
+                step: "3",
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ),
+                color: "#F0FDF4",
+                borderColor: "#BBF7D0",
+                iconBg: "#DCFCE7",
+                title: "Récoltez vos avis",
+                desc: "Vos clients scannent, tournent et laissent un avis Google.",
+                action: null,
+                cta: null,
+              },
+            ].map(({ step, icon, color, borderColor, iconBg, title, desc, action, cta }) => (
+              <div key={step} style={{
+                background: color,
+                border: `1.5px solid ${borderColor}`,
+                borderRadius: 14,
+                padding: "18px 16px",
+                position: "relative",
+              }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <div style={{
+                    width: 38, height: 38, borderRadius: 10,
+                    background: iconBg,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    {icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 800, color: "#94A3B8",
+                        letterSpacing: "1px", textTransform: "uppercase",
+                      }}>
+                        Étape {step}
+                      </span>
+                    </div>
+                    <p style={{ fontWeight: 700, color: "#0F172A", margin: "0 0 4px", fontSize: 14 }}>
+                      {title}
+                    </p>
+                    <p style={{ color: "#64748B", fontSize: 12, margin: "0 0 10px", lineHeight: 1.5 }}>
+                      {desc}
+                    </p>
+                    {cta && action && (
+                      <button
+                        onClick={() => setCurrentPage(action)}
+                        style={{
+                          background: "none", border: "none", padding: 0,
+                          color: "#2563EB", fontWeight: 700, fontSize: 12,
+                          cursor: "pointer", textDecoration: "none",
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        {cta}
+                      </button>
+                    )}
+                    {!cta && (
+                      <span style={{ fontSize: 12, color: "#10B981", fontWeight: 600 }}>
+                        Automatique ✓
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div>
-            <p style={{ fontWeight: 700, color: "#1E40AF", margin: "0 0 3px", fontSize: 15 }}>
-              Commencez par configurer votre roue
-            </p>
-            <p style={{ color: "#3B82F6", fontSize: 13, margin: 0 }}>
-              Ajoutez un établissement, configurez la roue et partagez votre lien avec vos clients.{" "}
-              <button
-                onClick={() => setCurrentPage("clients")}
-                style={{ color: "#2563EB", fontWeight: 700, textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 13 }}
-              >
-                Ajouter un établissement →
-              </button>
-            </p>
-          </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => setCurrentPage("wheel")}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "linear-gradient(135deg, #2563EB, #0EA5E9)",
+              color: "#fff", border: "none",
+              padding: "12px 24px", borderRadius: 12,
+              fontWeight: 700, fontSize: 14, cursor: "pointer",
+              fontFamily: "inherit",
+              boxShadow: "0 4px 16px rgba(37,99,235,0.3)",
+            }}
+          >
+            Commencer
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
         </div>
       )}
 

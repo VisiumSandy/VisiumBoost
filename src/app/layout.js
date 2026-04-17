@@ -1,10 +1,39 @@
 import "@/styles/globals.css";
 
 export const metadata = {
+  metadataBase: new URL("https://visium-boost.fr"),
   title: "VisiumBoost — Boostez vos avis Google",
   description:
     "La roue de la fortune gamifiée qui transforme vos clients en ambassadeurs Google. Configurez en 5 minutes, récoltez des avis à vie.",
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: "/images/favicon.ico",
+    shortcut: "/images/favicon.ico",
+    apple: "/images/favicon.ico",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://visium-boost.fr",
+    title: "VisiumBoost — Boostez vos avis Google",
+    description:
+      "La roue de la fortune gamifiée qui transforme vos clients en ambassadeurs Google. Configurez en 5 minutes, récoltez des avis à vie.",
+    siteName: "VisiumBoost",
+    images: [
+      {
+        url: "/images/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "VisiumBoost — Boostez vos avis Google",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VisiumBoost — Boostez vos avis Google",
+    description:
+      "La roue de la fortune gamifiée qui transforme vos clients en ambassadeurs Google. Configurez en 5 minutes, récoltez des avis à vie.",
+    images: ["/images/og-image.png"],
+    site: "@visiumboost",
+  },
 };
 
 export default function RootLayout({ children }) {

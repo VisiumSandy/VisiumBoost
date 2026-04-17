@@ -111,12 +111,19 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {[
               { label: "Email", field: "email", type: "email", placeholder: "vous@exemple.fr" },
-              { label: "Mot de passe", field: "password", type: "password", placeholder: "••••••••" },
-            ].map(({ label, field, type, placeholder }) => (
+              { label: "Mot de passe", field: "password", type: "password", placeholder: "••••••••", forgotLink: true },
+            ].map(({ label, field, type, placeholder, forgotLink }) => (
               <div key={field}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>
-                  {label}
-                </label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                    {label}
+                  </label>
+                  {forgotLink && (
+                    <Link href="/forgot-password" style={{ fontSize: 12, color: "#2563EB", textDecoration: "none", fontWeight: 600 }}>
+                      Mot de passe oublié ?
+                    </Link>
+                  )}
+                </div>
                 <input
                   type={type}
                   required

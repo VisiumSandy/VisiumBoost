@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Code from "@/lib/models/Code";
+import User from "@/lib/models/User";
+import { validateCodeLimiter, getIp } from "@/lib/rateLimit";
+import { sendCodeValidatedEmail } from "@/lib/email";
 
 export async function POST(req) {
+  // Rate limiting — 10 validations per IP per minute
+  const ip = getIp(req);
+  const limit = validateCodeLimiter.check(ip);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { valid: false, error: `Trop de tentatives. Réessayez dans ${limit.retryAfter} secondes.` },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfter) },
+      }
+    );
+  }
+
   const { code, userId } = await req.json();
 
   if (!code || typeof code !== "string") {
@@ -24,6 +40,21 @@ export async function POST(req) {
     if (record.used) return NextResponse.json({ valid: false, error: "Code déjà utilisé" });
 
     await Code.updateOne({ _id: record._id }, { used: true, usedAt: new Date() });
+
+    // Send notification email to the business owner (non-blocking)
+    try {
+      const owner = await User.findById(record.userId).lean();
+      if (owner?.email) {
+        sendCodeValidatedEmail({
+          to: owner.email,
+          businessName: owner.businessName || owner.name,
+          code: normalized,
+        });
+      }
+    } catch (emailErr) {
+      console.error("[validate] Failed to send notification email:", emailErr);
+    }
+
     return NextResponse.json({ valid: true, code: normalized, message: "Code validé avec succès !" });
   } catch {
     return NextResponse.json({ valid: false, error: "Erreur serveur" }, { status: 500 });

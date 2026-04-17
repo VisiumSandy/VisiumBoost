@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { signToken, setAuthCookie } from "@/lib/auth";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(req) {
   try {
@@ -36,6 +37,9 @@ export async function POST(req) {
 
     const token = signToken({ id: user._id.toString(), email: user.email, role: user.role, name: user.name });
     setAuthCookie(token);
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail({ to: user.email, name: user.name });
 
     return NextResponse.json({
       user: { id: user._id, email: user.email, name: user.name, role: user.role, plan: user.plan },

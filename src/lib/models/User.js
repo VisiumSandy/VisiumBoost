@@ -14,6 +14,8 @@ const UserSchema = new mongoose.Schema(
     trialEndsAt: { type: Date, default: null },
     stripeCustomerId: { type: String, default: null },
     stripeSubscriptionId: { type: String, default: null },
+    resetToken: { type: String, default: null },
+    resetTokenExpiry: { type: Date, default: null },
     active: { type: Boolean, default: true },
     lastLogin: { type: Date, default: null },
     // Stats cached

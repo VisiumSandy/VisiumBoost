@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { signToken, setAuthCookie } from "@/lib/auth";
+import { loginLimiter, getIp } from "@/lib/rateLimit";
 
 // Seed admin on first call if needed
 async function ensureAdmin() {
@@ -27,6 +28,22 @@ async function ensureAdmin() {
 
 export async function POST(req) {
   try {
+    // Rate limiting — 5 attempts per IP per 15 minutes
+    const ip = getIp(req);
+    const limit = loginLimiter.check(ip);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `Trop de tentatives. Réessayez dans ${limit.retryAfter} secondes.` },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(limit.retryAfter),
+            "X-RateLimit-Reset": String(limit.resetAt),
+          },
+        }
+      );
+    }
+
     const { email, password } = await req.json();
 
     if (!email || !password) {

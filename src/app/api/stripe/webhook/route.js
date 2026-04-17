@@ -76,6 +76,11 @@ export async function POST(req) {
       case "customer.subscription.deleted":
         await handleSubscriptionDeleted(event.data.object);
         break;
+      case "invoice.payment_failed": {
+        const invoice = event.data.object;
+        console.warn(`[stripe] invoice.payment_failed customer=${invoice.customer} amount=${invoice.amount_due}`);
+        break;
+      }
       default:
         break;
     }

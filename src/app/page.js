@@ -1554,6 +1554,7 @@ export default function LandingPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
             <span style={{ fontSize: 12, color: "#374151" }}>© 2026 VisiumBoost — Tous droits réservés</span>
             <Link href="/mentions-legales" style={{ fontSize: 12, color: "#52525B", textDecoration: "none", borderBottom: "1px solid #374151", paddingBottom: 1 }}>Mentions légales</Link>
+            <Link href="/cgu" style={{ fontSize: 12, color: "#52525B", textDecoration: "none", borderBottom: "1px solid #374151", paddingBottom: 1 }}>CGU</Link>
           </div>
         </div>
       </footer>
