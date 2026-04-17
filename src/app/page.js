@@ -104,7 +104,7 @@ function NavBar({ isDark, onToggleDark }) {
           {/* Logo */}
           <motion.div whileHover={{ scale: 1.04 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
             <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-              <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 30, objectFit: "contain" }} />
+              <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 42, objectFit: "contain" }} />
             </Link>
           </motion.div>
 
@@ -984,7 +984,7 @@ export default function LandingPage() {
           style={{ display: "flex", alignItems: "center", gap: 56, width: "max-content" }}>
           {[...imgs, ...imgs].map((src, i) => (
             <img key={i} src={src} alt={`partenaire ${(i%10)+1}`}
-              style={{ height: 44, width: "auto", maxWidth: 160, objectFit: "contain", flexShrink: 0, opacity: 0.72 }} />
+              style={{ height: 68, width: "auto", maxWidth: 200, objectFit: "contain", flexShrink: 0, opacity: 0.72 }} />
           ))}
         </motion.div>
       </div>
@@ -1378,7 +1378,7 @@ export default function LandingPage() {
           display: "flex", justifyContent: "space-between", alignItems: "center",
           flexWrap: "wrap", gap: 16,
         }}>
-          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 30, objectFit: "contain" }} />
+          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 42, objectFit: "contain" }} />
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {[["Connexion","/login"],["Créer un compte","/register"],["Dashboard","/dashboard"]].map(([label, href]) => (
               <Link key={label} href={href} style={{ color: "#52525B", textDecoration: "none", fontSize: 13, fontWeight: 500, padding: "6px 12px", borderRadius: 8 }}>{label}</Link>
