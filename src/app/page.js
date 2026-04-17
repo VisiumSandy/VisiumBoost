@@ -697,12 +697,12 @@ const STEPS = [
 ];
 
 const BENTO_FEATURES = [
-  { col: "span 2", rows: 1, color: "#3B82F6", icon: Ic.Sparkle,  title: "Roue 100% personnalisable",  desc: "Couleurs, récompenses, logo, probabilités par segment. Configurez tout en quelques secondes.", tags: ["Drag & drop","Live preview","Export PDF"], big: true },
-  { col: "span 1", rows: 1, color: "#818CF8", icon: Ic.Shield,   title: "Anti-fraude intégré",         desc: "Codes uniques à usage unique. Impossible de tricher.", tags: ["Codes uniques","Vérification IP"] },
-  { col: "span 1", rows: 1, color: "#06B6D4", icon: Ic.TrendUp,  title: "Analytics temps réel",        desc: "Scans, conversions, avis générés et ROI en direct.", tags: ["Dashboard live","Export CSV"] },
-  { col: "span 1", rows: 1, color: "#38BDF8", icon: Ic.QrCode,   title: "QR Code prêt à imprimer",     desc: "PNG / SVG / PDF. URL personnalisée prête à l'emploi.", tags: ["URL perso","Sticker A4"] },
-  { col: "span 2", rows: 1, color: "#10B981", icon: Ic.Layers,   title: "Multi-établissements",         desc: "Gérez tous vos restaurants, salons ou points de vente depuis une seule interface. Statistiques consolidées.", tags: ["Illimité","Stats consolidées","Rôles équipe"], big: true },
-  { col: "span 1", rows: 1, color: "#F59E0B", icon: Ic.Clock,    title: "Setup en 5 minutes",           desc: "Aucune installation, aucun code. Opérationnel dès aujourd'hui.", tags: ["Guidé","Support 7j/7"] },
+  { col: "span 2", big: true, color: "#3B82F6", icon: Ic.Sparkle, status: "Live",       meta: "Drag & drop",  title: "Roue 100% personnalisable",  desc: "Couleurs, récompenses, logo, probabilités par segment. Configurez tout en quelques secondes.", tags: ["Drag & drop","Live preview","Export PDF"] },
+  { col: "span 1",            color: "#818CF8", icon: Ic.Shield,  status: "Actif",      meta: "0 fraude",     title: "Anti-fraude intégré",         desc: "Codes uniques à usage unique. Impossible de tricher.", tags: ["Codes uniques","Vérification IP"] },
+  { col: "span 1",            color: "#06B6D4", icon: Ic.TrendUp, status: "Temps réel", meta: "Dashboard",    title: "Analytics temps réel",        desc: "Scans, conversions, avis générés et ROI en direct.", tags: ["Dashboard live","Export CSV"] },
+  { col: "span 1",            color: "#38BDF8", icon: Ic.QrCode,  status: "Prêt",       meta: "PNG/SVG/PDF",  title: "QR Code prêt à imprimer",     desc: "PNG / SVG / PDF. URL personnalisée prête à l'emploi.", tags: ["URL perso","Sticker A4"] },
+  { col: "span 2", big: true, color: "#10B981", icon: Ic.Layers,  status: "Starter+",   meta: "Illimité",     title: "Multi-établissements",         desc: "Gérez tous vos restaurants, salons ou points de vente depuis une seule interface. Statistiques consolidées.", tags: ["Illimité","Stats consolidées","Rôles équipe"] },
+  { col: "span 1",            color: "#F59E0B", icon: Ic.Clock,   status: "< 5 min",    meta: "Setup rapide", title: "Setup en 5 minutes",           desc: "Aucune installation, aucun code. Opérationnel dès aujourd'hui.", tags: ["Guidé","Support 7j/7"] },
 ];
 
 const TESTIMONIALS = [
@@ -715,9 +715,9 @@ const TESTIMONIALS = [
 ];
 
 const PLANS = [
-  { id: "free",    name: "Essentiel", price: "9,99", desc: "Après votre essai gratuit",  features: ["1 établissement","100 scans/mois","Roue personnalisée","Codes anti-fraude","Support email"],                    cta: "Démarrer l'essai",       href: "/register" },
-  { id: "starter", name: "Starter",  price: "29",   desc: "Pour les indépendants",      features: ["3 établissements","500 scans/mois","Analytics avancés","URL personnalisée","Support prioritaire"],              cta: "Essai 14 jours gratuit", href: "/register", highlight: true },
-  { id: "pro",     name: "Pro",      price: "79",   desc: "Pour les chaînes & agences", features: ["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],               cta: "Nous contacter",         href: "/register" },
+  { id: "free",    name: "Essentiel", price: "9,99", priceAnnual: "7,99", desc: "Après votre essai gratuit",  features: ["1 établissement","100 scans/mois","Roue personnalisée","Codes anti-fraude","Support email"],                    cta: "Démarrer l'essai",       href: "/register" },
+  { id: "starter", name: "Starter",  price: "29",   priceAnnual: "23",   desc: "Pour les indépendants",      features: ["3 établissements","500 scans/mois","Analytics avancés","URL personnalisée","Support prioritaire"],              cta: "Essai 14 jours gratuit", href: "/register", highlight: true },
+  { id: "pro",     name: "Pro",      price: "79",   priceAnnual: "63",   desc: "Pour les chaînes & agences", features: ["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],               cta: "Nous contacter",         href: "/register" },
 ];
 
 const SLIDER_IMGS_DARK  = Array.from({ length: 10 }, (_, i) => `/images/slider_sombre/slider${i+1}.png`);
@@ -727,6 +727,103 @@ const iv = (delay = 0) => ({
   initial: { opacity: 0, y: 28 }, whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.1 }, transition: { duration: 0.65, ease: E, delay },
 });
+
+// ── Stagger Testimonials (21st.dev pattern) ───────────────────────────────────
+function StaggerTestimonials({ isDark, text, text2, text3, card, border }) {
+  const [idx, setIdx] = useState(0);
+  const n = TESTIMONIALS.length;
+  const prev = () => setIdx(i => (i - 1 + n) % n);
+  const next = () => setIdx(i => (i + 1) % n);
+
+  const getPos = (i) => {
+    const diff = ((i - idx) % n + n) % n;
+    if (diff === 0) return 0;
+    if (diff === 1) return 1;
+    if (diff === n - 1) return -1;
+    return 2; // hidden
+  };
+
+  return (
+    <div style={{ position: "relative", height: 260, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      {TESTIMONIALS.map((t, i) => {
+        const pos = getPos(i);
+        if (pos === 2) return null;
+        const isCenter = pos === 0;
+        return (
+          <motion.div key={i}
+            onClick={() => !isCenter && setIdx(i)}
+            animate={{
+              x: pos * 240, scale: isCenter ? 1 : 0.82,
+              rotate: pos === 1 ? 2.5 : pos === -1 ? -2.5 : 0,
+              zIndex: isCenter ? 10 : 5,
+              opacity: isCenter ? 1 : 0.55,
+            }}
+            transition={{ type: "spring", stiffness: 280, damping: 26 }}
+            style={{
+              position: "absolute", width: 290, cursor: isCenter ? "default" : "pointer",
+              borderRadius: 20,
+              background: isCenter
+                ? (isDark ? "linear-gradient(135deg,#1e2d4a,#0f1a35)" : "linear-gradient(135deg,#0F172A,#1e2d4a)")
+                : (isDark ? "rgba(255,255,255,0.04)" : "#ffffff"),
+              border: isCenter ? "1px solid rgba(37,99,235,0.35)" : `1px solid ${border}`,
+              boxShadow: isCenter
+                ? "0 20px 56px rgba(37,99,235,0.3), 0 0 0 1px rgba(37,99,235,0.12)"
+                : isDark ? "0 4px 20px rgba(0,0,0,0.3)" : "0 2px 12px rgba(0,0,0,0.06)",
+              padding: "24px 26px",
+            }}
+          >
+            <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>
+              {[...Array(5)].map((_, j) => <Ic.Star key={j} s={12} c={isCenter ? "#F59E0B" : "#F59E0B"} />)}
+            </div>
+            <p style={{
+              fontSize: 13, lineHeight: 1.75, margin: "0 0 18px", fontStyle: "italic",
+              color: isCenter ? "rgba(255,255,255,0.75)" : text2,
+            }}>&ldquo;{t.q}&rdquo;</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 14, borderTop: `1px solid ${isCenter ? "rgba(255,255,255,0.08)" : border}` }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
+                background: `linear-gradient(135deg,${t.color},${t.color}88)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: 800, color: "#fff", fontSize: 11,
+              }}>{t.avatar}</div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: isCenter ? "#F1F5F9" : text }}>{t.name}</div>
+                <div style={{ fontSize: 10, color: isCenter ? "rgba(255,255,255,0.35)" : text3 }}>{t.role}</div>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+
+      {/* Prev / Next */}
+      {[{fn: prev, side: -380, label: "←"}, {fn: next, side: 380, label: "→"}].map(({fn, side, label}) => (
+        <motion.button key={label} onClick={fn}
+          whileHover={{ scale: 1.08, background: isDark ? "rgba(255,255,255,0.12)" : "rgba(37,99,235,0.12)" }}
+          whileTap={{ scale: 0.94 }}
+          style={{
+            position: "absolute", left: `calc(50% + ${side}px)`, transform: "translateX(-50%)",
+            width: 42, height: 42, borderRadius: "50%", border: `1px solid ${border}`,
+            background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+            color: text2, fontSize: 16, cursor: "pointer", display: "flex",
+            alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY,
+            zIndex: 20,
+          }}
+        >{label}</motion.button>
+      ))}
+
+      {/* Dots */}
+      <div style={{ position: "absolute", bottom: -28, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
+        {TESTIMONIALS.map((_, i) => (
+          <motion.div key={i} onClick={() => setIdx(i)}
+            animate={{ width: i === idx ? 20 : 6, background: i === idx ? "#2563EB" : border }}
+            transition={{ type: "spring", stiffness: 400, damping: 28 }}
+            style={{ height: 6, borderRadius: 99, cursor: "pointer" }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ── Bento Feature Card ─────────────────────────────────────────────────────────
 function BentoCard({ f, isDark, border, text, text2, card }) {
@@ -773,32 +870,60 @@ function BentoCard({ f, isDark, border, text, text2, card }) {
         }} />
 
         <div style={{ position: "relative", zIndex: 1, flex: 1 }}>
-          <motion.div
-            animate={hov ? { rotate: 12, scale: 1.1 } : { rotate: 0, scale: 1 }}
-            transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            style={{
-              width: 44, height: 44, borderRadius: 13,
-              background: `${f.color}18`, border: `1px solid ${f.color}30`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              marginBottom: 16,
-            }}
-          >
-            <f.icon s={20} c={f.color} />
-          </motion.div>
+          {/* Top row: icon + status badge (21st.dev pattern) */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <motion.div
+              animate={hov ? { rotate: 12, scale: 1.1 } : { rotate: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              style={{
+                width: 44, height: 44, borderRadius: 13,
+                background: `${f.color}18`, border: `1px solid ${f.color}30`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <f.icon s={20} c={f.color} />
+            </motion.div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {f.meta && (
+                <span style={{
+                  fontSize: 10, fontWeight: 600, color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.32)",
+                  fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.2px",
+                }}>{f.meta}</span>
+              )}
+              {f.status && (
+                <span style={{
+                  fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 6,
+                  background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
+                  color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)",
+                  backdropFilter: "blur(8px)",
+                  border: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.07)",
+                  letterSpacing: "0.3px",
+                  transition: "background 0.2s, color 0.2s",
+                }}>{f.status}</span>
+              )}
+            </div>
+          </div>
           <h3 style={{ fontSize: f.big ? 20 : 17, fontWeight: 800, color: text, margin: "0 0 8px", letterSpacing: "-0.3px" }}>
             {f.title}
           </h3>
           <p style={{ fontSize: 13, color: text2, lineHeight: 1.7, margin: "0 0 16px" }}>
             {f.desc}
           </p>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {f.tags.map((tag, i) => (
-              <span key={i} style={{
-                padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700,
-                background: `${f.color}14`, border: `1px solid ${f.color}28`,
-                color: f.color, letterSpacing: "0.3px",
-              }}>{tag}</span>
-            ))}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 2 }}>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {f.tags.map((tag, i) => (
+                <span key={i} style={{
+                  padding: "3px 10px", borderRadius: 100, fontSize: 10.5, fontWeight: 700,
+                  background: `${f.color}14`, border: `1px solid ${f.color}28`,
+                  color: f.color, letterSpacing: "0.3px",
+                }}>#{tag}</span>
+              ))}
+            </div>
+            <motion.span
+              animate={{ opacity: hov ? 1 : 0, x: hov ? 0 : -6 }}
+              transition={{ duration: 0.2 }}
+              style={{ fontSize: 11, color: text3, whiteSpace: "nowrap", marginLeft: 8 }}
+            >Voir →</motion.span>
           </div>
         </div>
 
@@ -828,6 +953,7 @@ function BentoCard({ f, isDark, border, text, text2, card }) {
 // ══════════════════════════════════════════════════════════════════════════════
 export default function LandingPage() {
   const [isDark, setIsDark] = useState(false);
+  const [annual, setAnnual] = useState(false);
   const { scrollY } = useScroll();
 
   // ── Theme tokens ─────────────────────────────────────────────────────────────
@@ -1137,6 +1263,11 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
+          {/* Stagger interactive cards (21st.dev) */}
+          <motion.div {...iv(0.05)} style={{ marginBottom: 64 }}>
+            <StaggerTestimonials isDark={isDark} text={text} text2={text2} text3={text3} card={card} border={border} />
+          </motion.div>
+
           {/* Infinite scroll rows — top */}
           <div style={{ position: "relative", marginBottom: 14 }}>
             <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 120, zIndex: 2, pointerEvents: "none",
@@ -1223,9 +1354,33 @@ export default function LandingPage() {
             <h2 style={{ fontFamily: FONT_TITLE, fontSize: "clamp(28px,4.5vw,56px)", fontWeight: 400, margin: "0 0 14px", letterSpacing: "-0.02em", lineHeight: 1.08, color: text }}>
               Simple. <G from="#F59E0B" to="#EF4444">Transparent.</G> Sans surprise.
             </h2>
-            <p style={{ color: text2, fontSize: 16, maxWidth: 360, margin: "0 auto" }}>
+            <p style={{ color: text2, fontSize: 16, maxWidth: 360, margin: "0 auto 28px" }}>
               14 jours gratuits sur tous les plans. Sans carte bancaire.
             </p>
+
+            {/* Billing toggle (21st.dev pattern) */}
+            <motion.div {...iv(0.08)} style={{ display: "inline-flex", alignItems: "center", gap: 0, borderRadius: 9999, border: `1px solid ${border}`, background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)", padding: 4 }}>
+              {[{label: "Mensuel", val: false}, {label: "Annuel", val: true}].map(({label, val}) => (
+                <motion.button key={label} onClick={() => setAnnual(val)}
+                  style={{
+                    padding: "7px 20px", borderRadius: 9999, border: "none", cursor: "pointer",
+                    fontWeight: 700, fontSize: 13, fontFamily: FONT_BODY,
+                    background: annual === val ? (isDark ? "rgba(255,255,255,0.1)" : "#ffffff") : "transparent",
+                    color: annual === val ? (isDark ? "#EEF2FF" : "#0A0D1E") : text3,
+                    boxShadow: annual === val ? (isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.08)") : "none",
+                    transition: "all 0.25s",
+                    display: "flex", alignItems: "center", gap: 6,
+                  }}
+                >
+                  {label}
+                  {val && (
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 99, background: "rgba(16,185,129,0.15)", color: "#10B981", letterSpacing: "0.3px" }}>
+                      −20%
+                    </span>
+                  )}
+                </motion.button>
+              ))}
+            </motion.div>
           </motion.div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, alignItems: "start" }} className="pricing-grid">
@@ -1270,12 +1425,23 @@ export default function LandingPage() {
                     {plan.name}
                   </div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 4 }}>
-                    <span style={{ fontFamily: FONT_TITLE, fontSize: 52, fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1, color: plan.highlight ? "#F5F5F7" : text }}>
-                      {plan.price}
-                    </span>
+                    <AnimatePresence mode="wait">
+                      <motion.span key={annual ? "a" : "m"}
+                        initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                        transition={{ duration: 0.22, ease: E }}
+                        style={{ fontFamily: FONT_TITLE, fontSize: 52, fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1, color: plan.highlight ? "#F5F5F7" : text }}
+                      >
+                        {annual ? plan.priceAnnual : plan.price}
+                      </motion.span>
+                    </AnimatePresence>
                     <span style={{ fontSize: 18, color: plan.highlight ? "#6E6E73" : text2, marginLeft: 2 }}>€</span>
                     <span style={{ fontSize: 13, color: plan.highlight ? "#6E6E73" : text3, marginLeft: 2 }}>/mois</span>
                   </div>
+                  {annual && (
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#10B981", marginBottom: 4 }}>
+                      Économisez {Math.round((parseFloat(plan.price.replace(",",".")) - parseFloat((plan.priceAnnual||plan.price).replace(",","."))) * 12)}€/an
+                    </div>
+                  )}
                   <p style={{ color: plan.highlight ? "#6E6E73" : text3, fontSize: 13, margin: "0 0 24px", lineHeight: 1.5 }}>
                     {plan.desc}
                   </p>
