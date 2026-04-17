@@ -31,8 +31,8 @@ export default function PageDashboard({ user }) {
 
   return (
     <div className="animate-fade-in">
-      {/* Header */}
-      <div className="mb-8">
+      {/* Header — hidden on mobile (AppShell shows the page title there) */}
+      <div className="hidden md:block mb-8">
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
           Bonjour, {firstName} 👋
         </h1>
@@ -226,7 +226,7 @@ export default function PageDashboard({ user }) {
       )}
 
       {/* Stats */}
-      <div className="flex flex-wrap gap-4 mb-7">
+      <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 mb-6">
         <StatCard
           icon="qr"
           label="Scans de page"
@@ -254,7 +254,7 @@ export default function PageDashboard({ user }) {
       </div>
 
       {/* Chart */}
-      <div className="card p-6">
+      <div className="card p-4 md:p-6">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h3 className="text-base font-semibold text-slate-900">Activité — 7 derniers jours</h3>
@@ -267,7 +267,7 @@ export default function PageDashboard({ user }) {
             Total : {s.totalSpins ?? 0}
           </span>
         </div>
-        <ResponsiveContainer width="100%" height={240}>
+        <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={weekChart} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1">

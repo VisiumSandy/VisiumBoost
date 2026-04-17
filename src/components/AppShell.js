@@ -55,8 +55,21 @@ function StripeReturnHandler({ onToast }) {
   return null;
 }
 
+const PAGE_TITLES = {
+  dashboard:    "Tableau de bord",
+  clients:      "Mes entreprises",
+  wheel:        "Ma Roue",
+  affiches:     "Affiches QR",
+  codes:        "Validations",
+  avis:         "Avis Google",
+  stats:        "Statistiques",
+  affiliation:  "Affiliation",
+  subscription: "Abonnement",
+  account:      "Mon compte",
+};
+
 export default function AppShell({ user }) {
-  const { currentPage, setCurrentPage, sidebarCollapsed } = useApp();
+  const { currentPage, setCurrentPage, sidebarCollapsed, pendingValidations } = useApp();
   const [toast, setToast] = useState(null);
 
   const hasAccess = isAccessAllowed(user);
@@ -85,7 +98,7 @@ export default function AppShell({ user }) {
 
       {/* Stripe toast */}
       {toast && (
-        <div style={{
+        <div className="toast-notification" style={{
           position: "fixed", top: 20, right: 20, zIndex: 200,
           background: toast.ok ? "#F0FDF4" : "#FEF2F2",
           border: `1.5px solid ${toast.ok ? "#BBF7D0" : "#FECACA"}`,
@@ -107,8 +120,32 @@ export default function AppShell({ user }) {
         style={{ marginLeft: "var(--sidebar-w)", padding: "36px 40px" }}
       >
         {/* Mobile header */}
-        <div className="md:hidden flex items-center mb-6">
-          <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 48, objectFit: "contain" }} />
+        <div className="md:hidden flex items-center justify-between mb-5" style={{ marginTop: -4 }}>
+          <div>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.3px" }}>
+              {PAGE_TITLES[currentPage] || "Dashboard"}
+            </h1>
+          </div>
+          <button
+            onClick={() => setCurrentPage("account")}
+            style={{
+              width: 38, height: 38, borderRadius: "50%",
+              background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: "none", cursor: "pointer", flexShrink: 0,
+              color: "#fff", fontWeight: 800, fontSize: 15,
+              position: "relative",
+            }}
+          >
+            {user?.name?.charAt(0).toUpperCase()}
+            {pendingValidations > 0 && (
+              <span style={{
+                position: "absolute", top: -2, right: -2,
+                background: "#EF4444", width: 10, height: 10,
+                borderRadius: "50%", border: "2px solid #F8FAFC",
+              }} />
+            )}
+          </button>
         </div>
 
         {/* Trial expiry warning banner (last 3 days) */}
@@ -143,9 +180,12 @@ export default function AppShell({ user }) {
         :root { --sidebar-w: ${sidebarCollapsed ? "68px" : "256px"}; }
         @media (max-width: 767px) {
           :root { --sidebar-w: 0px; }
-          main { padding: 20px 16px 96px !important; }
+          main { padding: 20px 16px 88px !important; }
         }
         @keyframes slideIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+        @media (max-width: 767px) {
+          .toast-notification { top: auto !important; bottom: 96px !important; left: 16px !important; right: 16px !important; max-width: none !important; }
+        }
       `}</style>
     </>
   );
