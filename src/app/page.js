@@ -15,6 +15,7 @@ const G = ({ children, from = "#2563EB", to = "#38BDF8" }) => (
     background: `linear-gradient(135deg,${from} 0%,${to} 100%)`,
     WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
     backgroundClip: "text", display: "inline",
+    paddingRight: "0.1em", marginRight: "-0.1em",
   }}>{children}</span>
 );
 
