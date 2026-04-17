@@ -513,102 +513,66 @@ function HeroWheel({ isDark }) {
       <AnimatePresence mode="wait">
         {won && (
           <motion.div key="won"
-            initial={{ opacity: 0, rotateY: -22, scale: 0.84, y: 10 }}
-            animate={{ opacity: 1, rotateY: 0, scale: 1, y: 0 }}
-            exit={{ opacity: 0, rotateY: 14, scale: 0.88, y: -6 }}
-            transition={{ type: "spring", stiffness: 290, damping: 22 }}
-            style={{ perspective: "900px", position: "relative" }}
+            initial={{ opacity: 0, y: 10, scaleX: 0.82 }}
+            animate={{ opacity: 1, y: 0, scaleX: 1 }}
+            exit={{ opacity: 0, y: 6, scaleX: 0.9 }}
+            transition={{ type: "spring", stiffness: 320, damping: 26 }}
+            style={{
+              display: "flex", alignItems: "center", gap: 12,
+              background: isDark ? "rgba(11,14,32,0.88)" : "rgba(255,255,255,0.88)",
+              backdropFilter: "blur(24px) saturate(180%)",
+              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              border: isDark ? "1px solid rgba(245,158,11,0.14)" : "1px solid rgba(245,158,11,0.2)",
+              borderRadius: 9999, padding: "9px 14px 9px 10px",
+              boxShadow: isDark ? "0 12px 40px rgba(0,0,0,0.55)" : "0 12px 40px rgba(0,0,0,0.08)",
+            }}
           >
-            {/* Ambient halo */}
-            <div style={{
-              position: "absolute", inset: -28, borderRadius: 48, pointerEvents: "none",
-              background: "radial-gradient(circle, rgba(245,158,11,0.16) 0%, transparent 68%)",
-              filter: "blur(16px)",
-            }} />
-
-            {/* Sparkle particles */}
-            {[...Array(6)].map((_, i) => {
-              const a = (i / 6) * 360;
-              const rad = (a * Math.PI) / 180;
-              return (
-                <motion.div key={i}
-                  initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
-                  animate={{ opacity: [0, 1, 0], x: Math.cos(rad) * 58, y: Math.sin(rad) * 58, scale: [0, 1.3, 0.5] }}
-                  transition={{ duration: 0.75, delay: i * 0.045, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    position: "absolute", top: "50%", left: "50%",
-                    width: 5, height: 5, borderRadius: "50%", marginLeft: -2.5, marginTop: -2.5,
-                    background: i % 3 === 0 ? "#F59E0B" : i % 3 === 1 ? "#8B5CF6" : "#3B82F6",
-                    pointerEvents: "none",
-                  }}
-                />
-              );
-            })}
-
-            {/* Glass card */}
-            <div style={{
-              position: "relative",
-              background: isDark
-                ? "linear-gradient(145deg, rgba(11,14,32,0.95) 0%, rgba(18,22,46,0.92) 100%)"
-                : "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,250,255,0.92) 100%)",
-              backdropFilter: "blur(28px) saturate(200%)",
-              WebkitBackdropFilter: "blur(28px) saturate(200%)",
-              border: isDark ? "1px solid rgba(245,158,11,0.16)" : "1px solid rgba(245,158,11,0.22)",
-              borderRadius: 22, padding: "20px 30px 17px", textAlign: "center", minWidth: 188,
-              boxShadow: isDark
-                ? "0 28px 72px rgba(0,0,0,0.68), 0 1px 0 rgba(255,255,255,0.05) inset"
-                : "0 28px 72px rgba(0,0,0,0.09), 0 1px 0 rgba(255,255,255,1) inset",
-            }}>
-
-              {/* Spinning conic ring + trophy */}
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 11 }}>
-                <div style={{ position: "relative", width: 50, height: 50 }}>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
-                    style={{
-                      position: "absolute", inset: 0, borderRadius: "50%",
-                      background: "conic-gradient(from 0deg, #F59E0B, #EF4444, #8B5CF6, #3B82F6, #10B981, #F59E0B)",
-                    }}
-                  />
-                  <div style={{
-                    position: "absolute", inset: 3, borderRadius: "50%",
-                    background: isDark ? "#0b0e20" : "#ffffff",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    zIndex: 1, fontSize: 20,
-                  }}>🏆</div>
-                </div>
-              </div>
-
-              {/* Eyebrow */}
-              <div style={{
-                fontSize: 9, fontWeight: 900, letterSpacing: 2.5, marginBottom: 5,
-                color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)",
-                textTransform: "uppercase", fontFamily: FONT_BODY,
-              }}>Félicitations</div>
-
-              {/* Prize name */}
-              <div style={{
-                fontSize: 18, fontWeight: 900, fontFamily: FONT_TITLE, lineHeight: 1.25, marginBottom: 13,
-                background: "linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-                filter: "drop-shadow(0 0 10px rgba(245,158,11,0.2))",
-              }}>{won}</div>
-
-              {/* Replay */}
-              <motion.button
-                onClick={() => setWon(null)}
-                whileHover={{ scale: 1.06, background: isDark ? "rgba(255,255,255,0.11)" : "rgba(0,0,0,0.08)" }}
-                whileTap={{ scale: 0.96 }}
+            {/* Conic ring icon */}
+            <div style={{ position: "relative", width: 34, height: 34, flexShrink: 0 }}>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
                 style={{
-                  padding: "5px 17px", borderRadius: 100, border: "none",
-                  background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
-                  color: isDark ? "rgba(255,255,255,0.38)" : "rgba(0,0,0,0.36)",
-                  fontWeight: 600, fontSize: 11, cursor: "pointer",
-                  letterSpacing: 0.5, fontFamily: FONT_BODY,
+                  position: "absolute", inset: 0, borderRadius: "50%",
+                  background: "conic-gradient(from 0deg, #F59E0B, #EF4444, #8B5CF6, #F59E0B)",
                 }}
-              >Rejouer</motion.button>
+              />
+              <div style={{
+                position: "absolute", inset: 2.5, borderRadius: "50%",
+                background: isDark ? "#0b0e20" : "#fff",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 14, zIndex: 1,
+              }}>🏆</div>
             </div>
+
+            {/* Text */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <div style={{
+                fontSize: 8.5, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase",
+                color: isDark ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.22)", fontFamily: FONT_BODY,
+              }}>Gagné</div>
+              <div style={{
+                fontSize: 14, fontWeight: 800, fontFamily: FONT_TITLE, lineHeight: 1,
+                background: "linear-gradient(135deg,#F59E0B,#EF4444)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              }}>{won}</div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ width: 1, height: 22, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)", flexShrink: 0 }} />
+
+            {/* Rejouer */}
+            <motion.button
+              onClick={() => setWon(null)}
+              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}
+              style={{
+                padding: "4px 13px", borderRadius: 9999, border: "none",
+                background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
+                color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)",
+                fontWeight: 600, fontSize: 10.5, cursor: "pointer",
+                letterSpacing: 0.3, fontFamily: FONT_BODY, whiteSpace: "nowrap",
+              }}
+            >Rejouer</motion.button>
           </motion.div>
         )}
         {!won && !spinning && (
