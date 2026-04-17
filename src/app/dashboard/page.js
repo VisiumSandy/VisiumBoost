@@ -23,7 +23,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div style={{
-        minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center",
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
         background: "#F8FAFC", fontFamily: "'Inter', sans-serif",
       }}>
         <div style={{ textAlign: "center" }}>
@@ -35,7 +35,9 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user) return null;
+  if (!user) return (
+    <div style={{ minHeight: "100vh", background: "#F8FAFC" }} />
+  );
 
   return <AppShell user={user} />;
 }

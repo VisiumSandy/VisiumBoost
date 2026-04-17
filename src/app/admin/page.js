@@ -794,7 +794,7 @@ export default function AdminPage() {
 
   if (loading || !user) {
     return (
-      <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC", fontFamily: "'Inter',sans-serif" }}>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC", fontFamily: "'Inter',sans-serif" }}>
         <div style={{ textAlign: "center" }}>
           <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}`}</style>
           <img src="/images/logo_second.png" alt="VisiumBoost" style={{ height: 64, objectFit: "contain", margin: "0 auto 16px", display: "block", animation: "pulse 1.6s ease-in-out infinite" }} />
@@ -807,7 +807,7 @@ export default function AdminPage() {
   const s = stats || {};
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#F8FAFC", fontFamily: "'Inter',system-ui,sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "'Inter',system-ui,sans-serif" }}>
       <style>{`
         @keyframes slideUp { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
         * { box-sizing: border-box; }
