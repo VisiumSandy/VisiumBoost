@@ -46,16 +46,16 @@ const NAV_LINKS = [
 ];
 
 function NavBar({ isDark, onToggleDark }) {
-  const [scrolled,  setScrolled]  = useState(false);
-  const [hoveredId, setHoveredId] = useState(null);
-  const [activeId,  setActiveId]  = useState(null);
-  const [themeHov,  setThemeHov]  = useState(false);
-  const [loginHov,  setLoginHov]  = useState(false);
+  const [scrolled,    setScrolled]    = useState(false);
+  const [hoveredId,   setHoveredId]   = useState(null);
+  const [activeId,    setActiveId]    = useState(null);
+  const [themeHov,    setThemeHov]    = useState(false);
+  const [mobileOpen,  setMobileOpen]  = useState(false);
 
-  const border  = isDark ? "rgba(255,255,255,0.09)" : "rgba(37,99,235,0.12)";
-  const text2   = isDark ? "#8892B0" : "#4B5563";
+  const border = isDark ? "rgba(255,255,255,0.09)" : "rgba(37,99,235,0.12)";
+  const text2  = isDark ? "#8892B0" : "#4B5563";
+  const textMain = isDark ? "#EEF2FF" : "#0A0D1E";
 
-  // Scroll detection
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -63,28 +63,25 @@ function NavBar({ isDark, onToggleDark }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Floating pill glass style (after scroll)
-  const pillBg   = isDark ? "rgba(6,9,26,0.82)"    : "rgba(255,255,255,0.82)";
-  const pillBrd  = isDark ? "rgba(255,255,255,0.1)" : "rgba(37,99,235,0.14)";
-  const pillShadow = isDark
+  // Close drawer on resize to desktop
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 860) setMobileOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const pillBg      = isDark ? "rgba(6,9,26,0.82)"    : "rgba(255,255,255,0.82)";
+  const pillBrd     = isDark ? "rgba(255,255,255,0.1)" : "rgba(37,99,235,0.14)";
+  const pillShadow  = isDark
     ? "0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset"
     : "0 8px 40px rgba(37,99,235,0.1), 0 1px 0 rgba(255,255,255,0.9) inset";
+  const drawerBg    = isDark ? "rgba(6,9,26,0.97)"    : "rgba(255,255,255,0.97)";
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, pointerEvents: "none" }}>
-      {/* Full-width transparent backdrop at top */}
-      <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: scrolled ? 0 : 1 }}
-        transition={{ duration: 0.35 }}
-        style={{
-          position: "absolute", inset: 0,
-          backdropFilter: "blur(0px)", WebkitBackdropFilter: "blur(0px)",
-          pointerEvents: "none",
-        }}
-      />
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, pointerEvents: "none" }}>
 
       {/* Floating pill nav */}
-      <div style={{ display: "flex", justifyContent: "center", padding: "14px 24px", pointerEvents: "none" }}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "12px 16px", pointerEvents: "none" }}>
         <motion.nav
           initial={{ opacity: 0, y: -24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -94,10 +91,10 @@ function NavBar({ isDark, onToggleDark }) {
             pointerEvents: "all",
             padding: scrolled ? "7px 10px" : "8px 12px",
             borderRadius: 9999,
-            background:    scrolled ? pillBg   : "transparent",
-            border:        scrolled ? `1px solid ${pillBrd}` : "1px solid transparent",
-            boxShadow:     scrolled ? pillShadow : "none",
-            backdropFilter: scrolled ? "blur(28px) saturate(200%)" : "none",
+            background:           scrolled ? pillBg     : "transparent",
+            border:               scrolled ? `1px solid ${pillBrd}` : "1px solid transparent",
+            boxShadow:            scrolled ? pillShadow : "none",
+            backdropFilter:       scrolled ? "blur(28px) saturate(200%)" : "none",
             WebkitBackdropFilter: scrolled ? "blur(28px) saturate(200%)" : "none",
             transition: "background 0.4s, border-color 0.4s, box-shadow 0.4s, padding 0.4s",
             width: "min(100%, 880px)",
@@ -107,48 +104,36 @@ function NavBar({ isDark, onToggleDark }) {
           {/* Logo */}
           <motion.div whileHover={{ scale: 1.04 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
             <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-              <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 32, objectFit: "contain" }} />
+              <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 30, objectFit: "contain" }} />
             </Link>
           </motion.div>
 
-          {/* Nav links with liquid sliding indicator */}
+          {/* Nav links — desktop only */}
           <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: 2, position: "relative" }}>
             {NAV_LINKS.map(({ label, href }) => {
               const isHov = hoveredId === label;
               const isAct = activeId === label;
               return (
-                <a
-                  key={label} href={href}
+                <a key={label} href={href}
                   onMouseEnter={() => setHoveredId(label)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={() => setActiveId(label)}
                   style={{
                     position: "relative", padding: "7px 16px", borderRadius: 9999,
                     textDecoration: "none", fontWeight: 500, fontSize: 14,
-                    color: isAct
-                      ? (isDark ? "#EEF2FF" : "#0A0D1E")
-                      : (isHov ? (isDark ? "#E2E8F0" : "#1e3a8a") : text2),
-                    transition: "color 0.22s",
-                    zIndex: 1,
+                    color: isAct ? textMain : (isHov ? (isDark ? "#E2E8F0" : "#1e3a8a") : text2),
+                    transition: "color 0.22s", zIndex: 1,
                   }}
                 >
-                  {/* Liquid hover pill */}
                   <AnimatePresence>
                     {(isHov || isAct) && (
-                      <motion.span
-                        layoutId="nav-pill"
-                        initial={{ opacity: 0, scale: 0.88 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.88 }}
+                      <motion.span layoutId="nav-pill"
+                        initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.88 }}
                         transition={{ type: "spring", stiffness: 380, damping: 28 }}
                         style={{
                           position: "absolute", inset: 0, borderRadius: 9999, zIndex: -1,
-                          background: isAct
-                            ? (isDark ? "rgba(37,99,235,0.22)" : "rgba(37,99,235,0.1)")
-                            : (isDark ? "rgba(255,255,255,0.07)" : "rgba(37,99,235,0.07)"),
-                          border: `1px solid ${isAct
-                            ? (isDark ? "rgba(37,99,235,0.4)" : "rgba(37,99,235,0.2)")
-                            : (isDark ? "rgba(255,255,255,0.1)" : "rgba(37,99,235,0.12)")}`,
+                          background: isAct ? (isDark ? "rgba(37,99,235,0.22)" : "rgba(37,99,235,0.1)") : (isDark ? "rgba(255,255,255,0.07)" : "rgba(37,99,235,0.07)"),
+                          border: `1px solid ${isAct ? (isDark ? "rgba(37,99,235,0.4)" : "rgba(37,99,235,0.2)") : (isDark ? "rgba(255,255,255,0.1)" : "rgba(37,99,235,0.12)")}`,
                         }}
                       />
                     )}
@@ -159,58 +144,164 @@ function NavBar({ isDark, onToggleDark }) {
             })}
           </div>
 
-          {/* Right actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-
-            {/* Theme toggle — liquid rotation */}
-            <motion.button
-              onClick={onToggleDark}
+          {/* Right — desktop */}
+          <div className="nav-right-desktop" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <motion.button onClick={onToggleDark}
               onMouseEnter={() => setThemeHov(true)} onMouseLeave={() => setThemeHov(false)}
               whileTap={{ scale: 0.88 }}
               style={{
                 width: 36, height: 36, borderRadius: 10,
                 border: `1px solid ${themeHov ? (isDark ? "rgba(255,255,255,0.2)" : "rgba(37,99,235,0.25)") : border}`,
-                background: themeHov
-                  ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(37,99,235,0.06)")
-                  : "transparent",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "background 0.25s, border-color 0.25s",
-                flexShrink: 0,
+                background: themeHov ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(37,99,235,0.06)") : "transparent",
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "background 0.25s, border-color 0.25s", flexShrink: 0,
               }}
             >
               <AnimatePresence mode="wait">
                 <motion.div key={isDark ? "sun" : "moon"}
-                  initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-                  animate={{ rotate: 0,   opacity: 1, scale: 1 }}
-                  exit={{    rotate:  90,  opacity: 0, scale: 0.5 }}
-                  transition={{ duration: 0.3, ease: [0.22,1,0.36,1] }}
+                  initial={{ rotate: -90, opacity: 0, scale: 0.5 }} animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: 90, opacity: 0, scale: 0.5 }} transition={{ duration: 0.3, ease: [0.22,1,0.36,1] }}
+                >
+                  {isDark ? <Ic.Sun s={16} c={text2} /> : <Ic.Moon s={16} c={text2} />}
+                </motion.div>
+              </AnimatePresence>
+            </motion.button>
+            <a href="/login" style={{
+              padding: "7px 15px", borderRadius: 9999, textDecoration: "none",
+              color: text2, fontWeight: 500, fontSize: 14, transition: "all 0.22s",
+            }}>Se connecter</a>
+            <NavCTA isDark={isDark} />
+          </div>
+
+          {/* Right — mobile: theme toggle + hamburger */}
+          <div className="nav-right-mobile" style={{ display: "none", alignItems: "center", gap: 8 }}>
+            <motion.button onClick={onToggleDark} whileTap={{ scale: 0.88 }}
+              style={{
+                width: 36, height: 36, borderRadius: 10,
+                border: `1px solid ${border}`, background: "transparent",
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.div key={isDark ? "sun2" : "moon2"}
+                  initial={{ rotate: -90, opacity: 0, scale: 0.5 }} animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: 90, opacity: 0, scale: 0.5 }} transition={{ duration: 0.3, ease: [0.22,1,0.36,1] }}
                 >
                   {isDark ? <Ic.Sun s={16} c={text2} /> : <Ic.Moon s={16} c={text2} />}
                 </motion.div>
               </AnimatePresence>
             </motion.button>
 
-            {/* Login link */}
-            <a
-              href="/login"
-              onMouseEnter={() => setLoginHov(true)} onMouseLeave={() => setLoginHov(false)}
+            {/* Hamburger */}
+            <motion.button
+              onClick={() => setMobileOpen(o => !o)} whileTap={{ scale: 0.9 }}
               style={{
-                padding: "7px 15px", borderRadius: 9999, textDecoration: "none",
-                color: loginHov ? (isDark ? "#EEF2FF" : "#1e3a8a") : text2,
-                fontWeight: 500, fontSize: 14,
-                background: loginHov ? (isDark ? "rgba(255,255,255,0.07)" : "rgba(37,99,235,0.06)") : "transparent",
-                border: loginHov ? `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(37,99,235,0.15)"}` : "1px solid transparent",
-                transition: "all 0.22s",
-                display: "inline-block",
+                width: 38, height: 38, borderRadius: 10,
+                border: `1px solid ${mobileOpen ? (isDark ? "rgba(37,99,235,0.4)" : "rgba(37,99,235,0.2)") : border}`,
+                background: mobileOpen ? (isDark ? "rgba(37,99,235,0.15)" : "rgba(37,99,235,0.07)") : "transparent",
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                flexDirection: "column", gap: 5, padding: "10px",
+                transition: "all 0.25s",
               }}
-            >Se connecter</a>
-
-            {/* CTA — animated shimmer border */}
-            <NavCTA isDark={isDark} />
+            >
+              <motion.span animate={mobileOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
+                transition={{ duration: 0.25 }}
+                style={{ display: "block", width: 18, height: 1.5, background: text2, borderRadius: 2, transformOrigin: "center" }} />
+              <motion.span animate={mobileOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
+                transition={{ duration: 0.2 }}
+                style={{ display: "block", width: 14, height: 1.5, background: text2, borderRadius: 2 }} />
+              <motion.span animate={mobileOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
+                transition={{ duration: 0.25 }}
+                style={{ display: "block", width: 18, height: 1.5, background: text2, borderRadius: 2, transformOrigin: "center" }} />
+            </motion.button>
           </div>
         </motion.nav>
       </div>
+
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: -1, pointerEvents: "all" }}
+            />
+            {/* Drawer panel */}
+            <motion.div
+              initial={{ opacity: 0, y: -12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.97 }}
+              transition={{ duration: 0.3, ease: [0.22,1,0.36,1] }}
+              style={{
+                position: "absolute", top: "calc(100% - 8px)", left: 16, right: 16,
+                background: drawerBg,
+                backdropFilter: "blur(32px) saturate(200%)",
+                WebkitBackdropFilter: "blur(32px) saturate(200%)",
+                border: `1px solid ${pillBrd}`,
+                borderRadius: 20,
+                boxShadow: isDark ? "0 24px 64px rgba(0,0,0,0.6)" : "0 24px 64px rgba(37,99,235,0.15)",
+                overflow: "hidden", pointerEvents: "all",
+              }}
+            >
+              {/* Nav links */}
+              <div style={{ padding: "8px 8px 4px" }}>
+                {NAV_LINKS.map(({ label, href }, i) => (
+                  <motion.a key={label} href={href}
+                    initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 + 0.05, duration: 0.3, ease: [0.22,1,0.36,1] }}
+                    onClick={() => { setActiveId(label); setMobileOpen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", padding: "14px 16px",
+                      borderRadius: 12, textDecoration: "none",
+                      color: activeId === label ? (isDark ? "#93C5FD" : "#1D4ED8") : textMain,
+                      fontWeight: 600, fontSize: 16,
+                      background: activeId === label ? (isDark ? "rgba(37,99,235,0.15)" : "rgba(37,99,235,0.07)") : "transparent",
+                      transition: "background 0.2s, color 0.2s",
+                    }}
+                  >{label}</motion.a>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: isDark ? "rgba(255,255,255,0.06)" : "rgba(37,99,235,0.08)", margin: "4px 16px" }} />
+
+              {/* Actions */}
+              <div style={{ padding: "8px 8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+                <motion.a href="/login"
+                  initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3, ease: [0.22,1,0.36,1] }}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: "block", padding: "13px 16px", borderRadius: 12,
+                    textDecoration: "none", color: text2, fontWeight: 600, fontSize: 15,
+                    border: `1px solid ${border}`, textAlign: "center",
+                    transition: "background 0.2s",
+                  }}
+                >Se connecter</motion.a>
+                <motion.div
+                  initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.25, duration: 0.3, ease: [0.22,1,0.36,1] }}
+                >
+                  <Link href="/register" onClick={() => setMobileOpen(false)}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      padding: "14px 16px", borderRadius: 12, textDecoration: "none",
+                      background: "linear-gradient(135deg,#2563EB,#06B6D4)", color: "#fff",
+                      fontWeight: 700, fontSize: 15,
+                      boxShadow: "0 4px 16px rgba(37,99,235,0.4)",
+                    }}
+                  >
+                    Commencer gratuitement <Ic.Arrow s={14} c="#fff" />
+                  </Link>
+                </motion.div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -596,7 +687,7 @@ const iv = (delay = 0) => ({
 function BentoCard({ f, isDark, border, text, text2, card }) {
   const [hov, setHov] = useState(false);
   return (
-    <TiltCard style={{ gridColumn: f.col, height: "100%" }}>
+    <TiltCard style={{ gridColumn: f.col, height: "100%" }} className={f.big ? "bento-wide" : ""}>
       <motion.div {...iv()}
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         style={{
@@ -774,6 +865,7 @@ export default function LandingPage() {
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: E, delay: 0.18 }}
+              className="hero-btns"
               style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
               <FluidBtn href="/register" variant="primary" size="lg" isDark={isDark}>
                 Commencer gratuitement <Ic.Arrow />
@@ -815,7 +907,7 @@ export default function LandingPage() {
           </div>
 
           {/* RIGHT */}
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div className="hero-wheel-wrap" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             <HeroWheel isDark={isDark} />
           </div>
         </div>
@@ -1041,7 +1133,7 @@ export default function LandingPage() {
           </div>
 
           {/* Trust badges */}
-          <motion.div {...iv(0.1)} style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", marginTop: 40, padding: "0 24px" }}>
+          <motion.div {...iv(0.1)} className="trust-badges" style={{ display: "grid", gridTemplateColumns: "repeat(4,auto)", justifyContent: "center", gap: 12, marginTop: 40, padding: "0 24px" }}>
             {[
               { icon: Ic.Shield, label: "RGPD Conforme",   sub: "Données hébergées en France" },
               { icon: Ic.Lock,   label: "SSL / HTTPS",     sub: "Connexion 100% sécurisée" },
@@ -1256,30 +1348,64 @@ export default function LandingPage() {
       </footer>
 
       <style>{`
-        * { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; }
         body { transition: background-color 0.4s ease, color 0.4s ease; }
+        html { scroll-behavior: smooth; }
+
+        /* Grids — desktop defaults */
         .hero-grid    { grid-template-columns: 1fr 1fr; }
         .steps-grid   { grid-template-columns: repeat(3,1fr); }
         .pricing-grid { grid-template-columns: repeat(3,1fr); }
         .stats-grid   { grid-template-columns: repeat(4,1fr); }
         .bento-grid   { grid-template-columns: repeat(3,1fr); }
-        .nav-links    { display: flex; }
+        .nav-links         { display: flex; }
+        .nav-right-desktop { display: flex; }
+        .nav-right-mobile  { display: none !important; }
+
+        /* Tablet — ≤ 1024 */
         @media (max-width: 1024px) {
           .hero-grid  { grid-template-columns: 1fr !important; }
           .bento-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .bento-wide { grid-column: span 2 !important; }
+          .pricing-grid { grid-template-columns: repeat(2,1fr) !important; }
         }
-        @media (max-width: 860px) {
-          .steps-grid, .pricing-grid { grid-template-columns: 1fr !important; }
-          .stats-grid  { grid-template-columns: repeat(2,1fr) !important; }
-          .nav-links   { display: none !important; }
+
+        /* Mobile — ≤ 768 */
+        @media (max-width: 768px) {
+          .nav-links          { display: none !important; }
+          .nav-right-desktop  { display: none !important; }
+          .nav-right-mobile   { display: flex !important; }
+
+          .steps-grid   { grid-template-columns: 1fr !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
+          .stats-grid   { grid-template-columns: repeat(2,1fr) !important; }
+          .bento-grid   { grid-template-columns: 1fr !important; }
+          .bento-wide   { grid-column: span 1 !important; }
           .step-connector { display: none !important; }
-          .bento-grid  { grid-template-columns: 1fr !important; }
+
+          /* Hero adjustments */
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .hero-wheel-wrap { display: none !important; }
+
+          /* Buttons — full width stack on mobile */
+          .hero-btns { flex-direction: column !important; align-items: stretch !important; }
+          .hero-btns a, .hero-btns button { justify-content: center !important; width: 100% !important; }
+
+          /* Trust badges — 2 cols */
+          .trust-badges { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+
+          /* Section padding reduction */
+          section { padding-left: 18px !important; padding-right: 18px !important; }
         }
-        @media (max-width: 600px) {
-          .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+
+        /* Small phones — ≤ 480 */
+        @media (max-width: 480px) {
+          .stats-grid   { grid-template-columns: repeat(2,1fr) !important; }
+          .trust-badges { grid-template-columns: 1fr !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
         }
+
         @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.6)} }
-        html { scroll-behavior: smooth; }
       `}</style>
     </div>
   );
