@@ -826,7 +826,7 @@ function StaggerTestimonials({ isDark, text, text2, text3, card, border }) {
 }
 
 // ── Bento Feature Card ─────────────────────────────────────────────────────────
-function BentoCard({ f, isDark, border, text, text2, card }) {
+function BentoCard({ f, isDark, border, text, text2, text3, card }) {
   const [hov, setHov] = useState(false);
   return (
     <TiltCard style={{ gridColumn: f.col, height: "100%" }} className={f.big ? "bento-wide" : ""}>
@@ -1225,7 +1225,7 @@ export default function LandingPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, alignItems: "stretch" }} className="bento-grid">
             {BENTO_FEATURES.map((f, i) => (
-              <BentoCard key={i} f={f} isDark={isDark} border={border} text={text} text2={text2} card={card} />
+              <BentoCard key={i} f={f} isDark={isDark} border={border} text={text} text2={text2} text3={text3} card={card} />
             ))}
           </div>
         </div>
