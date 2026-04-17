@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import StatCard from "@/components/StatCard";
+import { SkeletonStatCards, SkeletonCard, Skeleton, SkeletonStyles } from "@/components/Skeleton";
 import { useApp } from "@/lib/context";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -28,6 +29,18 @@ export default function PageDashboard({ user }) {
   });
 
   const firstName = user?.name?.split(" ")[0] || "là";
+
+  if (loading) return (
+    <div className="animate-fade-in">
+      <SkeletonStyles />
+      <SkeletonStatCards />
+      <SkeletonCard>
+        <Skeleton w="40%" h={16} radius={6} mb={6} />
+        <Skeleton w="25%" h={12} radius={4} mb={20} />
+        <Skeleton w="100%" h={200} radius={12} />
+      </SkeletonCard>
+    </div>
+  );
 
   return (
     <div className="animate-fade-in">
@@ -227,30 +240,10 @@ export default function PageDashboard({ user }) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 mb-6">
-        <StatCard
-          icon="qr"
-          label="Scans de page"
-          value={loading ? "—" : String(s.totalScans ?? 0)}
-          color="#3B82F6"
-        />
-        <StatCard
-          icon="wheel"
-          label="Roues tournées"
-          value={loading ? "—" : String(s.totalSpins ?? 0)}
-          color="#0EA5E9"
-        />
-        <StatCard
-          icon="check"
-          label="Codes validés"
-          value={loading ? "—" : String(s.validatedSpins ?? 0)}
-          color="#10B981"
-        />
-        <StatCard
-          icon="trendUp"
-          label="Taux de retrait"
-          value={loading ? "—" : `${s.conversionRate ?? 0}%`}
-          color="#F59E0B"
-        />
+        <StatCard icon="qr"      label="Scans de page"   value={String(s.totalScans ?? 0)}        color="#3B82F6" />
+        <StatCard icon="wheel"   label="Roues tournées"  value={String(s.totalSpins ?? 0)}        color="#0EA5E9" />
+        <StatCard icon="check"   label="Codes validés"   value={String(s.validatedSpins ?? 0)}    color="#10B981" />
+        <StatCard icon="trendUp" label="Taux de retrait" value={`${s.conversionRate ?? 0}%`}      color="#F59E0B" />
       </div>
 
       {/* Chart */}

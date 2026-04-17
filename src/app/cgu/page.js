@@ -184,15 +184,55 @@ export default function CGUPage() {
           </Para>
         </Section>
 
-        <Section num="6" title="Facturation et paiement">
+        <Section num="6" title="Facturation et paiement — Conditions Stripe">
           <Para>
             Les abonnements payants sont facturés mensuellement via la plateforme de paiement
-            sécurisée Stripe. En cas d&apos;échec de paiement, l&apos;accès aux fonctionnalités premium
+            sécurisée <strong style={{ color: "#374151" }}>Stripe</strong>. En cas d&apos;échec de paiement, l&apos;accès aux fonctionnalités premium
             pourra être suspendu après une période de grâce de 7 jours.
           </Para>
           <Para>
-            Les paiements sont sécurisés par Stripe et conformes aux standards PCI-DSS. VisiumBoost
-            ne stocke aucune donnée bancaire.
+            Les paiements sont sécurisés par Stripe et conformes aux standards <strong style={{ color: "#374151" }}>PCI-DSS niveau 1</strong>.
+            VisiumBoost ne stocke, ne voit et ne traite <strong style={{ color: "#374151" }}>aucune donnée bancaire</strong>.
+            L&apos;ensemble des informations de paiement (numéro de carte, date d&apos;expiration, CVV)
+            sont saisies directement sur les serveurs de Stripe.
+          </Para>
+          <div style={{
+            background: "#F8FAFC", border: "1.5px solid #E2E8F0", borderRadius: 12,
+            padding: "16px 20px", display: "flex", flexDirection: "column", gap: 8,
+          }}>
+            <p style={{ fontWeight: 700, color: "#374151", margin: 0, fontSize: 14 }}>
+              Conditions spécifiques au paiement via Stripe :
+            </p>
+            <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6 }}>
+              <li style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7 }}>
+                En souscrivant à un plan payant, vous acceptez également les{" "}
+                <a href="https://stripe.com/fr/legal/consumer" target="_blank" rel="noopener noreferrer" style={{ color: "#2563EB", fontWeight: 600, textDecoration: "none" }}>
+                  Conditions d&apos;utilisation des services Stripe
+                </a>.
+              </li>
+              <li style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7 }}>
+                Les abonnements sont renouvelés automatiquement à la date anniversaire.
+                Vous pouvez annuler à tout moment depuis l&apos;espace «&nbsp;Abonnement&nbsp;» du tableau de bord.
+              </li>
+              <li style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7 }}>
+                En cas d&apos;échec de paiement répété (3 tentatives), l&apos;abonnement sera annulé
+                et votre compte basculé sur le plan Gratuit.
+              </li>
+              <li style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7 }}>
+                Les remboursements sont traités par Stripe sous 5 à 10 jours ouvrés selon
+                votre établissement bancaire.
+              </li>
+              <li style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7 }}>
+                Stripe peut collecter certaines données pour prévenir la fraude — consulter la{" "}
+                <a href="https://stripe.com/fr/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "#2563EB", fontWeight: 600, textDecoration: "none" }}>
+                  politique de confidentialité Stripe
+                </a>.
+              </li>
+            </ul>
+          </div>
+          <Para>
+            Pour gérer votre abonnement, accéder à vos factures ou mettre à jour votre moyen de
+            paiement, rendez-vous dans votre tableau de bord → section <strong style={{ color: "#374151" }}>Abonnement</strong>.
           </Para>
         </Section>
 
@@ -333,6 +373,7 @@ export default function CGUPage() {
         <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
           <Link href="/mentions-legales" style={{ fontSize: 13, color: "#52525B", textDecoration: "none" }}>Mentions légales</Link>
           <Link href="/cgu" style={{ fontSize: 13, color: "#52525B", textDecoration: "none" }}>CGU</Link>
+          <Link href="/politique-de-confidentialite" style={{ fontSize: 13, color: "#94A3B8", textDecoration: "none" }}>Confidentialité</Link>
         </div>
         <div style={{ fontSize: 13, color: "#374151" }}>© 2026 VisiumBoost — Tous droits réservés</div>
       </footer>

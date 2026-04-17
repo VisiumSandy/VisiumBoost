@@ -162,7 +162,9 @@ export default function RegisterPage() {
 
             <p style={{ fontSize: 12, color: "#94A3B8", textAlign: "center", lineHeight: 1.6 }}>
               En créant un compte, vous acceptez nos{" "}
-              <span style={{ color: "#2563EB", cursor: "pointer" }}>Conditions d&apos;utilisation</span>
+              <a href="/cgu" target="_blank" rel="noopener noreferrer" style={{ color: "#2563EB", textDecoration: "none", fontWeight: 600 }}>CGU</a>
+              {" "}et notre{" "}
+              <a href="/politique-de-confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: "#2563EB", textDecoration: "none", fontWeight: 600 }}>politique de confidentialité</a>
             </p>
           </form>
         </div>
