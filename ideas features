@@ -1,0 +1,70 @@
+ ---
+  Technique
+
+  Bloquant avant lancement :
+  - Stripe webhooks — le retour paiement est géré dans AppShell mais sans webhook /api/stripe/webhook, les plans ne se mettent pas à jour si le
+  paiement passe en arrière-plan (expiration, échec, renouvellement). Le user.plan restera free même après paiement.
+  - Reset mot de passe — aucun flow forgot-password dans le code. Si un commerçant oublie son mot de passe → bloqué.
+  - Email transactionnel — pas de service email (Resend, Sendgrid…). Zéro email : confirmation inscription, reset mdp, alerte nouveau code validé.
+  - Rate limiting — les API /api/codes/validate et /api/auth/login sont sans protection → bruteforce possible.
+
+  Important mais pas bloquant :
+  - QR code : l'URL /s/[slug] existe mais la génération PNG/SVG du QR dans PageClients doit être vérifiée (besoin d'une lib comme qrcode)
+  - La génération des affiches PDF dans PageAffiches — si ce n'est que du window.print() c'est fragile
+  - Logs d'erreurs / monitoring (Sentry ou équivalent)
+
+  ---
+  Visuel
+
+  - Favicon + OG image — pas de preview quand on partage le lien sur WhatsApp/Instagram
+  - Page 404 / 500 custom — actuellement probablement Next.js par défaut
+  - Skeletons loaders dans le dashboard — les pages s'affichent vides pendant le fetch
+  - Onboarding vide — un commerçant qui s'inscrit arrive sur un dashboard vide sans guidance (aucun empty state, aucun tooltip "Commencez ici")
+  - Mobile dashboard — AppShell a MobileNav mais les pages internes (PageWheel, PageClients) ne sont probablement pas optimisées mobile
+
+  ---
+  Fonctionnel
+
+  Manquant ou à vérifier :
+  - Flow complet client : scanner QR → laisser avis Google → recevoir le code → valider en caisse → tourner la roue. Ce tunnel doit être testé de bout
+  en bout sur vrai mobile.
+  - Validation côté commerçant — PageCodes permet de voir les codes, mais le commerçant a-t-il une interface simple (style caisse) pour valider un code   qu'un client lui montre ?
+  - Notifications temps réel — aucun système de notification push/email quand un nouveau code est généré
+  - Statistiques — PageStats existe mais les données sont-elles réelles ou mockées ?
+
+  ---
+  Légal (obligatoire en France)
+
+  - CGU / CGV / Mentions légales — pages obligatoires pour vendre un SaaS en France
+  - Politique de confidentialité RGPD — données personnelles, cookies
+  - Conditions d'utilisation Stripe — informer les clients des conditions de paiement
+
+  ---
+  Pour aller proposer aux commerçants dès maintenant
+
+  Le minimum viable :
+
+  ┌──────────┬───────────────────────────────────────┬──────────────┐
+  │ Priorité │                Action                 │ Temps estimé │
+  ├──────────┼───────────────────────────────────────┼──────────────┤
+  │ 🔴       │ Stripe webhooks + mise à jour plan    │ 2-3h         │
+  ├──────────┼───────────────────────────────────────┼──────────────┤
+  │ 🔴       │ Reset mot de passe (email)            │ 3-4h         │
+  ├──────────┼───────────────────────────────────────┼──────────────┤
+  │ 🔴       │ Test tunnel complet client sur mobile │ 1h           │
+  ├──────────┼───────────────────────────────────────┼──────────────┤
+  │ 🟠       │ CGU / Mentions légales (texte)        │ 2h           │
+  ├──────────┼───────────────────────────────────────┼──────────────┤
+  │ 🟠       │ OG image + Favicon                    │ 30min        │
+  ├──────────┼───────────────────────────────────────┼──────────────┤
+  │ 🟡       │ Empty state onboarding                │ 1-2h         │
+  ├──────────┼───────────────────────────────────────┼──────────────┤
+  │ 🟡       │ Notification email nouveau code       │ 1h           │
+  └──────────┴───────────────────────────────────────┴──────────────┘
+
+  Ce qui peut attendre la V2 :
+  - Monitoring, rate limiting avancé, notifications push, mobile dashboard complet
+
+  ---
+  Conclusion : le cœur du produit (roue, codes, QR, wheel publique) semble opérationnel. Avec 1-2 journées de travail sur les 🔴 bloquants, tu peux
+  aller démarcher. Le pitch terrain ne nécessite pas que tout soit parfait — tu peux même faire une démo live avec ton propre compte.

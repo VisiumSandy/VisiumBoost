@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +19,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Identifiants incorrects"); setLoading(false); return; }
-      router.push(data.user.role === "admin" ? "/admin" : "/dashboard");
+      window.location.href = data.user.role === "admin" ? "/admin" : "/dashboard";
     } catch {
       setError("Erreur réseau. Réessayez."); setLoading(false);
     }

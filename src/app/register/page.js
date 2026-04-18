@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "", businessName: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +19,7 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Erreur d'inscription"); setLoading(false); return; }
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch {
       setError("Erreur réseau. Réessayez."); setLoading(false);
     }
