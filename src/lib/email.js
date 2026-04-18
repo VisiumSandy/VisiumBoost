@@ -99,3 +99,55 @@ export async function sendCodeValidatedEmail({ to, businessName, code }) {
   `;
   return sendEmail({ to, subject: `Code validé — ${businessName}`, html });
 }
+
+export async function sendMonthlyReportEmail({ to, name, month, spins, validated, scans, conversionRate }) {
+  const encouragement = spins >= 20
+    ? "Continuez comme ça, vous êtes sur la bonne lancée !"
+    : "Le mois prochain sera encore meilleur — pensez à afficher l'affiche QR bien en vue !";
+
+  const kpis = [
+    { label: "Roues tournées", value: spins,           color: "#3B82F6" },
+    { label: "Codes validés",  value: validated,        color: "#10B981" },
+    { label: "Scans de page",  value: scans,            color: "#0EA5E9" },
+    { label: "Taux de retrait", value: `${conversionRate}%`, color: "#F59E0B" },
+  ];
+
+  const kpiHtml = kpis.map(k => `
+    <div style="flex:1;min-width:120px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px;text-align:center;">
+      <div style="font-size:24px;font-weight:800;color:${k.color};margin-bottom:4px;">${k.value}</div>
+      <div style="font-size:12px;color:#64748B;font-weight:500;">${k.label}</div>
+    </div>
+  `).join("");
+
+  const html = `
+    <div style="font-family:'DM Sans',system-ui,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+      <div style="background:linear-gradient(135deg,#0F172A,#1E3A5F);padding:36px 40px;text-align:center;">
+        <h1 style="color:#F1F5F9;font-size:22px;margin:0 0 6px;font-weight:800;letter-spacing:-0.5px;">VisiumBoost</h1>
+        <p style="color:#60A5FA;margin:0;font-size:14px;font-weight:600;">Rapport mensuel — ${month}</p>
+      </div>
+      <div style="padding:36px 40px;">
+        <h2 style="color:#0F172A;font-size:18px;font-weight:700;margin:0 0 6px;">Bonjour ${name} 👋</h2>
+        <p style="color:#475569;font-size:14px;line-height:1.7;margin:0 0 28px;">
+          Voici le bilan de votre activité sur VisiumBoost pour le mois de <strong>${month}</strong>.
+        </p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px;">
+          ${kpiHtml}
+        </div>
+
+        <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
+          <p style="margin:0;font-size:14px;color:#1E40AF;font-weight:600;">💡 ${encouragement}</p>
+        </div>
+
+        <a href="https://visium-boost.fr/dashboard" style="display:inline-block;background:linear-gradient(135deg,#2563EB,#0EA5E9);color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:15px;">
+          Voir mon tableau de bord →
+        </a>
+        <p style="color:#94A3B8;font-size:12px;margin:28px 0 0;line-height:1.6;">
+          Vous recevez cet email car vous avez demandé votre rapport mensuel.<br/>
+          Contact : <a href="mailto:contact@visium-boost.fr" style="color:#2563EB;">contact@visium-boost.fr</a>
+        </p>
+      </div>
+    </div>
+  `;
+  return sendEmail({ to, subject: `Votre rapport mensuel VisiumBoost — ${month}`, html });
+}

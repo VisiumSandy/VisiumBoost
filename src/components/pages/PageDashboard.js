@@ -13,6 +13,8 @@ export default function PageDashboard({ user }) {
   const { setCurrentPage } = useApp();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reportSending, setReportSending] = useState(false);
+  const [reportResult, setReportResult] = useState(null);
 
   useEffect(() => {
     fetch("/api/user/stats")
@@ -287,6 +289,73 @@ export default function PageDashboard({ user }) {
             />
           </AreaChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Benchmark card */}
+      <div className="card p-4 md:p-6 mt-6">
+        <div style={{ marginBottom: 20 }}>
+          <h3 className="text-base font-semibold text-slate-900">Comment vous situez-vous ?</h3>
+          <p className="text-slate-400 text-[13px] mt-0.5">Comparatif avec les établissements actifs sur VisiumBoost</p>
+        </div>
+        {[
+          { label: "Roues / mois", userVal: s.totalSpins || 0, avg: 47, unit: "" },
+          { label: "Taux de validation", userVal: s.conversionRate || 0, avg: 68, unit: "%" },
+          { label: "Scans / mois", userVal: s.totalScans || 0, avg: 89, unit: "" },
+        ].map(({ label, userVal, avg, unit }) => {
+          const diff = avg > 0 ? Math.round(((userVal - avg) / avg) * 100) : 0;
+          const above = userVal >= avg;
+          return (
+            <div key={label} style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "12px 0", borderBottom: "1px solid #F1F5F9", flexWrap: "wrap", gap: 8,
+            }}>
+              <span style={{ fontSize: 14, color: "#475569", fontWeight: 500, minWidth: 140 }}>{label}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#0F172A" }}>
+                {userVal}{unit}
+              </span>
+              <span style={{ fontSize: 13, color: "#94A3B8" }}>vs {avg}{unit} moy.</span>
+              <span style={{
+                fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 20,
+                background: above ? "#DCFCE7" : "#FEF3C7",
+                color: above ? "#15803D" : "#92400E",
+              }}>
+                {above ? `+${diff}% au-dessus` : `${Math.abs(diff)}% en dessous`}
+              </span>
+            </div>
+          );
+        })}
+        <div style={{ marginTop: 20 }}>
+          {reportResult && (
+            <div style={{
+              marginBottom: 12, padding: "10px 14px", borderRadius: 10,
+              background: reportResult.ok ? "#F0FDF4" : "#FEF2F2",
+              border: `1px solid ${reportResult.ok ? "#BBF7D0" : "#FECACA"}`,
+              fontSize: 13, fontWeight: 600,
+              color: reportResult.ok ? "#166534" : "#DC2626",
+            }}>
+              {reportResult.ok ? "✓ Rapport envoyé avec succès !" : `✗ ${reportResult.error}`}
+            </div>
+          )}
+          <button
+            onClick={async () => {
+              setReportSending(true); setReportResult(null);
+              const r = await fetch("/api/user/monthly-report", { method: "POST" });
+              const d = await r.json();
+              setReportResult({ ok: r.ok, ...d });
+              setReportSending(false);
+            }}
+            disabled={reportSending}
+            style={{
+              padding: "10px 20px", borderRadius: 10, border: "none",
+              background: reportSending ? "#E2E8F0" : "linear-gradient(135deg, #2563EB, #0EA5E9)",
+              color: reportSending ? "#94A3B8" : "#fff",
+              fontWeight: 700, fontSize: 14, cursor: reportSending ? "not-allowed" : "pointer",
+              fontFamily: "inherit",
+            }}
+          >
+            {reportSending ? "Envoi…" : "Envoyer mon rapport mensuel"}
+          </button>
+        </div>
       </div>
     </div>
   );

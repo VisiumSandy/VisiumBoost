@@ -13,6 +13,12 @@ export default function PageCodes() {
   const [quickResult, setQuickResult] = useState(null);
   const [quickLoading, setQuickLoading] = useState(false);
 
+  // Mode Caisse
+  const [caisseMode, setCaisseMode] = useState(false);
+  const [caisseCode, setCaisseCode] = useState("");
+  const [caisseResult, setCaisseResult] = useState(null);
+  const [caisseLoading, setCaisseLoading] = useState(false);
+
   const fetchSpins = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -39,6 +45,21 @@ export default function PageCodes() {
     setQuickResult({ ok: r.ok, ...d });
     setQuickLoading(false);
     if (r.ok) { setQuickCode(""); fetchSpins(); }
+  };
+
+  const handleCaisseValidate = async () => {
+    if (!caisseCode.trim()) return;
+    setCaisseLoading(true); setCaisseResult(null);
+    const r = await fetch("/api/user/validations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ winCode: caisseCode.trim(), action: "validate" }),
+    });
+    const d = await r.json();
+    setCaisseResult({ ok: r.ok, ...d });
+    setCaisseLoading(false);
+    if (r.ok) { setCaisseCode(""); fetchSpins(); }
+    setTimeout(() => { setCaisseResult(null); setCaisseCode(""); }, 4000);
   };
 
   const handleAction = async (winCode, action) => {
@@ -69,9 +90,129 @@ export default function PageCodes() {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-7">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Codes clients</h1>
-        <p className="text-slate-400 text-sm mt-1">Vérifiez et gérez les codes gagnants de vos clients</p>
+      {/* Mode Caisse Overlay */}
+      {caisseMode && (
+        <div style={{
+          position: "fixed", inset: 0, background: "#fff",
+          zIndex: 100, display: "flex", flexDirection: "column",
+        }}>
+          {/* Top bar */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "18px 28px", borderBottom: "1.5px solid #E2E8F0",
+            background: "#FAFAFA",
+          }}>
+            <span style={{ fontWeight: 800, fontSize: 18, color: "#0F172A", letterSpacing: "-0.3px" }}>
+              Mode Caisse — VisiumBoost
+            </span>
+            <button
+              onClick={() => { setCaisseMode(false); setCaisseCode(""); setCaisseResult(null); }}
+              style={{
+                padding: "9px 20px", borderRadius: 10, border: "1.5px solid #E2E8F0",
+                background: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                color: "#64748B", fontFamily: "inherit",
+              }}
+            >
+              Quitter
+            </button>
+          </div>
+
+          {/* Center */}
+          <div style={{
+            flex: 1, display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            padding: "32px 24px",
+          }}>
+            <p style={{ fontSize: 15, color: "#64748B", marginBottom: 28, textAlign: "center" }}>
+              Saisissez le code du client et appuyez sur VALIDER
+            </p>
+            <input
+              value={caisseCode}
+              onChange={e => { setCaisseCode(e.target.value.toUpperCase()); setCaisseResult(null); }}
+              onKeyDown={e => e.key === "Enter" && handleCaisseValidate()}
+              placeholder="WIN-XXXX-XXXX"
+              maxLength={20}
+              autoFocus
+              style={{
+                width: "100%", maxWidth: 420, padding: "18px 24px",
+                borderRadius: 16, border: "2.5px solid #E2E8F0",
+                fontSize: 32, fontWeight: 700, letterSpacing: 6,
+                fontFamily: "'DM Mono','JetBrains Mono',monospace",
+                outline: "none", textAlign: "center", color: "#0F172A",
+                background: "#F8FAFC", boxSizing: "border-box",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={e => e.target.style.borderColor = "#3B82F6"}
+              onBlur={e => e.target.style.borderColor = "#E2E8F0"}
+            />
+            <button
+              onClick={handleCaisseValidate}
+              disabled={caisseLoading || !caisseCode.trim()}
+              style={{
+                width: "100%", maxWidth: 420, marginTop: 18,
+                padding: "18px 0", borderRadius: 16, border: "none",
+                background: caisseLoading || !caisseCode.trim()
+                  ? "#CBD5E1"
+                  : "linear-gradient(135deg, #2563EB, #0EA5E9)",
+                color: "#fff", fontWeight: 800, fontSize: 20,
+                cursor: caisseLoading || !caisseCode.trim() ? "not-allowed" : "pointer",
+                letterSpacing: 2, fontFamily: "inherit",
+                boxShadow: caisseLoading || !caisseCode.trim() ? "none" : "0 6px 24px rgba(37,99,235,0.3)",
+                transition: "all 0.2s",
+              }}
+            >
+              {caisseLoading ? "Vérification…" : "VALIDER"}
+            </button>
+
+            {caisseResult && (
+              <div style={{
+                width: "100%", maxWidth: 420, marginTop: 22,
+                padding: "20px 24px", borderRadius: 16,
+                background: caisseResult.ok ? "#F0FDF4" : "#FEF2F2",
+                border: `2px solid ${caisseResult.ok ? "#BBF7D0" : "#FECACA"}`,
+              }}>
+                {caisseResult.ok ? (
+                  <div>
+                    <p style={{ fontWeight: 800, color: "#166534", fontSize: 20, margin: "0 0 6px", textAlign: "center" }}>
+                      ✓ Code valide !
+                    </p>
+                    <p style={{ color: "#15803D", fontSize: 16, margin: 0, textAlign: "center" }}>
+                      Récompense : <strong>{caisseResult.rewardName}</strong>
+                    </p>
+                    <p style={{ color: "#16A34A", fontSize: 14, margin: "4px 0 0", textAlign: "center" }}>
+                      {caisseResult.entreprise}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <p style={{ fontWeight: 800, color: "#DC2626", fontSize: 18, margin: "0 0 6px", textAlign: "center" }}>
+                      ✗ {caisseResult.error}
+                    </p>
+                    {caisseResult.validatedAt && (
+                      <p style={{ fontSize: 13, color: "#EF4444", margin: 0, textAlign: "center" }}>
+                        Utilisé le {new Date(caisseResult.validatedAt).toLocaleString("fr-FR")}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="mb-7" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Codes clients</h1>
+          <p className="text-slate-400 text-sm mt-1">Vérifiez et gérez les codes gagnants de vos clients</p>
+        </div>
+        <button
+          onClick={() => setCaisseMode(true)}
+          className="btn-primary"
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", fontSize: 14, borderRadius: 12 }}
+        >
+          <span>🏪</span> Mode Caisse
+        </button>
       </div>
 
       {/* Quick validate */}

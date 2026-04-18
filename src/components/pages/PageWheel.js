@@ -101,6 +101,39 @@ const TEMPLATES = [
   },
 ];
 
+const SECTOR_PRESETS = [
+  { id: "restaurant", emoji: "🍽️", label: "Restaurant", rewards: [
+    { name: "Café offert", probability: 25 }, { name: "Dessert offert", probability: 20 },
+    { name: "10% sur la prochaine addition", probability: 25 }, { name: "Entrée offerte", probability: 15 },
+    { name: "Boisson offerte", probability: 10 }, { name: "Repas -20%", probability: 5 },
+  ]},
+  { id: "boulangerie", emoji: "🥐", label: "Boulangerie", rewards: [
+    { name: "Croissant offert", probability: 30 }, { name: "Pain offert", probability: 25 },
+    { name: "Viennoiserie surprise", probability: 20 }, { name: "10% de réduction", probability: 15 },
+    { name: "Café + viennoiserie", probability: 7 }, { name: "Tarte offerte", probability: 3 },
+  ]},
+  { id: "salon", emoji: "💇", label: "Salon de coiffure", rewards: [
+    { name: "Shampoing offert", probability: 30 }, { name: "Soin offert", probability: 25 },
+    { name: "10% sur la prochaine coupe", probability: 25 }, { name: "Couleur -15%", probability: 10 },
+    { name: "Coupe + brushing -20%", probability: 7 }, { name: "Soin premium offert", probability: 3 },
+  ]},
+  { id: "cafe", emoji: "☕", label: "Café / Bar", rewards: [
+    { name: "Café offert", probability: 30 }, { name: "Boisson offerte", probability: 25 },
+    { name: "10% sur la prochaine consommation", probability: 25 }, { name: "Snack offert", probability: 12 },
+    { name: "Happy hour -30%", probability: 5 }, { name: "Bouteille offerte", probability: 3 },
+  ]},
+  { id: "fastfood", emoji: "🥙", label: "Kebab / Fast-food", rewards: [
+    { name: "Boisson offerte", probability: 30 }, { name: "Frite offerte", probability: 25 },
+    { name: "Sauce au choix", probability: 20 }, { name: "5% de réduction", probability: 15 },
+    { name: "Menu -10%", probability: 7 }, { name: "Dessert offert", probability: 3 },
+  ]},
+  { id: "commerce", emoji: "🛍️", label: "Commerce de proximité", rewards: [
+    { name: "5% de réduction", probability: 35 }, { name: "10% de réduction", probability: 30 },
+    { name: "Produit surprise offert", probability: 20 }, { name: "Livraison gratuite", probability: 10 },
+    { name: "15% de réduction", probability: 4 }, { name: "-20% sur tout le magasin", probability: 1 },
+  ]},
+];
+
 const DEFAULT_THEME = {
   segmentColors: [],
   borderColor: "#ffffff", centerColor: "#ffffff", centerLogo: "",
@@ -444,6 +477,7 @@ export default function PageWheel() {
   const [confetti,     setConfetti]     = useState(false);
   const [previewOpen,  setPreviewOpen]  = useState(false);
   const [copiedSlug,   setCopiedSlug]   = useState(null);
+  const [presetToast,  setPresetToast]  = useState(null);
   const qrCanvasRefs = useRef({});
   const tplScrollRef = useRef(null);
 
@@ -1063,6 +1097,47 @@ export default function PageWheel() {
               Total : {totalProb}%
               {totalProb !== 100 && <span style={{ fontSize: 12, fontWeight: 500, marginLeft: 6 }}>— doit être = 100%</span>}
             </span>
+          </div>
+
+          {/* Sector presets */}
+          <div style={{ marginBottom: 18 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 10 }}>
+              Démarrage rapide — Secteur d&apos;activité
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {SECTOR_PRESETS.map(preset => (
+                <button
+                  key={preset.id}
+                  onClick={() => {
+                    const newRewards = preset.rewards.map(r => ({ id: uid(), name: r.name, prob: r.probability }));
+                    update("rewards", newRewards);
+                    setPresetToast(preset.label);
+                    setTimeout(() => setPresetToast(null), 2500);
+                  }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    padding: "6px 12px", borderRadius: 20,
+                    border: "1.5px solid #E2E8F0", background: "#F8FAFC",
+                    fontSize: 12, fontWeight: 600, cursor: "pointer",
+                    color: "#374151", fontFamily: "inherit",
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#EFF6FF"; e.currentTarget.style.borderColor = "#BFDBFE"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#F8FAFC"; e.currentTarget.style.borderColor = "#E2E8F0"; }}
+                >
+                  <span>{preset.emoji}</span> {preset.label}
+                </button>
+              ))}
+            </div>
+            {presetToast && (
+              <div style={{
+                marginTop: 10, padding: "8px 14px", borderRadius: 10,
+                background: "#DCFCE7", border: "1px solid #BBF7D0",
+                fontSize: 13, fontWeight: 600, color: "#15803D",
+              }}>
+                ✓ Récompenses &quot;{presetToast}&quot; appliquées !
+              </div>
+            )}
           </div>
 
           {config.rewards.length === 0 && (
