@@ -1114,24 +1114,7 @@ export default function LandingPage() {
 
           {/* RIGHT */}
           <div className="hero-wheel-wrap" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <motion.div
-              initial={{ opacity: 0, x: 40, scale: 0.96 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-              style={{ position: "relative" }}
-            >
-              {/* Glow behind mockup */}
-              <div style={{
-                position: "absolute", inset: -40, borderRadius: 40,
-                background: isDark
-                  ? "radial-gradient(ellipse at center, rgba(37,99,235,0.18) 0%, transparent 70%)"
-                  : "radial-gradient(ellipse at center, rgba(37,99,235,0.1) 0%, transparent 70%)",
-                pointerEvents: "none", zIndex: 0,
-              }} />
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <AnimatedDemoMockup scale={0.72} />
-              </div>
-            </motion.div>
+            <HeroWheel isDark={isDark} />
           </div>
         </div>
 
@@ -1202,6 +1185,43 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── APP PREVIEW ── */}
+      <section style={{ padding: "clamp(60px,8vw,100px) clamp(20px,6vw,80px)", background: isDark ? "#06091A" : "#F0F4FF", overflow: "hidden" }}>
+        <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+          <motion.div {...iv()} style={{ textAlign: "center", marginBottom: 48 }}>
+            <div style={{ fontSize: 11, color: "#2563EB", fontWeight: 800, letterSpacing: "2.5px", textTransform: "uppercase", marginBottom: 14 }}>
+              APERÇU DU TABLEAU DE BORD
+            </div>
+            <h2 style={{ fontFamily: FONT_TITLE, fontSize: "clamp(26px,4vw,48px)", fontWeight: 400, margin: "0 0 14px", letterSpacing: "-0.02em", lineHeight: 1.1, color: text }}>
+              Tout piloter depuis <G>un seul endroit</G>
+            </h2>
+            <p style={{ color: text2, fontSize: 16, maxWidth: 440, margin: "0 auto", lineHeight: 1.7 }}>
+              Statistiques en temps réel, configuration de la roue, gestion des validations. Le dashboard fait le travail.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            style={{ display: "flex", justifyContent: "center" }}
+          >
+            <div style={{ position: "relative" }}>
+              {/* Glow */}
+              <div style={{
+                position: "absolute", inset: -60, borderRadius: 60,
+                background: isDark
+                  ? "radial-gradient(ellipse at 50% 60%, rgba(37,99,235,0.25) 0%, transparent 65%)"
+                  : "radial-gradient(ellipse at 50% 60%, rgba(37,99,235,0.14) 0%, transparent 65%)",
+                pointerEvents: "none",
+              }} />
+              <AnimatedDemoMockup scale={0.82} />
+            </div>
+          </motion.div>
         </div>
       </section>
 
