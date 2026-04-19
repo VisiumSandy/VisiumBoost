@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+import AnimatedDemoMockup from "@/components/AnimatedDemoMockup";
 
 const E = [0.22, 1, 0.36, 1];
 const FONT_TITLE = "'Special Gothic Expanded One','DM Sans',system-ui,sans-serif";
@@ -1113,7 +1114,24 @@ export default function LandingPage() {
 
           {/* RIGHT */}
           <div className="hero-wheel-wrap" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <HeroWheel isDark={isDark} />
+            <motion.div
+              initial={{ opacity: 0, x: 40, scale: 0.96 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+              style={{ position: "relative" }}
+            >
+              {/* Glow behind mockup */}
+              <div style={{
+                position: "absolute", inset: -40, borderRadius: 40,
+                background: isDark
+                  ? "radial-gradient(ellipse at center, rgba(37,99,235,0.18) 0%, transparent 70%)"
+                  : "radial-gradient(ellipse at center, rgba(37,99,235,0.1) 0%, transparent 70%)",
+                pointerEvents: "none", zIndex: 0,
+              }} />
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <AnimatedDemoMockup scale={0.72} />
+              </div>
+            </motion.div>
           </div>
         </div>
 
