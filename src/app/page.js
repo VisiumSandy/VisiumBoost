@@ -45,7 +45,7 @@ const NAV_LINKS = [
   { label: "Tarifs",          href: "#pricing" },
   { label: "Témoignages",     href: "#testimonials" },
   { label: "Démo",            href: "/demo" },
-  { label: "vs Partoo",       href: "/vs-partoo" },
+  { label: "Comparatif",      href: "/vs-partoo" },
 ];
 
 function NavBar({ isDark, onToggleDark }) {
@@ -1549,7 +1549,7 @@ export default function LandingPage() {
         }}>
           <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 42, objectFit: "contain" }} />
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[["Démo","/demo"],["vs Partoo","/vs-partoo"],["Connexion","/login"],["Créer un compte","/register"],["Dashboard","/dashboard"]].map(([label, href]) => (
+            {[["Démo","/demo"],["Comparatif","/vs-partoo"],["Connexion","/login"],["Créer un compte","/register"],["Dashboard","/dashboard"]].map(([label, href]) => (
               <Link key={label} href={href} style={{ color: "#52525B", textDecoration: "none", fontSize: 13, fontWeight: 500, padding: "6px 12px", borderRadius: 8 }}>{label}</Link>
             ))}
           </div>
