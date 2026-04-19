@@ -1189,8 +1189,18 @@ export default function LandingPage() {
       </section>
 
       {/* ── APP PREVIEW ── */}
-      <section style={{ padding: "clamp(60px,8vw,100px) clamp(20px,6vw,80px)", background: isDark ? "#06091A" : "#F0F4FF", overflow: "hidden" }}>
-        <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <section style={{ padding: "clamp(60px,8vw,100px) clamp(20px,6vw,80px)", background: isDark ? "#06091A" : "#F5F7FF", overflow: "hidden", position: "relative" }}>
+        {/* 3D perspective grid background */}
+        <PerspectiveGrid dark={isDark} />
+        {/* Radial glow center */}
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: isDark
+            ? "radial-gradient(ellipse 70% 55% at 50% 80%, rgba(37,99,235,0.13) 0%, transparent 70%)"
+            : "radial-gradient(ellipse 70% 55% at 50% 80%, rgba(37,99,235,0.09) 0%, transparent 70%)",
+        }} />
+
+        <div style={{ maxWidth: 1060, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <motion.div {...iv()} style={{ textAlign: "center", marginBottom: 48 }}>
             <div style={{ fontSize: 11, color: "#2563EB", fontWeight: 800, letterSpacing: "2.5px", textTransform: "uppercase", marginBottom: 14 }}>
               APERÇU DU TABLEAU DE BORD
@@ -1206,21 +1216,11 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             style={{ display: "flex", justifyContent: "center" }}
           >
-            <div style={{ position: "relative" }}>
-              {/* Glow */}
-              <div style={{
-                position: "absolute", inset: -60, borderRadius: 60,
-                background: isDark
-                  ? "radial-gradient(ellipse at 50% 60%, rgba(37,99,235,0.25) 0%, transparent 65%)"
-                  : "radial-gradient(ellipse at 50% 60%, rgba(37,99,235,0.14) 0%, transparent 65%)",
-                pointerEvents: "none",
-              }} />
-              <AnimatedDemoMockup scale={0.82} />
-            </div>
+            <AnimatedDemoMockup scale={0.82} />
           </motion.div>
         </div>
       </section>
