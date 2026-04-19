@@ -100,7 +100,7 @@ function NavBar({ isDark, onToggleDark }) {
             backdropFilter:       scrolled ? "blur(28px) saturate(200%)" : "none",
             WebkitBackdropFilter: scrolled ? "blur(28px) saturate(200%)" : "none",
             transition: "background 0.4s, border-color 0.4s, box-shadow 0.4s, padding 0.4s",
-            width: "min(100%, 880px)",
+            width: "min(100%, 1020px)",
             justifyContent: "space-between",
           }}
         >
@@ -122,10 +122,10 @@ function NavBar({ isDark, onToggleDark }) {
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={() => setActiveId(label)}
                   style={{
-                    position: "relative", padding: "7px 16px", borderRadius: 9999,
-                    textDecoration: "none", fontWeight: 500, fontSize: 14,
+                    position: "relative", padding: "7px 11px", borderRadius: 9999,
+                    textDecoration: "none", fontWeight: 500, fontSize: 13,
                     color: isAct ? textMain : (isHov ? (isDark ? "#E2E8F0" : "#1e3a8a") : text2),
-                    transition: "color 0.22s", zIndex: 1,
+                    transition: "color 0.22s", zIndex: 1, whiteSpace: "nowrap",
                   }}
                 >
                   <AnimatePresence>
@@ -170,8 +170,9 @@ function NavBar({ isDark, onToggleDark }) {
               </AnimatePresence>
             </motion.button>
             <a href="/login" style={{
-              padding: "7px 15px", borderRadius: 9999, textDecoration: "none",
-              color: text2, fontWeight: 500, fontSize: 14, transition: "all 0.22s",
+              padding: "7px 12px", borderRadius: 9999, textDecoration: "none",
+              color: text2, fontWeight: 500, fontSize: 13, transition: "all 0.22s",
+              whiteSpace: "nowrap",
             }}>Se connecter</a>
             <NavCTA isDark={isDark} />
           </div>
@@ -317,9 +318,9 @@ function NavCTA({ isDark }) {
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
         display: "inline-flex", alignItems: "center", gap: 6,
-        padding: "8px 18px", borderRadius: 9999, textDecoration: "none",
-        fontWeight: 700, fontSize: 14, fontFamily: FONT_BODY,
-        color: "#fff", position: "relative", overflow: "hidden",
+        padding: "8px 14px", borderRadius: 9999, textDecoration: "none",
+        fontWeight: 700, fontSize: 13, fontFamily: FONT_BODY,
+        color: "#fff", position: "relative", overflow: "hidden", whiteSpace: "nowrap",
         background: hov ? "linear-gradient(135deg,#1D51CE,#059bbf)" : "linear-gradient(135deg,#2563EB,#06B6D4)",
         boxShadow: hov ? "0 8px 28px rgba(37,99,235,0.55), 0 0 0 1px rgba(37,99,235,0.3)" : "0 4px 16px rgba(37,99,235,0.38)",
         transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
