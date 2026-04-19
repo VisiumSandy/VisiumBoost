@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "CGU — Conditions Générales d'Utilisation — VisiumBoost",
+  title: "Conditions Générales d'Utilisation de VisiumBoost",
   description: "Conditions Générales d'Utilisation et de Vente du service SaaS VisiumBoost.",
 };
 
@@ -375,7 +375,7 @@ export default function CGUPage() {
           <Link href="/cgu" style={{ fontSize: 13, color: "#52525B", textDecoration: "none" }}>CGU</Link>
           <Link href="/politique-de-confidentialite" style={{ fontSize: 13, color: "#94A3B8", textDecoration: "none" }}>Confidentialité</Link>
         </div>
-        <div style={{ fontSize: 13, color: "#374151" }}>© 2026 VisiumBoost — Tous droits réservés</div>
+        <div style={{ fontSize: 13, color: "#374151" }}>© 2026 VisiumBoost. Tous droits réservés.</div>
       </footer>
     </div>
   );

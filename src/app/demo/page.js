@@ -16,17 +16,17 @@ const FEATURES = [
   {
     icon: "🎰",
     title: "Roue de la fortune",
-    desc: "Vos clients tournent la roue et gagnent une récompense. Un mécanisme simple et addictif qui booste l'engagement.",
+    desc: "Vos clients scannent le QR code, tournent la roue et repartent avec un cadeau. Le plaisir du jeu pousse naturellement à participer.",
   },
   {
     icon: "⭐",
     title: "Plus d'avis Google",
-    desc: "Conditionnez la roue à un avis Google. Vos clients laissent un avis, puis découvrent leur cadeau.",
+    desc: "La roue ne se débloque qu'après un avis Google. Vos clients laissent leur retour, puis découvrent leur récompense.",
   },
   {
     icon: "📊",
     title: "Tableau de bord",
-    desc: "Suivez les scans, les roues tournées et les codes validés en temps réel depuis votre dashboard.",
+    desc: "Suivez vos scans, vos roues tournées et vos codes validés en temps réel. Toutes vos données au même endroit.",
   },
 ];
 
@@ -234,7 +234,7 @@ export default function DemoPage() {
             Tout ce qu&apos;il vous faut
           </h2>
           <p style={{ textAlign: "center", color: "#64748B", fontSize: 15, marginBottom: 40 }}>
-            Une solution complète pour transformer vos clients en ambassadeurs
+            Tout ce qu&apos;il faut pour récupérer des avis Google en continu, sans relancer vos clients
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 24 }}>
             {FEATURES.map(f => (
@@ -257,7 +257,7 @@ export default function DemoPage() {
           Prêt à booster vos avis ?
         </h2>
         <p style={{ fontSize: 16, color: "#94A3B8", marginBottom: 32 }}>
-          14 jours d&apos;essai gratuit — aucune carte bancaire requise
+          14 jours gratuits, sans carte bancaire
         </p>
         <Link href="/register" style={{
           display: "inline-flex", alignItems: "center", gap: 8,

@@ -455,7 +455,7 @@ export default function PlayClient({ entreprise }) {
             {/* Win code */}
             <div style={{ marginBottom: 28 }}>
               <p style={{ fontSize: 13, color: subtleColor, marginBottom: 12, fontWeight: 600 }}>
-                Votre code unique — montrez-le au personnel
+                Votre code unique, montrez-le au personnel
               </p>
               <div onClick={copyCode} style={{
                 background: isTextLight ? "rgba(255,255,255,0.12)" : "#0F0F1A",

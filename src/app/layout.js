@@ -2,9 +2,22 @@ import "@/styles/globals.css";
 
 export const metadata = {
   metadataBase: new URL("https://visium-boost.fr"),
-  title: "VisiumBoost — Boostez vos avis Google",
+  title: {
+    default: "VisiumBoost : obtenez plus d'avis Google avec la gamification",
+    template: "%s | VisiumBoost",
+  },
   description:
-    "La roue de la fortune gamifiée qui transforme vos clients en ambassadeurs Google. Configurez en 5 minutes, récoltez des avis à vie.",
+    "VisiumBoost est un outil de gamification des avis Google pour les commerçants locaux. Roue de la fortune, codes anti-fraude, setup en 5 minutes. Essai gratuit 14 jours.",
+  keywords: [
+    "avis Google", "gamification avis", "roue de la fortune avis Google",
+    "augmenter avis Google restaurant", "outil avis clients",
+    "booster avis Google", "QR code avis Google",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
   icons: {
     icon: "/images/favicon.ico",
     shortcut: "/images/favicon.ico",
@@ -13,24 +26,25 @@ export const metadata = {
   openGraph: {
     type: "website",
     url: "https://visium-boost.fr",
-    title: "VisiumBoost — Boostez vos avis Google",
+    title: "VisiumBoost : obtenez plus d'avis Google avec la gamification",
     description:
-      "La roue de la fortune gamifiée qui transforme vos clients en ambassadeurs Google. Configurez en 5 minutes, récoltez des avis à vie.",
+      "Roue de la fortune, codes anti-fraude, dashboard analytics. L'outil de gamification des avis Google pensé pour les commerces locaux.",
     siteName: "VisiumBoost",
+    locale: "fr_FR",
     images: [
       {
         url: "/images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "VisiumBoost — Boostez vos avis Google",
+        alt: "VisiumBoost, outil de gamification des avis Google",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "VisiumBoost — Boostez vos avis Google",
+    title: "VisiumBoost : plus d'avis Google grâce à la gamification",
     description:
-      "La roue de la fortune gamifiée qui transforme vos clients en ambassadeurs Google. Configurez en 5 minutes, récoltez des avis à vie.",
+      "Roue de la fortune, codes anti-fraude, setup en 5 minutes. Essai gratuit 14 jours.",
     images: ["/images/og-image.png"],
     site: "@visiumboost",
   },

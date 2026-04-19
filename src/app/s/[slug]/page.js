@@ -11,9 +11,9 @@ export async function generateMetadata({ params }) {
   try {
     await connectDB();
     const e = await Entreprise.findOne({ slug }).lean();
-    if (!e) return { title: "Page introuvable — VisiumBoost" };
+    if (!e) return { title: "Page introuvable | VisiumBoost" };
     return {
-      title: `${e.nom} — Tournez la roue !`,
+      title: `${e.nom} : tournez la roue et gagnez une récompense`,
       description: e.cta_text,
     };
   } catch {

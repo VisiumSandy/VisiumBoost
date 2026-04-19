@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Mentions légales — VisiumBoost",
+  title: "Mentions légales de VisiumBoost",
   description: "Mentions légales, éditeur, hébergeur et politique de confidentialité de VisiumBoost.",
 };
 
@@ -210,7 +210,7 @@ export default function MentionsLegales() {
         display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12,
       }}>
         <img src="/images/logo_main2.png" alt="VisiumBoost" style={{ height: 28, objectFit: "contain" }} />
-        <div style={{ fontSize: 13, color: "#374151" }}>© 2026 VisiumBoost — Tous droits réservés</div>
+        <div style={{ fontSize: 13, color: "#374151" }}>© 2026 VisiumBoost. Tous droits réservés.</div>
       </footer>
     </div>
   );

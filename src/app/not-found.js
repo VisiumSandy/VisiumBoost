@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Page introuvable — VisiumBoost",
+  title: "Page introuvable | VisiumBoost",
 };
 
 const FONT_TITLE = "'Special Gothic Expanded One','DM Sans',system-ui,sans-serif";

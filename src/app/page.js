@@ -968,8 +968,40 @@ export default function LandingPage() {
   const border   = isDark ? "rgba(255,255,255,0.07)"  : "rgba(37,99,235,0.1)";
   const imgs     = isDark ? SLIDER_IMGS_DARK : SLIDER_IMGS_LIGHT;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "VisiumBoost",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "url": "https://visium-boost.fr",
+    "description": "Outil de gamification des avis Google pour commerces locaux. Roue de la fortune, codes anti-fraude, QR code, dashboard analytics.",
+    "offers": {
+      "@type": "AggregateOffer",
+      "lowPrice": "9.99",
+      "highPrice": "79",
+      "priceCurrency": "EUR",
+      "offerCount": "3"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "500",
+      "bestRating": "5"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "VisiumBoost",
+      "url": "https://visium-boost.fr"
+    }
+  };
+
   return (
     <div style={{ fontFamily: FONT_BODY, background: bg, color: text, minHeight: "100vh", overflowX: "clip" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* ── NAV ── */}
       <NavBar isDark={isDark} onToggleDark={() => setIsDark(d => !d)} />
@@ -1017,7 +1049,7 @@ export default function LandingPage() {
                 fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: "0.3px",
               }}>NOUVEAU</span>
               <span style={{ color: isDark ? "#93C5FD" : "#1D4ED8", fontWeight: 600, fontSize: 13 }}>
-                14 jours d&apos;essai gratuit — sans CB
+                14 jours d&apos;essai gratuit, sans CB
               </span>
             </motion.div>
 
@@ -1033,8 +1065,7 @@ export default function LandingPage() {
 
             <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: E, delay: 0.12 }}
               style={{ fontSize: "clamp(15px,1.6vw,18px)", lineHeight: 1.75, color: text2, margin: "0 0 36px", maxWidth: 480 }}>
-              Gamifiez l&apos;expérience client. Chaque avis Google déclenche un tour de roue —
-              vos clients jouent, vos avis explosent.
+              Chaque avis Google débloque un tour de roue. Vos clients jouent, gagnent une récompense et reviennent.
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: E, delay: 0.18 }}
@@ -1554,7 +1585,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 12, color: "#374151" }}>© 2026 VisiumBoost — Tous droits réservés</span>
+            <span style={{ fontSize: 12, color: "#374151" }}>© 2026 VisiumBoost. Tous droits réservés.</span>
             <Link href="/mentions-legales" style={{ fontSize: 12, color: "#52525B", textDecoration: "none", borderBottom: "1px solid #374151", paddingBottom: 1 }}>Mentions légales</Link>
             <Link href="/cgu" style={{ fontSize: 12, color: "#52525B", textDecoration: "none", borderBottom: "1px solid #374151", paddingBottom: 1 }}>CGU</Link>
             <Link href="/politique-de-confidentialite" style={{ fontSize: 12, color: "#52525B", textDecoration: "none", borderBottom: "1px solid #374151", paddingBottom: 1 }}>Confidentialité</Link>

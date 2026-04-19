@@ -1,7 +1,7 @@
 import { AppProvider } from "@/lib/context";
 
 export const metadata = {
-  title: "Dashboard — VisiumBoost",
+  title: "Tableau de bord | VisiumBoost",
 };
 
 export default function DashboardLayout({ children }) {
