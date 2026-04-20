@@ -1220,7 +1220,7 @@ export default function LandingPage() {
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             style={{ display: "flex", justifyContent: "center" }}
           >
-            <AnimatedDemoMockup scale={0.82} />
+            <AnimatedDemoMockup scale={0.9} />
           </motion.div>
         </div>
       </section>
