@@ -79,3 +79,9 @@ export const spinLimiter = createRateLimiter({
   maxRequests: 20,
   windowMs: 60 * 1000, // 20 spins / min per IP
 });
+
+export const sendCodeLimiter = createRateLimiter({
+  key: "send_code",
+  maxRequests: 3,
+  windowMs: 10 * 60 * 1000, // 3 sends / 10 min per IP
+});

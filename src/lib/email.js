@@ -100,6 +100,42 @@ export async function sendCodeValidatedEmail({ to, businessName, code }) {
   return sendEmail({ to, subject: `Code validé — ${businessName}`, html });
 }
 
+export async function sendVerificationCodeEmail({ to, name, code, action }) {
+  const isEmail = action === "change_email";
+  const subject = isEmail ? "Code de vérification — changement d'email" : "Code de vérification — changement de mot de passe";
+  const title   = isEmail ? "Confirmez votre nouvel email" : "Confirmez le changement de mot de passe";
+  const desc    = isEmail
+    ? "Vous avez demandé à changer l'adresse email de votre compte VisiumBoost."
+    : "Vous avez demandé à modifier le mot de passe de votre compte VisiumBoost.";
+
+  const html = `
+    <div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+      <div style="background:#0F172A;padding:32px 40px;text-align:center;">
+        <h1 style="color:#F1F5F9;font-size:26px;margin:0;font-weight:800;letter-spacing:-0.5px;">VisiumBoost</h1>
+        <p style="color:#60A5FA;margin:8px 0 0;font-size:14px;">Vérification du compte</p>
+      </div>
+      <div style="padding:40px;">
+        <h2 style="color:#0F172A;font-size:20px;font-weight:700;margin:0 0 12px;">${title}</h2>
+        <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 8px;">
+          Bonjour ${name},
+        </p>
+        <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 28px;">
+          ${desc}<br/>Entrez le code ci-dessous pour confirmer.
+        </p>
+        <div style="background:#EFF6FF;border:2px solid #BFDBFE;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
+          <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1px;">Votre code de vérification</p>
+          <p style="margin:0;font-size:38px;font-weight:900;color:#1D4ED8;letter-spacing:10px;font-family:'JetBrains Mono',monospace;">${code}</p>
+          <p style="margin:10px 0 0;font-size:12px;color:#94A3B8;">Valable 10 minutes</p>
+        </div>
+        <p style="color:#94A3B8;font-size:13px;line-height:1.6;margin:0;">
+          Si vous n'avez pas fait cette demande, ignorez cet email — votre compte est en sécurité.
+        </p>
+      </div>
+    </div>
+  `;
+  return sendEmail({ to, subject, html });
+}
+
 export async function sendMonthlyReportEmail({ to, name, month, spins, validated, scans, conversionRate }) {
   const encouragement = spins >= 20
     ? "Continuez comme ça, vous êtes sur la bonne lancée !"

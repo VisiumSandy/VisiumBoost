@@ -16,6 +16,14 @@ const UserSchema = new mongoose.Schema(
     stripeSubscriptionId: { type: String, default: null },
     resetToken: { type: String, default: null },
     resetTokenExpiry: { type: Date, default: null },
+    // Pending verification code for email/password change
+    pendingCode: {
+      code:      { type: String,  default: null },
+      action:    { type: String,  default: null }, // "change_email" | "change_password"
+      data:      { type: mongoose.Schema.Types.Mixed, default: null }, // newEmail OR hashedNewPassword
+      expiresAt: { type: Date,    default: null },
+      attempts:  { type: Number,  default: 0 },
+    },
     active: { type: Boolean, default: true },
     lastLogin: { type: Date, default: null },
     // Stats cached
