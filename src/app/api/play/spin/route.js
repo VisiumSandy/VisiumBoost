@@ -53,8 +53,6 @@ export async function POST(req) {
       tries++;
     } while (tries < 10 && (await Spin.exists({ winCode })));
 
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "";
-
     const spin = await Spin.create({
       entrepriseId: entreprise._id,
       winCode,
@@ -63,7 +61,7 @@ export async function POST(req) {
       clientName:  (clientName  || "").slice(0, 100),
       clientEmail: (clientEmail || "").slice(0, 200),
       clientPhone: (clientPhone || "").slice(0, 30),
-      ip: ip.split(",")[0].trim(),
+      ip,
     });
 
     // Incrémenter le compteur de scans
