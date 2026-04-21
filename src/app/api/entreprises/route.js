@@ -63,29 +63,37 @@ export async function PATCH(req) {
   const session = getCurrentUser();
   if (!session) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-  const { id, ...updates } = await req.json();
+  const body = await req.json();
+  const { id } = body;
   await connectDB();
 
   // Ensure user owns this entreprise
   const existing = await Entreprise.findOne({ _id: id, userId: session.id });
   if (!existing) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
-  // If changing slug, check uniqueness
+  // Whitelist updatable fields — never allow userId, totalScans, totalReviews, _id
+  const ALLOWED_FIELDS = [
+    "nom", "slug", "logo", "couleur_principale", "couleur_secondaire",
+    "lien_avis", "cta_text", "rewards", "active", "theme",
+    "wheel_segment_colors", "wheel_border_color", "wheel_center_color",
+    "wheel_center_logo", "wheel_font", "wheel_size",
+    "page_bg", "page_bg_type", "page_bg_gradient", "page_banner",
+    "page_title", "page_welcome", "page_btn_color", "page_btn_text",
+    "page_thanks", "page_text_color",
+  ];
+  const updates = {};
+  ALLOWED_FIELDS.forEach(f => { if (body[f] !== undefined) updates[f] = body[f]; });
+
+  // If changing slug, validate format and uniqueness
   if (updates.slug && updates.slug !== existing.slug) {
+    if (!/^[a-z0-9-]+$/.test(updates.slug)) {
+      return NextResponse.json({ error: "Slug invalide" }, { status: 400 });
+    }
     const conflict = await Entreprise.findOne({ slug: updates.slug });
     if (conflict) return NextResponse.json({ error: "Ce slug est déjà utilisé." }, { status: 409 });
   }
 
-  // DEBUG — log collectFields before and after save
-  if (updates.theme?.collectFields !== undefined) {
-    console.log("[PATCH] collectFields IN :", JSON.stringify(updates.theme.collectFields));
-  }
-
   const updated = await Entreprise.findByIdAndUpdate(id, { $set: updates }, { new: true, lean: true });
-
-  if (updated?.theme?.collectFields !== undefined) {
-    console.log("[PATCH] collectFields OUT:", JSON.stringify(updated.theme?.collectFields));
-  }
 
   return NextResponse.json({ entreprise: updated });
 }

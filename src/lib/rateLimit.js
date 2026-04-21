@@ -62,8 +62,20 @@ export const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 5 attempts / 15 min
 });
 
+export const registerLimiter = createRateLimiter({
+  key: "register",
+  maxRequests: 5,
+  windowMs: 60 * 60 * 1000, // 5 registrations / hour
+});
+
 export const validateCodeLimiter = createRateLimiter({
   key: "validate_code",
   maxRequests: 10,
   windowMs: 60 * 1000, // 10 attempts / 1 min
+});
+
+export const spinLimiter = createRateLimiter({
+  key: "spin",
+  maxRequests: 20,
+  windowMs: 60 * 1000, // 20 spins / min per IP
 });

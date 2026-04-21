@@ -4,17 +4,39 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { signToken, setAuthCookie } from "@/lib/auth";
 import { sendWelcomeEmail } from "@/lib/email";
+import { registerLimiter, getIp } from "@/lib/rateLimit";
 
 export async function POST(req) {
   try {
+    // Rate limiting — 5 registrations per IP per hour
+    const ip = getIp(req);
+    const limit = registerLimiter.check(ip);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `Trop de tentatives. Réessayez dans ${limit.retryAfter} secondes.` },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
+
     const { email, password, name, businessName, phone } = await req.json();
 
     if (!email || !password || !name) {
       return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
     }
-    if (password.length < 6) {
-      return NextResponse.json({ error: "Mot de passe trop court (min. 6 caractères)" }, { status: 400 });
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Adresse email invalide" }, { status: 400 });
     }
+
+    if (password.length < 8) {
+      return NextResponse.json({ error: "Mot de passe trop court (min. 8 caractères)" }, { status: 400 });
+    }
+
+    // Truncate inputs to prevent oversized payloads
+    const safeName = String(name).slice(0, 100);
+    const safeBusinessName = businessName ? String(businessName).slice(0, 100) : safeName;
+    const safePhone = phone ? String(phone).slice(0, 30) : "";
 
     await connectDB();
 
@@ -26,11 +48,11 @@ export async function POST(req) {
     const hashed = await bcrypt.hash(password, 12);
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     const user = await User.create({
-      email: email.toLowerCase(),
+      email: email.toLowerCase().trim(),
       password: hashed,
-      name,
-      businessName: businessName || name,
-      phone: phone || "",
+      name: safeName,
+      businessName: safeBusinessName,
+      phone: safePhone,
       role: "client",
       trialEndsAt,
     });

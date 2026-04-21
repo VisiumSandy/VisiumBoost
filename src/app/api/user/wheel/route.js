@@ -24,9 +24,19 @@ export async function PUT(req) {
   const body = await req.json();
   await connectDB();
 
+  // Whitelist allowed fields — never allow userId to be overwritten
+  const { googleLink, primaryColor, secondaryColor, ctaText, logoUrl, rewards } = body;
+  const safeUpdate = { userId: session.id };
+  if (googleLink    !== undefined) safeUpdate.googleLink    = String(googleLink).slice(0, 500);
+  if (primaryColor  !== undefined) safeUpdate.primaryColor  = String(primaryColor).slice(0, 20);
+  if (secondaryColor !== undefined) safeUpdate.secondaryColor = String(secondaryColor).slice(0, 20);
+  if (ctaText       !== undefined) safeUpdate.ctaText       = String(ctaText).slice(0, 300);
+  if (logoUrl       !== undefined) safeUpdate.logoUrl       = String(logoUrl).slice(0, 500);
+  if (rewards       !== undefined) safeUpdate.rewards       = rewards;
+
   const config = await WheelConfig.findOneAndUpdate(
     { userId: session.id },
-    { ...body, userId: session.id },
+    safeUpdate,
     { new: true, upsert: true }
   );
   return NextResponse.json({ config });

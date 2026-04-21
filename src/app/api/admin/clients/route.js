@@ -24,13 +24,15 @@ export async function GET(req) {
 
     const filter = { role: "client" };
     if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").slice(0, 100);
       filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { businessName: { $regex: search, $options: "i" } },
+        { name: { $regex: escaped, $options: "i" } },
+        { email: { $regex: escaped, $options: "i" } },
+        { businessName: { $regex: escaped, $options: "i" } },
       ];
     }
-    if (plan) filter.plan = plan;
+    const VALID_PLANS = ["free", "starter", "pro"];
+    if (plan && VALID_PLANS.includes(plan)) filter.plan = plan;
 
     const clients = await User.find(filter)
       .select("-password")
@@ -51,14 +53,23 @@ export async function PATCH(req) {
   try {
     await connectDB();
     const { userId, plan, active, name, email, businessName, phone, googleLink, trialEndsAt, renewTrial } = await req.json();
+
+    if (!userId || typeof userId !== "string" || userId.length > 100) {
+      return NextResponse.json({ error: "userId invalide" }, { status: 400 });
+    }
+
+    const VALID_PLANS = ["free", "starter", "pro"];
     const update = {};
-    if (plan         !== undefined) update.plan         = plan;
-    if (active       !== undefined) update.active       = active;
-    if (name         !== undefined) update.name         = name;
-    if (email        !== undefined) update.email        = email.toLowerCase().trim();
-    if (businessName !== undefined) update.businessName = businessName;
-    if (phone        !== undefined) update.phone        = phone;
-    if (googleLink   !== undefined) update.googleLink   = googleLink;
+    if (plan         !== undefined) {
+      if (!VALID_PLANS.includes(plan)) return NextResponse.json({ error: "Plan invalide" }, { status: 400 });
+      update.plan = plan;
+    }
+    if (active       !== undefined) update.active       = Boolean(active);
+    if (name         !== undefined) update.name         = String(name).slice(0, 100);
+    if (email        !== undefined) update.email        = String(email).toLowerCase().trim().slice(0, 200);
+    if (businessName !== undefined) update.businessName = String(businessName).slice(0, 100);
+    if (phone        !== undefined) update.phone        = String(phone).slice(0, 30);
+    if (googleLink   !== undefined) update.googleLink   = String(googleLink).slice(0, 500);
     if (trialEndsAt  !== undefined) update.trialEndsAt  = trialEndsAt ? new Date(trialEndsAt) : null;
     if (renewTrial) update.trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 

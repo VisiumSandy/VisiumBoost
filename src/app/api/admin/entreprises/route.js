@@ -22,10 +22,13 @@ export async function GET(req) {
 
     const filter = {};
     if (userId) filter.userId = userId;
-    if (search) filter.$or = [
-      { nom: { $regex: search, $options: "i" } },
-      { slug: { $regex: search, $options: "i" } },
-    ];
+    if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").slice(0, 100);
+      filter.$or = [
+        { nom:  { $regex: escaped, $options: "i" } },
+        { slug: { $regex: escaped, $options: "i" } },
+      ];
+    }
 
     const entreprises = await Entreprise.find(filter).sort({ createdAt: -1 }).lean();
 

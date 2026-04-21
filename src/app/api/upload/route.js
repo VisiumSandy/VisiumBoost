@@ -36,7 +36,11 @@ export async function POST(req) {
   }
 
   try {
-    const blob = await put(`logos/${Date.now()}-${file.name}`, file, {
+    const safeName = file.name
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .replace(/\.{2,}/g, "_")
+      .slice(0, 100);
+    const blob = await put(`logos/${Date.now()}-${safeName}`, file, {
       access: "public",
       token:  process.env.BLOB_READ_WRITE_TOKEN,
     });
