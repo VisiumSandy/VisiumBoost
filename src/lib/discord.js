@@ -4,7 +4,10 @@
  * Never throws — all errors are silently logged to console.
  */
 
-const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+// Read at call time — not at module load — so Vercel env vars are always fresh
+function getWebhookUrl() {
+  return process.env.DISCORD_WEBHOOK_URL || null;
+}
 
 // ── Colour palette (Discord embed colours) ────────────────────────────────────
 export const Colors = {
@@ -21,10 +24,14 @@ export const Colors = {
  * @param {{ title, description, color, fields, footer }} embed
  */
 export async function discordLog(embed) {
-  if (!WEBHOOK_URL) return; // Silently skip if not configured
+  const url = getWebhookUrl();
+  if (!url) {
+    console.warn("[discord] DISCORD_WEBHOOK_URL not set — skipping log");
+    return;
+  }
 
   try {
-    await fetch(WEBHOOK_URL, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -39,6 +46,10 @@ export async function discordLog(embed) {
         ],
       }),
     });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(`[discord] Webhook error ${res.status}:`, text);
+    }
   } catch (err) {
     console.error("[discord] Failed to send log:", err);
   }
