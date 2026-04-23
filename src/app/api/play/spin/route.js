@@ -70,7 +70,15 @@ export async function POST(req) {
     await Entreprise.updateOne({ _id: entreprise._id }, { $inc: { totalScans: 1 } });
 
     // Log to Discord (non-blocking)
-    logSpin({ slug, rewardName, clientEmail: spin.clientEmail });
+    logSpin({
+      nom:         entreprise.nom,
+      slug,
+      rewardName,
+      winCode:     spin.winCode,
+      clientName:  spin.clientName  || null,
+      clientEmail: spin.clientEmail || null,
+      clientPhone: spin.clientPhone || null,
+    });
 
     return NextResponse.json({ winCode: spin.winCode, rewardName: spin.rewardName });
   } catch (err) {

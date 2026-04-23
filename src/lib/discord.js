@@ -111,14 +111,17 @@ export function logPayment({ event, email, plan, amount }) {
 }
 
 /** New spin on a wheel */
-export function logSpin({ slug, rewardName, clientEmail }) {
+export function logSpin({ nom, slug, rewardName, winCode, clientName, clientEmail, clientPhone }) {
+  const clientParts = [clientName, clientEmail, clientPhone].filter(Boolean);
+  const clientValue = clientParts.length > 0 ? clientParts.join(" · ") : "Anonyme";
   return discordLog({
     title: "Roue tournée",
     color: Colors.blue,
     fields: [
-      { name: "Établissement", value: slug,       inline: true },
-      { name: "Récompense",    value: rewardName, inline: true },
-      { name: "Client",        value: clientEmail || "anonyme", inline: true },
+      { name: "Établissement", value: `${nom} \`/${slug}\``, inline: false },
+      { name: "Récompense gagnée", value: rewardName, inline: true },
+      { name: "Code généré",   value: `\`${winCode}\``,     inline: true },
+      { name: "Client",        value: clientValue,           inline: false },
     ],
   });
 }
