@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import stripe, { PRICE_TO_PLAN } from "@/lib/stripe";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
+import { logPayment, logServerError } from "@/lib/discord";
 
 // App Router: disable body buffering so we can read the raw stream for Stripe signature
 export const dynamic = "force-dynamic";
@@ -67,18 +68,28 @@ export async function POST(req) {
 
   try {
     switch (event.type) {
-      case "checkout.session.completed":
-        await handleCheckoutCompleted(event.data.object);
+      case "checkout.session.completed": {
+        const session = event.data.object;
+        await handleCheckoutCompleted(session);
+        logPayment({ event: "new", email: session.customer_email, plan: session.metadata?.plan, amount: session.amount_total });
         break;
-      case "customer.subscription.updated":
-        await handleSubscriptionUpsert(event.data.object);
+      }
+      case "customer.subscription.updated": {
+        const sub = event.data.object;
+        await handleSubscriptionUpsert(sub);
+        const plan = PRICE_TO_PLAN[sub.items?.data?.[0]?.price?.id] || "free";
+        logPayment({ event: "updated", plan, email: sub.metadata?.userId || "—" });
         break;
-      case "customer.subscription.deleted":
-        await handleSubscriptionDeleted(event.data.object);
+      }
+      case "customer.subscription.deleted": {
+        const sub = event.data.object;
+        await handleSubscriptionDeleted(sub);
+        logPayment({ event: "deleted", email: sub.metadata?.userId || "—" });
         break;
+      }
       case "invoice.payment_failed": {
         const invoice = event.data.object;
-        console.warn(`[stripe] invoice.payment_failed customer=${invoice.customer} amount=${invoice.amount_due}`);
+        logPayment({ event: "failed", email: invoice.customer_email || "—", amount: invoice.amount_due });
         break;
       }
       default:
@@ -86,6 +97,7 @@ export async function POST(req) {
     }
   } catch (err) {
     console.error("Webhook handler error:", err);
+    logServerError({ route: "/api/stripe/webhook", message: err.message });
     return NextResponse.json({ error: "Erreur webhook" }, { status: 500 });
   }
 

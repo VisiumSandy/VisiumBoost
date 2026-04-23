@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Entreprise from "@/lib/models/Entreprise";
 import Spin from "@/lib/models/Spin";
 import { spinLimiter, getIp } from "@/lib/rateLimit";
+import { logSpin, logRateLimit, logServerError } from "@/lib/discord";
 
 // Génère un code gagnant unique format WIN-XXXX-XXXX
 function generateWinCode() {
@@ -21,6 +22,7 @@ export async function POST(req) {
     const ip = getIp(req);
     const limit = spinLimiter.check(ip);
     if (!limit.allowed) {
+      logRateLimit({ route: "/api/play/spin", ip });
       return NextResponse.json(
         { error: `Trop de requêtes. Réessayez dans ${limit.retryAfter} secondes.` },
         { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
@@ -67,9 +69,13 @@ export async function POST(req) {
     // Incrémenter le compteur de scans
     await Entreprise.updateOne({ _id: entreprise._id }, { $inc: { totalScans: 1 } });
 
+    // Log to Discord (non-blocking)
+    logSpin({ slug, rewardName, clientEmail: spin.clientEmail });
+
     return NextResponse.json({ winCode: spin.winCode, rewardName: spin.rewardName });
   } catch (err) {
     console.error("Spin error:", err);
+    logServerError({ route: "/api/play/spin", message: err.message });
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }

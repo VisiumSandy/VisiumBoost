@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import Code from "@/lib/models/Code";
 import Entreprise from "@/lib/models/Entreprise";
+import { logAdminAction } from "@/lib/discord";
 
 function requireAdmin() {
   const user = getCurrentUser();
@@ -74,6 +75,7 @@ export async function PATCH(req) {
     if (renewTrial) update.trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 
     const user = await User.findByIdAndUpdate(userId, update, { new: true }).select("-password");
+    logAdminAction({ admin: admin.email, action: `Mise à jour : ${Object.keys(update).join(", ")}`, target: user?.email || userId });
     return NextResponse.json({ user });
   } catch (err) {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -88,9 +90,11 @@ export async function DELETE(req) {
   try {
     await connectDB();
     const { userId } = await req.json();
+    const target = await User.findById(userId).select("email name").lean();
     await User.findByIdAndDelete(userId);
     await Code.deleteMany({ userId });
     await Entreprise.deleteMany({ userId });
+    logAdminAction({ admin: admin.email, action: "Suppression compte", target: target?.email || userId });
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

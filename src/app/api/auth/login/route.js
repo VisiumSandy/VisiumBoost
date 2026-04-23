@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { signToken, setAuthCookie } from "@/lib/auth";
 import { loginLimiter, getIp } from "@/lib/rateLimit";
+import { logLogin, logRateLimit, logSecurityEvent } from "@/lib/discord";
 
 // Seed admin on first call if needed
 async function ensureAdmin() {
@@ -32,6 +33,7 @@ export async function POST(req) {
     const ip = getIp(req);
     const limit = loginLimiter.check(ip);
     if (!limit.allowed) {
+      logRateLimit({ route: "/api/auth/login", ip });
       return NextResponse.json(
         { error: `Trop de tentatives. Réessayez dans ${limit.retryAfter} secondes.` },
         {
@@ -64,6 +66,7 @@ export async function POST(req) {
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
+      logSecurityEvent({ event: "Mot de passe incorrect", detail: `Email : ${email}`, ip });
       return NextResponse.json({ error: "Email ou mot de passe incorrect" }, { status: 401 });
     }
 
@@ -72,6 +75,9 @@ export async function POST(req) {
 
     const token = signToken({ id: user._id.toString(), email: user.email, role: user.role, name: user.name });
     setAuthCookie(token);
+
+    // Log to Discord (non-blocking)
+    logLogin({ name: user.name, email: user.email, role: user.role });
 
     return NextResponse.json({
       user: { id: user._id, email: user.email, name: user.name, role: user.role, plan: user.plan },

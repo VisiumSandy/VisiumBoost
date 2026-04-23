@@ -5,6 +5,7 @@ import User from "@/lib/models/User";
 import { signToken, setAuthCookie } from "@/lib/auth";
 import { sendWelcomeEmail } from "@/lib/email";
 import { registerLimiter, getIp } from "@/lib/rateLimit";
+import { logNewUser, logRateLimit } from "@/lib/discord";
 
 export async function POST(req) {
   try {
@@ -12,6 +13,7 @@ export async function POST(req) {
     const ip = getIp(req);
     const limit = registerLimiter.check(ip);
     if (!limit.allowed) {
+      logRateLimit({ route: "/api/auth/register", ip });
       return NextResponse.json(
         { error: `Trop de tentatives. Réessayez dans ${limit.retryAfter} secondes.` },
         { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
@@ -62,6 +64,9 @@ export async function POST(req) {
 
     // Send welcome email (non-blocking)
     sendWelcomeEmail({ to: user.email, name: user.name });
+
+    // Log to Discord (non-blocking)
+    logNewUser({ name: user.name, email: user.email, plan: user.plan });
 
     return NextResponse.json({
       user: { id: user._id, email: user.email, name: user.name, role: user.role, plan: user.plan },

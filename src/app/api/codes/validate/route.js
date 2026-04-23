@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Code from "@/lib/models/Code";
 import User from "@/lib/models/User";
 import { validateCodeLimiter, getIp } from "@/lib/rateLimit";
+import { logCodeValidated, logRateLimit, logSecurityEvent } from "@/lib/discord";
 import { sendCodeValidatedEmail } from "@/lib/email";
 
 export async function POST(req) {
@@ -10,6 +11,7 @@ export async function POST(req) {
   const ip = getIp(req);
   const limit = validateCodeLimiter.check(ip);
   if (!limit.allowed) {
+    logRateLimit({ route: "/api/codes/validate", ip });
     return NextResponse.json(
       { valid: false, error: `Trop de tentatives. Réessayez dans ${limit.retryAfter} secondes.` },
       {
@@ -36,10 +38,19 @@ export async function POST(req) {
     if (userId) filter.userId = userId;
 
     const record = await Code.findOne(filter);
-    if (!record) return NextResponse.json({ valid: false, error: "Code invalide ou inexistant" });
+    if (!record) {
+      logSecurityEvent({ event: "Code invalide", detail: `Code tenté : \`${normalized}\``, ip });
+      return NextResponse.json({ valid: false, error: "Code invalide ou inexistant" });
+    }
     if (record.used) return NextResponse.json({ valid: false, error: "Code déjà utilisé" });
 
     await Code.updateOne({ _id: record._id }, { used: true, usedAt: new Date() });
+
+    // Log to Discord (non-blocking)
+    try {
+      const ownerForLog = await User.findById(record.userId).select("businessName name").lean();
+      logCodeValidated({ code: normalized, businessName: ownerForLog?.businessName || ownerForLog?.name || "—" });
+    } catch {}
 
     // Send notification email to the business owner (non-blocking)
     try {
