@@ -5,15 +5,16 @@ import User from "@/lib/models/User";
 import { signToken, setAuthCookie } from "@/lib/auth";
 import { logLogin, logSecurityEvent } from "@/lib/discord";
 
-// Seed admin on first call if needed
+// Seed admin — creates if missing, always syncs password with env var
 async function ensureAdmin() {
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminEmail || !adminPassword) return;
 
+  const hashed = await bcrypt.hash(adminPassword, 12);
   const exists = await User.findOne({ email: adminEmail });
+
   if (!exists) {
-    const hashed = await bcrypt.hash(adminPassword, 12);
     await User.create({
       email: adminEmail,
       password: hashed,
@@ -23,6 +24,9 @@ async function ensureAdmin() {
       businessName: "VisiumBoost HQ",
     });
     console.log("[VisiumBoost] Admin account created:", adminEmail);
+  } else {
+    // Always sync password so changing ADMIN_PASSWORD in env takes effect immediately
+    await User.updateOne({ email: adminEmail }, { password: hashed });
   }
 }
 
