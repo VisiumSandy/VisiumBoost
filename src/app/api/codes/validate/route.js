@@ -39,31 +39,28 @@ export async function POST(req) {
 
     const record = await Code.findOne(filter);
     if (!record) {
-      logSecurityEvent({ event: "Code invalide", detail: `Code tenté : \`${normalized}\``, ip });
+      await logSecurityEvent({ event: "Code invalide", detail: `Code tenté : \`${normalized}\``, ip });
       return NextResponse.json({ valid: false, error: "Code invalide ou inexistant" });
     }
     if (record.used) return NextResponse.json({ valid: false, error: "Code déjà utilisé" });
 
-    await Code.updateOne({ _id: record._id }, { used: true, usedAt: new Date() });
+    const owner = await User.findById(record.userId).lean();
+    await Promise.all([
+      Code.updateOne({ _id: record._id }, { used: true, usedAt: new Date() }),
+      logCodeValidated({ code: normalized, businessName: owner?.businessName || owner?.name || "—" }),
+    ]);
 
-    // Log to Discord (non-blocking)
-    try {
-      const ownerForLog = await User.findById(record.userId).select("businessName name").lean();
-      logCodeValidated({ code: normalized, businessName: ownerForLog?.businessName || ownerForLog?.name || "—" });
-    } catch {}
-
-    // Send notification email to the business owner (non-blocking)
-    try {
-      const owner = await User.findById(record.userId).lean();
-      if (owner?.email) {
-        sendCodeValidatedEmail({
+    // Send notification email to the business owner
+    if (owner?.email) {
+      try {
+        await sendCodeValidatedEmail({
           to: owner.email,
           businessName: owner.businessName || owner.name,
           code: normalized,
         });
+      } catch (emailErr) {
+        console.error("[validate] Failed to send notification email:", emailErr);
       }
-    } catch (emailErr) {
-      console.error("[validate] Failed to send notification email:", emailErr);
     }
 
     return NextResponse.json({ valid: true, code: normalized, message: "Code validé avec succès !" });

@@ -62,8 +62,7 @@ export async function POST(req) {
     const token = signToken({ id: user._id.toString(), email: user.email, role: user.role, name: user.name });
     setAuthCookie(token);
 
-    // Log to Discord (non-blocking)
-    logLogin({ name: user.name, email: user.email, role: user.role });
+    await logLogin({ name: user.name, email: user.email, role: user.role });
 
     return NextResponse.json({
       user: { id: user._id, email: user.email, name: user.name, role: user.role, plan: user.plan },

@@ -66,19 +66,19 @@ export async function POST(req) {
       ip,
     });
 
-    // Incrémenter le compteur de scans
-    await Entreprise.updateOne({ _id: entreprise._id }, { $inc: { totalScans: 1 } });
-
-    // Log to Discord (non-blocking)
-    logSpin({
-      nom:         entreprise.nom,
-      slug,
-      rewardName,
-      winCode:     spin.winCode,
-      clientName:  spin.clientName  || null,
-      clientEmail: spin.clientEmail || null,
-      clientPhone: spin.clientPhone || null,
-    });
+    // Incrémenter le compteur de scans + log Discord (awaited before response)
+    await Promise.all([
+      Entreprise.updateOne({ _id: entreprise._id }, { $inc: { totalScans: 1 } }),
+      logSpin({
+        nom:         entreprise.nom,
+        slug,
+        rewardName,
+        winCode:     spin.winCode,
+        clientName:  spin.clientName  || null,
+        clientEmail: spin.clientEmail || null,
+        clientPhone: spin.clientPhone || null,
+      }),
+    ]);
 
     return NextResponse.json({ winCode: spin.winCode, rewardName: spin.rewardName });
   } catch (err) {

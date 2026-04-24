@@ -65,8 +65,7 @@ export async function POST(req) {
     // Send welcome email (non-blocking)
     sendWelcomeEmail({ to: user.email, name: user.name });
 
-    // Log to Discord (non-blocking)
-    logNewUser({ name: user.name, email: user.email, plan: user.plan });
+    await logNewUser({ name: user.name, email: user.email, plan: user.plan });
 
     return NextResponse.json({
       user: { id: user._id, email: user.email, name: user.name, role: user.role, plan: user.plan },
