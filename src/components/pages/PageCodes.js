@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useApp } from "@/lib/context";
 
 export default function PageCodes() {
+  const { refreshPending } = useApp();
   const [spins, setSpins] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,7 @@ export default function PageCodes() {
     const d = await r.json();
     setQuickResult({ ok: r.ok, ...d });
     setQuickLoading(false);
-    if (r.ok) { setQuickCode(""); fetchSpins(); }
+    if (r.ok) { setQuickCode(""); fetchSpins(); refreshPending(); }
   };
 
   const handleCaisseValidate = async () => {
@@ -58,7 +60,7 @@ export default function PageCodes() {
     const d = await r.json();
     setCaisseResult({ ok: r.ok, ...d });
     setCaisseLoading(false);
-    if (r.ok) { setCaisseCode(""); fetchSpins(); }
+    if (r.ok) { setCaisseCode(""); fetchSpins(); refreshPending(); }
     setTimeout(() => { setCaisseResult(null); setCaisseCode(""); }, 4000);
   };
 
@@ -70,7 +72,7 @@ export default function PageCodes() {
       body: JSON.stringify({ winCode, action }),
     });
     const d = await r.json();
-    if (r.ok) fetchSpins();
+    if (r.ok) { fetchSpins(); refreshPending(); }
     else alert(d.error || "Erreur");
     setActioning(null);
   };
