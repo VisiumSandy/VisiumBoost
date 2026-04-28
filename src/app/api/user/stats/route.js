@@ -13,10 +13,11 @@ export async function GET() {
   const entreprises = await Entreprise.find({ userId: session.id }).lean();
   const ids = entreprises.map((e) => e._id);
 
-  const [totalSpins, validatedSpins, recentSpins, bestDayResult, monthSpins] =
+  const [totalSpins, validatedSpins, pendingSpinsCount, recentSpins, bestDayResult, monthSpins] =
     await Promise.all([
       Spin.countDocuments({ entrepriseId: { $in: ids } }),
       Spin.countDocuments({ entrepriseId: { $in: ids }, validated: true }),
+      Spin.countDocuments({ entrepriseId: { $in: ids }, validated: false, expired: { $ne: true } }),
 
       // Last 7 days grouped by day
       Spin.aggregate([
@@ -118,7 +119,7 @@ export async function GET() {
     totalScans,
     totalSpins,
     validatedSpins,
-    pendingSpins: totalSpins - validatedSpins,
+    pendingSpins: pendingSpinsCount,
     conversionRate,
     totalEntreprises: entreprises.length,
     weekChart,
