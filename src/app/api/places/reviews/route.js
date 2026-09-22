@@ -25,32 +25,43 @@ export async function GET(req) {
   if (!apiKey) return NextResponse.json({ error: "GOOGLE_PLACES_API_KEY non configurée." }, { status: 500 });
 
   try {
-    const url =
-      `https://maps.googleapis.com/maps/api/place/details/json` +
-      `?place_id=${encodeURIComponent(placeId)}` +
-      `&fields=name,rating,user_ratings_total,reviews` +
-      `&reviews_sort=newest` +
-      `&language=fr` +
-      `&key=${apiKey}`;
+    const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=fr`;
 
-    const res = await fetch(url, { next: { revalidate: 0 } });
+    const res = await fetch(url, {
+      headers: {
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "displayName,rating,userRatingCount,reviews",
+      },
+      next: { revalidate: 0 },
+    });
     const data = await res.json();
 
-    if (data.status === "REQUEST_DENIED") {
-      return NextResponse.json({ error: "Clé API Google invalide.", detail: data.error_message || "" }, { status: 400 });
-    }
-    if (data.status !== "OK") {
-      return NextResponse.json({ error: data.status, detail: data.error_message || "" }, { status: 400 });
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: data?.error?.message || "Erreur API Google.", detail: data?.error?.status || "" },
+        { status: res.status }
+      );
     }
 
-    const result = data.result || {};
-    // Sort newest first by unix timestamp
-    const reviews = (result.reviews || []).sort((a, b) => b.time - a.time);
+    // L'API New ne propose plus reviews_sort=newest : on trie nous-mêmes
+    // parmi les (au plus 5) avis renvoyés par Google.
+    const reviews = (data.reviews || [])
+      .slice()
+      .sort((a, b) => new Date(b.publishTime) - new Date(a.publishTime))
+      .map((r) => ({
+        author_name: r.authorAttribution?.displayName || "Anonyme",
+        author_url: r.authorAttribution?.uri || "",
+        profile_photo_url: r.authorAttribution?.photoUri || "",
+        rating: r.rating,
+        text: r.text?.text || r.originalText?.text || "",
+        time: r.publishTime ? Math.floor(new Date(r.publishTime).getTime() / 1000) : null,
+        relative_time_description: r.relativePublishTimeDescription || "",
+      }));
 
     return NextResponse.json({
-      name: result.name || "",
-      rating: result.rating || null,
-      totalRatings: result.user_ratings_total || 0,
+      name: data.displayName?.text || "",
+      rating: data.rating || null,
+      totalRatings: data.userRatingCount || 0,
       reviews,
     });
   } catch {
