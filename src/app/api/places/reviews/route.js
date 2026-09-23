@@ -25,43 +25,38 @@ export async function GET(req) {
   if (!apiKey) return NextResponse.json({ error: "GOOGLE_PLACES_API_KEY non configurée." }, { status: 500 });
 
   try {
-    const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=fr`;
+    // API Legacy : seule version qui propose reviews_sort=newest (vrai tri chronologique,
+    // pas le tri "pertinence" de la New API).
+    const url =
+      `https://maps.googleapis.com/maps/api/place/details/json` +
+      `?place_id=${encodeURIComponent(placeId)}` +
+      `&fields=name,rating,user_ratings_total,reviews` +
+      `&reviews_sort=newest` +
+      `&language=fr` +
+      `&key=${encodeURIComponent(apiKey)}`;
 
-    const res = await fetch(url, {
-      headers: {
-        "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask": "displayName,rating,userRatingCount,reviews",
-      },
-      next: { revalidate: 0 },
-    });
+    const res = await fetch(url, { next: { revalidate: 0 } });
     const data = await res.json();
 
-    if (!res.ok) {
+    if (data.status !== "OK") {
       return NextResponse.json(
-        { error: data?.error?.message || "Erreur API Google.", detail: data?.error?.status || "" },
-        { status: res.status }
+        { error: data.error_message || `Erreur API Google (${data.status}).`, detail: data.status },
+        { status: 502 }
       );
     }
 
-    // L'API New ne propose plus reviews_sort=newest : on trie nous-mêmes
-    // parmi les (au plus 5) avis renvoyés par Google.
-    const reviews = (data.reviews || [])
+    const result = data.result || {};
+
+    // Les champs legacy (author_name, author_url, profile_photo_url, rating, text, time,
+    // relative_time_description) correspondent déjà 1:1 à ce qu'attend PageAvis.js.
+    const reviews = (result.reviews || [])
       .slice()
-      .sort((a, b) => new Date(b.publishTime) - new Date(a.publishTime))
-      .map((r) => ({
-        author_name: r.authorAttribution?.displayName || "Anonyme",
-        author_url: r.authorAttribution?.uri || "",
-        profile_photo_url: r.authorAttribution?.photoUri || "",
-        rating: r.rating,
-        text: r.text?.text || r.originalText?.text || "",
-        time: r.publishTime ? Math.floor(new Date(r.publishTime).getTime() / 1000) : null,
-        relative_time_description: r.relativePublishTimeDescription || "",
-      }));
+      .sort((a, b) => (b.time || 0) - (a.time || 0));
 
     return NextResponse.json({
-      name: data.displayName?.text || "",
-      rating: data.rating || null,
-      totalRatings: data.userRatingCount || 0,
+      name: result.name || "",
+      rating: result.rating || null,
+      totalRatings: result.user_ratings_total || 0,
       reviews,
     });
   } catch {
