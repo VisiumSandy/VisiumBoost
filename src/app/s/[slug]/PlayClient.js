@@ -437,6 +437,28 @@ export default function PlayClient({ entreprise }) {
               </div>
             </div>
 
+            {/* Avis Google : demande séparée, facultative, proposée à tous, sans lien avec le cadeau */}
+            {entreprise.lien_avis && (
+              <div style={{ marginBottom: 28 }}>
+                <a href={entreprise.lien_avis} target="_blank" rel="noopener noreferrer"
+                   style={{
+                     display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                     width: "100%", padding: "17px 24px", borderRadius: btnRadius, textDecoration: "none",
+                     background: `linear-gradient(135deg, ${pc}, ${sc})`, color: autoText(pc),
+                     fontWeight: 800, fontSize: 16, fontFamily: `'${ff}', sans-serif`,
+                     boxShadow: `0 10px 30px ${pc}40`,
+                   }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  Donner votre avis sur Google
+                </a>
+                <p style={{ margin: "10px 0 0", fontSize: 12, color: subtleColor, lineHeight: 1.5 }}>
+                  Facultatif : votre cadeau ne dépend pas de votre avis.
+                </p>
+              </div>
+            )}
+
             {/* Instructions */}
             <div style={{ background: cardBg, border: `1.5px solid ${cardBorder}`, borderRadius: 16, padding: "20px 24px", textAlign: "left" }}>
               <p style={{ fontSize: 14, fontWeight: 800, color: tc, margin: "0 0 12px", fontFamily: `'${ff}', sans-serif` }}>
@@ -459,26 +481,26 @@ export default function PlayClient({ entreprise }) {
               ))}
             </div>
 
-            {/* Avis Google : demande séparée, facultative, sans lien avec le cadeau */}
-            {entreprise.lien_avis && (
-              <div style={{ marginTop: 28, textAlign: "center" }}>
-                <a href={entreprise.lien_avis} target="_blank" rel="noopener noreferrer"
-                   style={{
-                     display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
-                     width: "100%", padding: "15px 24px", borderRadius: btnRadius, textDecoration: "none",
-                     background: "transparent", color: pc, border: `2px solid ${pc}`,
-                     fontWeight: 800, fontSize: 15, fontFamily: `'${ff}', sans-serif`,
-                   }}>
-                  ⭐ Donner votre avis sur Google
-                </a>
-                <p style={{ margin: "10px 0 0", fontSize: 12, color: subtleColor, lineHeight: 1.5 }}>
-                  Facultatif : votre cadeau ne dépend pas de votre avis.
-                </p>
-              </div>
-            )}
           </div>
         )}
       </main>
+
+      {/* ── RÈGLEMENT DU JEU ── */}
+      <section style={{ maxWidth: 480, margin: "0 auto", padding: "0 20px 28px" }}>
+        <details style={{ background: cardBg, border: `1.5px solid ${cardBorder}`, borderRadius: 16, padding: "14px 18px" }}>
+          <summary style={{ cursor: "pointer", fontSize: 13, fontWeight: 800, color: tc, listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            Règlement du jeu et règles Google <span aria-hidden="true" style={{ color: subtleColor }}>＋</span>
+          </summary>
+          <div style={{ fontSize: 12, color: subtleColor, lineHeight: 1.7, marginTop: 12 }}>
+            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>1. Organisateur.</strong> Ce jeu est organisé par {entreprise.nom}. VisiumBoost fournit uniquement l&apos;outil technique.</p>
+            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>2. Participation.</strong> Gratuite et sans obligation d&apos;achat, ouverte aux personnes majeures (mineurs avec l&apos;accord de leur représentant légal). Une partie par personne toutes les 48 heures.</p>
+            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>3. Lots.</strong> {(entreprise.rewards || []).length > 0 ? (entreprise.rewards.map(r => r.name).join(", ") + ". ") : ""}Le résultat est tiré au sort par la roue, sans lien avec une autre action que le lancement du jeu. Les lots ne sont ni échangeables ni remboursables.</p>
+            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>4. Retrait.</strong> Le code gagnant est valable 30 jours et utilisable une seule fois, sur présentation à l&apos;établissement.</p>
+            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>5. Avis Google.</strong> Aucun avis n&apos;est exigé ni récompensé : le lot est identique, que vous laissiez un avis ou non, et quel que soit son contenu ou sa note. Le lien vers la fiche Google est proposé de la même façon à tous les participants, à titre facultatif. Cet établissement n&apos;offre aucun avantage en échange d&apos;un avis, conformément à la politique de Google sur les avis.</p>
+            <p style={{ margin: 0 }}><strong style={{ color: tc }}>6. Données et réclamations.</strong> Les éventuelles données saisies servent uniquement à la remise du lot. Vous disposez des droits d&apos;accès, de rectification et d&apos;effacement (RGPD) auprès de {entreprise.nom}, que vous pouvez aussi contacter pour toute réclamation.</p>
+          </div>
+        </details>
+      </section>
 
       <footer style={{ textAlign: "center", padding: "16px", fontSize: 12, color: subtleColor, borderTop: `1px solid ${cardBorder}` }}>
         Propulsé par{" "}
