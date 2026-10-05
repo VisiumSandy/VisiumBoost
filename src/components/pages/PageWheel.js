@@ -32,9 +32,9 @@ const TEMPLATES = [
     wheelFont: "Playfair Display", wheelSize: 360,
     bg: "#FAFAFA", bgType: "color", bgGradient: "",
     textColor: "#1D1D1F", btnColor: "#1D1D1F", btnRadius: 6,
-    btnText: "⭐ Laisser mon avis Google",
+    btnText: "",
     title: "Tournez et gagnez !",
-    welcome: "Laissez-nous un avis et découvrez votre récompense exclusive.",
+    welcome: "Tentez votre chance et découvrez votre récompense exclusive.",
     thanks: "Merci ! Votre cadeau vous attend en caisse.",
     cardColor: "#F5F0E8",
   },
@@ -48,9 +48,9 @@ const TEMPLATES = [
     bg: "#7C3AED", bgType: "gradient",
     bgGradient: "linear-gradient(135deg, #7C3AED 0%, #EC4899 100%)",
     textColor: "#FFFFFF", btnColor: "#FFD93D", btnRadius: 999,
-    btnText: "🎊 Laisser mon avis Google",
+    btnText: "",
     title: "Tentez votre chance !",
-    welcome: "Laissez-nous un avis et tournez la roue des cadeaux !",
+    welcome: "Tournez la roue des cadeaux !",
     thanks: "🎊 Incroyable ! Votre cadeau vous attend !",
     cardColor: "rgba(255,255,255,0.12)",
   },
@@ -63,9 +63,9 @@ const TEMPLATES = [
     wheelFont: "Inter", wheelSize: 340,
     bg: "#F4F4F5", bgType: "color", bgGradient: "",
     textColor: "#18181B", btnColor: "#18181B", btnRadius: 4,
-    btnText: "Laisser un avis Google",
-    title: "Votre avis, votre cadeau.",
-    welcome: "Partagez votre expérience et découvrez votre récompense.",
+    btnText: "",
+    title: "Un cadeau pour vous.",
+    welcome: "Tournez la roue et découvrez votre récompense.",
     thanks: "Merci. Présentez ce code en caisse.",
     cardColor: "#EBEBEB",
   },
@@ -78,9 +78,9 @@ const TEMPLATES = [
     wheelFont: "Space Grotesk", wheelSize: 380,
     bg: "#0F0F1A", bgType: "color", bgGradient: "",
     textColor: "#FFFFFF", btnColor: "#00FF87", btnRadius: 10,
-    btnText: "⭐ Laisser mon avis",
+    btnText: "",
     title: "Tournez. Gagnez.",
-    welcome: "Laissez votre avis et découvrez votre récompense.",
+    welcome: "Tournez la roue et découvrez votre récompense.",
     thanks: "✨ Votre cadeau vous attend !",
     cardColor: "rgba(255,255,255,0.07)",
   },
@@ -93,7 +93,7 @@ const TEMPLATES = [
     wheelFont: "DM Sans", wheelSize: 360,
     bg: "#F0FDF4", bgType: "color", bgGradient: "",
     textColor: "#14532D", btnColor: "#16A34A", btnRadius: 14,
-    btnText: "🌿 Laisser mon avis Google",
+    btnText: "",
     title: "Tournez et gagnez chez nous !",
     welcome: "Merci de nous soutenir. Tournez la roue et gagnez un cadeau !",
     thanks: "Merci ! Votre récompense vous attend avec le sourire.",
@@ -140,14 +140,14 @@ const DEFAULT_THEME = {
   font: "DM Sans", wheelSize: 360,
   bg: "#ffffff", bgType: "color", bgGradient: "",
   banner: "",
-  title: "", welcome: "", btnColor: "", btnText: "⭐ Laisser mon avis Google",
+  title: "", welcome: "", btnColor: "", btnText: "",
   btnRadius: 14, thanks: "", textColor: "#0F0F1A", cardColor: "",
   collectFields: { prenom: false, email: false, telephone: false },
 };
 
 const DEFAULT_CONFIG = {
   googleLink: "", primaryColor: "#3B82F6", secondaryColor: "#0EA5E9",
-  ctaText: "Laissez-nous un avis et tentez votre chance !",
+  ctaText: "Tentez votre chance !",
   logoUrl: "", rewards: [],
   theme: { ...DEFAULT_THEME },
 };
@@ -191,7 +191,7 @@ function entrepriseToConfig(e) {
       title:         F("title",        "page_title",           ""),
       welcome:       F("welcome",      "page_welcome",         ""),
       btnColor:      F("btnColor",     "page_btn_color",       ""),
-      btnText:       F("btnText",      "page_btn_text",        "⭐ Laisser mon avis Google"),
+      btnText:       F("btnText",      "page_btn_text",        ""),
       btnRadius:     t.btnRadius       ?? 14,
       thanks:        F("thanks",       "page_thanks",          ""),
       textColor:     F("textColor",    "page_text_color",      "#0F0F1A"),
@@ -274,19 +274,19 @@ function LivePreview({ config, entreprise, compact = false }) {
         {/* Step 1 — Landing */}
         {pvStep === 1 && (
           <div style={{ textAlign: "center", width: "100%" }}>
-            <div style={{ fontSize: 38, lineHeight: 1, marginBottom: 8 }}>⭐</div>
+            <div style={{ fontSize: 38, lineHeight: 1, marginBottom: 8 }}>🎁</div>
             <h1 style={{ fontSize: 16, fontWeight: 900, color: tc, margin: "0 0 7px", lineHeight: 1.3, fontFamily: `'${ff}', sans-serif` }}>
               {theme.title || config.ctaText || "Tournez et gagnez !"}
             </h1>
             <p style={{ color: subtleTc, fontSize: 11, lineHeight: 1.6, margin: "0 auto 14px", maxWidth: 280 }}>
-              {theme.welcome || "Laissez-nous un avis Google, puis revenez ici pour tourner la roue !"}
+              {theme.welcome || "Tournez la roue et tentez de gagner un cadeau !"}
             </p>
             <button onClick={() => setPvStep(2)} style={{
               padding: "11px 24px", borderRadius: br, border: "none",
               background: btn, color: btnTc, fontWeight: 800, fontSize: 13,
               cursor: "pointer", fontFamily: `'${ff}', sans-serif`,
               boxShadow: `0 6px 20px ${btn}44`,
-            }}>{theme.btnText || "⭐ Laisser mon avis Google"}</button>
+            }}>Tourner la roue</button>
             {previewRewards.length > 0 && (
               <div style={{ marginTop: 16, opacity: 0.35, pointerEvents: "none" }}>
                 <SpinWheel key={`prev-idle-${spinKey}`}
@@ -302,9 +302,6 @@ function LivePreview({ config, entreprise, compact = false }) {
         {/* Step 2 — Wheel */}
         {pvStep === 2 && (
           <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#00B89418", border: "1.5px solid #00B89430", borderRadius: 10, padding: "6px 12px" }}>
-              <span style={{ color: "#00B894", fontWeight: 800, fontSize: 11 }}>✓ Merci pour votre avis !</span>
-            </div>
             {previewRewards.length > 0
               ? <SpinWheel key={`prev-spin-${spinKey}`}
                   rewards={previewRewards} primaryColor={pc} secondaryColor={sc}
@@ -700,6 +697,10 @@ export default function PageWheel() {
           <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 6 }}>
             Récupérez ce lien depuis votre fiche Google Business → Obtenir plus d&apos;avis
           </p>
+          <p style={{ fontSize: 12, color: "#64748B", marginTop: 10, lineHeight: 1.5, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "10px 12px" }}>
+            Ce lien est proposé aux joueurs comme une invitation facultative, une fois leur cadeau obtenu.
+            Conformément aux règles de Google, le cadeau ne dépend jamais d&apos;un avis : n&apos;en faites pas une condition.
+          </p>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
             <button onClick={() => setStep(2)} className="btn-primary">
               Suivant <Icon name="chevronRight" size={16} color="#fff" />
@@ -969,17 +970,15 @@ export default function PageWheel() {
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 6 }}>Message de bienvenue</div>
                     <textarea value={config.theme.welcome} onChange={e => updateT("welcome", e.target.value)}
-                      placeholder="Laissez-nous un avis Google, puis revenez tourner la roue !"
+                      placeholder="Tournez la roue et tentez de gagner un cadeau !"
                       rows={3} style={{ ...inp, resize: "vertical", lineHeight: 1.5 }}
                       onFocus={focusBlue} onBlur={blurGray} />
                   </div>
 
                   {/* Bouton */}
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Bouton principal</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Bouton (couleur et forme)</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      <input value={config.theme.btnText} onChange={e => updateT("btnText", e.target.value)}
-                        placeholder="⭐ Laisser mon avis Google" style={inp} onFocus={focusBlue} onBlur={blurGray} />
                       <div style={{ display: "flex", gap: 8 }}>
                         <div style={{ flex: 1 }}>
                           <ColorField label="Couleur" value={config.theme.btnColor || config.primaryColor} onChange={v => updateT("btnColor", v)} />
@@ -1004,7 +1003,7 @@ export default function PageWheel() {
                           fontWeight: 800, fontSize: 13,
                           fontFamily: `'${config.theme.font}', sans-serif`,
                         }}>
-                          {config.theme.btnText || "⭐ Laisser mon avis Google"}
+                          Découvrir mon cadeau 🎁
                         </div>
                       </div>
                     </div>

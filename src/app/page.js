@@ -697,7 +697,7 @@ const STATS = [
 const STEPS = [
   { n: "01", ac: "#2563EB", icon: Ic.Zap,       title: "Créez votre roue",    desc: "Configurez couleurs, récompenses et probabilités en quelques clics." },
   { n: "02", ac: "#8B5CF6", icon: Ic.QrCode,    title: "Affichez le QR code", desc: "Imprimez ou affichez le QR généré. Posez-le en caisse ou sur vos tables." },
-  { n: "03", ac: "#10B981", icon: Ic.BarChart,   title: "Récoltez les avis",   desc: "Vos clients jouent après un avis Google. Les avis arrivent en continu." },
+  { n: "03", ac: "#10B981", icon: Ic.BarChart,   title: "Fidélisez vos clients", desc: "Vos clients jouent, gagnent un cadeau à retirer sous 30 jours et reviennent chez vous." },
 ];
 
 const BENTO_FEATURES = [
@@ -977,7 +977,7 @@ export default function LandingPage() {
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "url": "https://visium-boost.fr",
-    "description": "Outil de gamification des avis Google pour commerces locaux. Roue de la fortune, codes anti-fraude, QR code, dashboard analytics.",
+    "description": "Roue de la fortune de fidélisation pour commerces locaux. Codes anti-fraude, QR code, dashboard analytics.",
     "offers": {
       "@type": "AggregateOffer",
       "lowPrice": "9.99",
@@ -1062,12 +1062,12 @@ export default function LandingPage() {
                 margin: "0 0 24px", color: text,
               }}>
               La roue qui <G>transforme</G>
-              <br />vos clients en <G from="#8B5CF6" to="#38BDF8">avis</G>
+              <br />vos clients en <G from="#8B5CF6" to="#38BDF8">habitués</G>
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: E, delay: 0.12 }}
               style={{ fontSize: "clamp(15px,1.6vw,18px)", lineHeight: 1.75, color: text2, margin: "0 0 36px", maxWidth: 480 }}>
-              Chaque avis Google débloque un tour de roue. Vos clients jouent, gagnent une récompense et reviennent.
+              Vos clients scannent, tournent la roue et gagnent une récompense. Ils reviennent la retirer. Conforme aux règles Google : le cadeau ne dépend jamais d’un avis.
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: E, delay: 0.18 }}
@@ -1237,7 +1237,7 @@ export default function LandingPage() {
               Opérationnel en <G>3 étapes</G>
             </h2>
             <p style={{ color: text2, fontSize: 16, maxWidth: 400, margin: "0 auto", lineHeight: 1.7 }}>
-              Pas de développeur. Pas de carte bancaire. Juste vos premiers avis.
+              Pas de développeur. Pas de carte bancaire. Juste vos premiers clients fidèles.
             </p>
           </motion.div>
 
@@ -1291,7 +1291,7 @@ export default function LandingPage() {
               FONCTIONNALITÉS
             </div>
             <h2 style={{ fontFamily: FONT_TITLE, fontSize: "clamp(28px,4.5vw,52px)", fontWeight: 400, margin: "0 0 16px", letterSpacing: "-0.02em", lineHeight: 1.08, color: text }}>
-              Tout ce qu&apos;il faut pour <G from="#8B5CF6" to="#06B6D4">booster vos avis</G>
+              Tout ce qu&apos;il faut pour <G from="#8B5CF6" to="#06B6D4">fidéliser vos clients</G>
             </h2>
           </motion.div>
 
