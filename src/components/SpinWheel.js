@@ -222,7 +222,7 @@ export default function SpinWheel({
             transition: "all 0.2s",
           }}
         >
-          {spinning ? "La roue tourne…" : disabled ? "Laissez d'abord un avis →" : "🎡 Tourner la roue !"}
+          {spinning ? "La roue tourne…" : "🎡 Tourner la roue !"}
         </button>
       )}
     </div>
