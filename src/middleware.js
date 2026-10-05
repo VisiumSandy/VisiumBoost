@@ -33,12 +33,12 @@ function extractSubdomain(host) {
   }
 
   // Production: restaurant.visium-boost.fr → "restaurant"
-  const parts = hostname.split(".");
-  if (parts.length > 2) {
-    const sub = parts[0];
-    return sub === "www" ? null : sub;
-  }
-  return null;
+  // Seuls les hôtes du domaine de l'app sont des sous-domaines de commerçants
+  // (les URLs *.vercel.app des prévisualisations restent des pages normales).
+  const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "visium-boost.fr";
+  if (!hostname.endsWith(`.${domain}`)) return null;
+  const sub = hostname.slice(0, -`.${domain}`.length);
+  return !sub || sub === "www" ? null : sub;
 }
 
 const PROTECTED_CLIENT = ["/dashboard"];
