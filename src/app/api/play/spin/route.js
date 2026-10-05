@@ -5,6 +5,10 @@ import Spin from "@/lib/models/Spin";
 import { spinLimiter, getIp } from "@/lib/rateLimit";
 import { logSpin, logRateLimit, logServerError } from "@/lib/discord";
 
+const PLAY_WINDOW_MS = 48 * 60 * 60 * 1000;      // une partie par appareil / 48 h
+const VALIDITY_MS = 30 * 24 * 60 * 60 * 1000;     // lot valable 30 jours
+const MAX_SPINS_PER_IP = 10;                      // plafond large : un wifi de commerce est partagé
+
 // Génère un code gagnant unique format WIN-XXXX-XXXX
 function generateWinCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -29,7 +33,8 @@ export async function POST(req) {
       );
     }
 
-    const { slug, rewardName, rewardIndex, clientName, clientEmail, clientPhone } = await req.json();
+    const { slug, rewardName, rewardIndex, clientName, clientEmail, clientPhone, deviceId: rawDeviceId } = await req.json();
+    const deviceId = typeof rawDeviceId === "string" && /^[A-Za-z0-9-]{8,64}$/.test(rawDeviceId) ? rawDeviceId : "";
 
     if (!slug || typeof slug !== "string" || !rewardName || typeof rewardName !== "string") {
       return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
@@ -48,6 +53,24 @@ export async function POST(req) {
       return NextResponse.json({ error: "Récompense invalide" }, { status: 400 });
     }
 
+    // Anti-rejeu : une partie par appareil toutes les 48 h (+ plafond large par IP en filet de sécurité)
+    const since = new Date(Date.now() - PLAY_WINDOW_MS);
+    const [lastByDevice, countByIp] = await Promise.all([
+      deviceId
+        ? Spin.findOne({ entrepriseId: entreprise._id, deviceId, createdAt: { $gte: since } }).sort({ createdAt: -1 }).select("createdAt").lean()
+        : null,
+      ip && ip !== "unknown"
+        ? Spin.countDocuments({ entrepriseId: entreprise._id, ip, createdAt: { $gte: since } })
+        : 0,
+    ]);
+    if (lastByDevice || countByIp >= MAX_SPINS_PER_IP) {
+      const retryAt = lastByDevice ? new Date(lastByDevice.createdAt.getTime() + PLAY_WINDOW_MS) : new Date(Date.now() + PLAY_WINDOW_MS);
+      return NextResponse.json(
+        { error: "Vous avez déjà joué récemment.", code: "ALREADY_PLAYED", retryAt },
+        { status: 429 }
+      );
+    }
+
     // Générer un code unique (retry si collision)
     let winCode, tries = 0;
     do {
@@ -64,6 +87,8 @@ export async function POST(req) {
       clientEmail: (clientEmail || "").slice(0, 200),
       clientPhone: (clientPhone || "").slice(0, 30),
       ip,
+      deviceId,
+      expiresAt: new Date(Date.now() + VALIDITY_MS),
     });
 
     // Incrémenter le compteur de scans + log Discord (awaited before response)

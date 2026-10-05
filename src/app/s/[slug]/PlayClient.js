@@ -56,6 +56,20 @@ function resolveTheme(e) {
   };
 }
 
+// Identifiant anonyme d'appareil, stocké en local, pour limiter à une partie par 48 h
+function getDeviceId() {
+  try {
+    let id = localStorage.getItem("vb_device");
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`);
+      localStorage.setItem("vb_device", id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
+
 export default function PlayClient({ entreprise }) {
   // ── DEBUG — remove after confirming collectFields values ──────────
   console.log(
@@ -72,6 +86,7 @@ export default function PlayClient({ entreprise }) {
   const [generating,     setGenerating]     = useState(false);
   const [confetti,       setConfetti]       = useState(false);
   const [copied,         setCopied]         = useState(false);
+  const [blockedUntil,   setBlockedUntil]   = useState(null);
 
   // Collect form state
   const [collectPending, setCollectPending] = useState(false);
@@ -129,6 +144,7 @@ export default function PlayClient({ entreprise }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          deviceId:    getDeviceId(),
           slug:        entreprise.slug,
           rewardName:  reward.name,
           rewardIndex,
@@ -143,6 +159,8 @@ export default function PlayClient({ entreprise }) {
         setStep(3);
         setConfetti(true);
         setTimeout(() => setConfetti(false), 5500);
+      } else if (res.status === 429 && data.code === "ALREADY_PLAYED") {
+        setBlockedUntil(data.retryAt ? new Date(data.retryAt) : new Date());
       } else {
         setWinCode("ERREUR");
         setStep(3);
@@ -246,8 +264,20 @@ export default function PlayClient({ entreprise }) {
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "28px 20px 80px" }}>
 
+        {/* ── Déjà joué (limite 48 h) ── */}
+        {blockedUntil && (
+          <div style={{ textAlign: "center", animation: "fadeUp 0.5s ease", padding: "40px 0" }}>
+            <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>⏳</div>
+            <h2 style={{ fontSize: 22, fontWeight: 900, color: tc, margin: "0 0 10px" }}>Vous avez déjà joué</h2>
+            <p style={{ color: subtleColor, fontSize: 14, lineHeight: 1.7, maxWidth: 340, margin: "0 auto" }}>
+              Une seule partie par personne toutes les 48 heures. Revenez le{" "}
+              {blockedUntil.toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}.
+            </p>
+          </div>
+        )}
+
         {/* ── COLLECT FORM (between spin and result) ── */}
-        {collectPending && step !== 3 && (
+        {!blockedUntil && collectPending && step !== 3 && (
           <div style={{ animation: "fadeUp 0.5s ease" }}>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>📋</div>
@@ -328,7 +358,7 @@ export default function PlayClient({ entreprise }) {
         )}
 
         {/* ── STEPS 1 & 2 ── */}
-        {!collectPending && step !== 3 && (
+        {!blockedUntil && !collectPending && step !== 3 && (
           <div style={{ animation: "fadeUp 0.5s ease" }}>
             {/* Intro */}
             <div style={{ textAlign: "center", marginBottom: 24 }}>

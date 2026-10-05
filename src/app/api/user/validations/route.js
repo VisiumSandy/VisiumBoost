@@ -26,7 +26,11 @@ export async function GET(req) {
 
   const filter = { entrepriseId: { $in: entrepriseIds } };
   if (q) filter.winCode = { $regex: q.toUpperCase(), $options: "i" };
-  if (status === "pending")   { filter.validated = false; filter.expired = { $ne: true }; }
+  if (status === "pending")   {
+    filter.validated = false;
+    filter.expired = { $ne: true };
+    filter.$or = [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }];
+  }
   if (status === "validated") { filter.validated = true; }
   if (status === "expired")   { filter.expired = true; }
   if (entrepriseId) filter.entrepriseId = entrepriseId;
@@ -75,6 +79,9 @@ export async function POST(req) {
   // action === "validate"
   if (spin.expired) {
     return NextResponse.json({ error: "Ce code est expiré et ne peut plus être validé" }, { status: 409 });
+  }
+  if (spin.expiresAt && spin.expiresAt < new Date()) {
+    return NextResponse.json({ error: "Ce code a dépassé sa durée de validité (30 jours)" }, { status: 409 });
   }
   if (spin.validated) {
     return NextResponse.json({

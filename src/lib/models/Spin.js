@@ -18,11 +18,15 @@ const SpinSchema = new mongoose.Schema(
     clientPhone: { type: String, default: "" },
     // optionnel : infos pour traçabilité
     ip: { type: String, default: "" },
+    deviceId: { type: String, default: "" },                // identifiant d'appareil anonyme (anti-rejeu)
+    expiresAt: { type: Date, default: null },               // date limite pour retirer le lot (30 jours)
   },
   { timestamps: true }
 );
 
 SpinSchema.index({ entrepriseId: 1, createdAt: -1 });
+SpinSchema.index({ entrepriseId: 1, deviceId: 1, createdAt: -1 });
+SpinSchema.index({ entrepriseId: 1, ip: 1, createdAt: -1 });
 SpinSchema.index({ winCode: 1 }, { unique: true });
 
 export default mongoose.models.Spin || mongoose.model("Spin", SpinSchema);
