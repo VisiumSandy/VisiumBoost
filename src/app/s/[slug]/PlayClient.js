@@ -62,6 +62,10 @@ function resolveTheme(e) {
     labelSize:      t.labelSize || 0,
     pointerColor:   t.pointerColor || "",
     shadow:         t.shadow !== false,
+    effect3d:       t.effect3d !== false,
+    gradient:       t.gradient !== false,
+    bulbs:          !!t.bulbs,
+    bulbColor:      t.bulbColor || "",
     spinBtnText:    t.spinBtnText || "",
     // Page background
     bgType:         F("bgType",      "page_bg_type",        "color"),
@@ -148,9 +152,8 @@ export default function PlayClient({ entreprise }) {
   const cardBorder = isTextLight ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.09)";
 
   // ── Wheel size ────────────────────────────────────────────────────
-  const wheelSize = typeof window !== "undefined"
-    ? Math.min(th.wheelSize || 360, Math.min(window.innerWidth - 40, 460))
-    : (th.wheelSize || 360);
+  // Taille maximale : SpinWheel s'adapte tout seul à la largeur de l'écran
+  const wheelSize = Math.min(th.wheelSize || 360, 460);
 
   // ── Core spin API call ────────────────────────────────────────────
   const callSpinApi = async (reward, rewardIndex, contactData = {}) => {
@@ -353,7 +356,7 @@ export default function PlayClient({ entreprise }) {
               onClick={handleCollectSubmit}
               disabled={submittingCollect}
               style={{
-                width: "100%", padding: "17px", borderRadius: btnRadius, border: "none",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", padding: "17px", borderRadius: btnRadius, border: "none",
                 background: submittingCollect ? "#b2bec3" : btnBgRaw,
                 color: btnTc, fontWeight: 800, fontSize: 16,
                 fontFamily: `'${ff}', sans-serif`,
@@ -362,6 +365,9 @@ export default function PlayClient({ entreprise }) {
               }}
             >
               {submittingCollect ? "Un instant…" : "Découvrir mon cadeau"}
+              {!submittingCollect && (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>
+              )}
             </button>
 
             <p style={{ color: subtleColor, fontSize: 11, textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
@@ -403,6 +409,10 @@ export default function PlayClient({ entreprise }) {
                 labelSize={th.labelSize}
                 pointerColor={th.pointerColor}
                 shadow={th.shadow}
+                effect3d={th.effect3d}
+                gradient={th.gradient}
+                bulbs={th.bulbs}
+                bulbColor={th.bulbColor}
                 buttonColor={btnBgRaw}
                 buttonRadius={btnRadius}
                 buttonText={th.spinBtnText}
@@ -454,8 +464,11 @@ export default function PlayClient({ entreprise }) {
                 <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 28, fontWeight: 700, color: "#fff", letterSpacing: 4 }}>
                   {generating ? "…" : winCode}
                 </span>
-                <span style={{ position: "absolute", top: 8, right: 12, fontSize: 11, color: "#718096", fontWeight: 600 }}>
-                  {copied ? "✓ Copié !" : "Appuyer pour copier"}
+                <span style={{ position: "absolute", top: 8, right: 12, fontSize: 11, color: "#718096", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    {copied ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" /></>}
+                  </svg>
+                  {copied ? "Copié" : "Copier"}
                 </span>
               </div>
             </div>
@@ -471,7 +484,7 @@ export default function PlayClient({ entreprise }) {
                      fontWeight: 800, fontSize: 16, fontFamily: `'${ff}', sans-serif`,
                      boxShadow: `0 10px 30px ${pc}40`,
                    }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
                   Donner votre avis sur Google

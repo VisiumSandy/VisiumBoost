@@ -24,14 +24,15 @@ const DEFAULT_PALETTE = ["#6C5CE7","#00B894","#FDCB6E","#E17055","#0984E3","#E84
 
 const TEMPLATES = [
   {
-    id: "elegant", name: "Élégant", emoji: "🏛️",
+    id: "elegant", name: "Or Royal",
     desc: "Noir & or, sobre et luxueux",
-    palette: ["#1D1D1F","#C9A84C","#F5F0E8","#2C2C2E","#D4AF37","#8C7B5A","#4A4035","#A68B4A"],
+    palette: ["#2A2A2E","#D4AF37","#F3E9D2","#3B3B40","#C9A84C","#8C7B5A","#1D1D1F","#E6C766"],
     primaryColor: "#1D1D1F", secondaryColor: "#C9A84C",
-    wheelBorderColor: "#C9A84C", wheelCenterColor: "#FAFAFA",
+    wheelBorderColor: "#C9A84C", wheelCenterColor: "#FAFAFA", dividerColor: "#F3E9D2", pointerColor: "#C9A84C",
+    ringWidth: 16, bulbs: true, bulbColor: "#FFF1C1",
     wheelFont: "Playfair Display", wheelSize: 360,
     bg: "#FAFAFA", bgType: "color", bgGradient: "",
-    textColor: "#1D1D1F", btnColor: "#1D1D1F", btnRadius: 6,
+    textColor: "#1D1D1F", btnColor: "#1D1D1F", btnRadius: 8,
     btnText: "",
     title: "Tournez et gagnez !",
     welcome: "Tentez votre chance et découvrez votre récompense exclusive.",
@@ -39,30 +40,31 @@ const TEMPLATES = [
     cardColor: "#F5F0E8",
   },
   {
-    id: "festif", name: "Festif", emoji: "🎉",
+    id: "festif", name: "Festif",
     desc: "Couleurs vives, festif",
-    palette: ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FC8","#845EC2","#FF9A3C","#00C2CB"],
-    primaryColor: "#FF6B6B", secondaryColor: "#FFD93D",
-    wheelBorderColor: "#FF6B6B", wheelCenterColor: "#fff",
+    palette: ["#FF5D73","#FFC93C","#2ECC71","#3D8BFF","#FF6FC8","#8E5CF2","#FF9A3C","#00C2CB"],
+    primaryColor: "#FF5D73", secondaryColor: "#FFC93C",
+    wheelBorderColor: "#FFFFFF", wheelCenterColor: "#FFFFFF", dividerColor: "#FFFFFF", pointerColor: "#FF5D73",
+    ringWidth: 14, bulbs: true, bulbColor: "#FFF3B0",
     wheelFont: "Nunito", wheelSize: 360,
-    bg: "#7C3AED", bgType: "gradient",
-    bgGradient: "linear-gradient(135deg, #7C3AED 0%, #EC4899 100%)",
-    textColor: "#FFFFFF", btnColor: "#FFD93D", btnRadius: 999,
+    bg: "#7C3AED", bgType: "gradient", bgGradient: "linear-gradient(135deg, #7C3AED 0%, #EC4899 100%)",
+    textColor: "#FFFFFF", btnColor: "#FFC93C", btnRadius: 999,
     btnText: "",
     title: "Tentez votre chance !",
     welcome: "Tournez la roue des cadeaux !",
-    thanks: "🎊 Incroyable ! Votre cadeau vous attend !",
+    thanks: "Incroyable ! Votre cadeau vous attend !",
     cardColor: "rgba(255,255,255,0.12)",
   },
   {
-    id: "minimaliste", name: "Minimal", emoji: "◻️",
+    id: "minimaliste", name: "Minimal",
     desc: "Épuré, typographie moderne",
     palette: ["#18181B","#52525B","#A1A1AA","#3F3F46","#71717A","#D4D4D8","#27272A","#E4E4E7"],
     primaryColor: "#18181B", secondaryColor: "#71717A",
-    wheelBorderColor: "#18181B", wheelCenterColor: "#F4F4F5",
+    wheelBorderColor: "#18181B", wheelCenterColor: "#F4F4F5", dividerColor: "#F4F4F5", pointerColor: "#18181B",
+    ringWidth: 10, bulbs: false, bulbColor: "",
     wheelFont: "Inter", wheelSize: 340,
     bg: "#F4F4F5", bgType: "color", bgGradient: "",
-    textColor: "#18181B", btnColor: "#18181B", btnRadius: 4,
+    textColor: "#18181B", btnColor: "#18181B", btnRadius: 6,
     btnText: "",
     title: "Un cadeau pour vous.",
     welcome: "Tournez la roue et découvrez votre récompense.",
@@ -70,26 +72,28 @@ const TEMPLATES = [
     cardColor: "#EBEBEB",
   },
   {
-    id: "sombre", name: "Sombre", emoji: "🌙",
+    id: "sombre", name: "Néon",
     desc: "Fond noir, accents néon",
-    palette: ["#00FF87","#00D4FF","#FF00FF","#FF6B00","#7B2FFF","#00FFB2","#FFE600","#FF0055"],
-    primaryColor: "#00FF87", secondaryColor: "#00D4FF",
-    wheelBorderColor: "#00FF87", wheelCenterColor: "#0F0F1A",
+    palette: ["#00E676","#00B8D4","#D500F9","#FF6D00","#651FFF","#1DE9B6","#FFD600","#FF1744"],
+    primaryColor: "#00E676", secondaryColor: "#00B8D4",
+    wheelBorderColor: "#1B1B2F", wheelCenterColor: "#0F0F1A", dividerColor: "#0F0F1A", pointerColor: "#00E676",
+    ringWidth: 16, bulbs: true, bulbColor: "#7CFFC4",
     wheelFont: "Space Grotesk", wheelSize: 380,
     bg: "#0F0F1A", bgType: "color", bgGradient: "",
-    textColor: "#FFFFFF", btnColor: "#00FF87", btnRadius: 10,
+    textColor: "#FFFFFF", btnColor: "#00E676", btnRadius: 12,
     btnText: "",
     title: "Tournez. Gagnez.",
     welcome: "Tournez la roue et découvrez votre récompense.",
-    thanks: "✨ Votre cadeau vous attend !",
+    thanks: "Votre cadeau vous attend !",
     cardColor: "rgba(255,255,255,0.07)",
   },
   {
-    id: "nature", name: "Nature", emoji: "🌿",
+    id: "nature", name: "Nature",
     desc: "Tons naturels, chaleureux",
-    palette: ["#16A34A","#65A30D","#CA8A04","#92400E","#6B7280","#4ADE80","#A3E635","#FCD34D"],
-    primaryColor: "#16A34A", secondaryColor: "#65A30D",
-    wheelBorderColor: "#16A34A", wheelCenterColor: "#F0FDF4",
+    palette: ["#16A34A","#84CC16","#EAB308","#B45309","#0D9488","#4ADE80","#A3E635","#F59E0B"],
+    primaryColor: "#16A34A", secondaryColor: "#84CC16",
+    wheelBorderColor: "#166534", wheelCenterColor: "#F0FDF4", dividerColor: "#F0FDF4", pointerColor: "#16A34A",
+    ringWidth: 14, bulbs: false, bulbColor: "",
     wheelFont: "DM Sans", wheelSize: 360,
     bg: "#F0FDF4", bgType: "color", bgGradient: "",
     textColor: "#14532D", btnColor: "#16A34A", btnRadius: 14,
@@ -98,6 +102,70 @@ const TEMPLATES = [
     welcome: "Merci de nous soutenir. Tournez la roue et gagnez un cadeau !",
     thanks: "Merci ! Votre récompense vous attend avec le sourire.",
     cardColor: "#DCFCE7",
+  },
+  {
+    id: "casino", name: "Casino",
+    desc: "Rouge, noir & or, ampoules",
+    palette: ["#C1121F","#111111","#C1121F","#111111","#C1121F","#111111","#C1121F","#111111"],
+    primaryColor: "#C1121F", secondaryColor: "#111111",
+    wheelBorderColor: "#D4AF37", wheelCenterColor: "#F3E9D2", dividerColor: "#D4AF37", pointerColor: "#D4AF37",
+    ringWidth: 20, bulbs: true, bulbColor: "#FFF1C1",
+    wheelFont: "Playfair Display", wheelSize: 370,
+    bg: "#1A0A0C", bgType: "gradient", bgGradient: "radial-gradient(circle at 50% 0%, #4A1018 0%, #1A0A0C 70%)",
+    textColor: "#FFFFFF", btnColor: "#D4AF37", btnRadius: 10,
+    btnText: "",
+    title: "Tentez votre chance !",
+    welcome: "Tournez la roue et découvrez votre gain.",
+    thanks: "Félicitations ! Votre gain vous attend.",
+    cardColor: "rgba(255,255,255,0.08)",
+  },
+  {
+    id: "ocean", name: "Océan",
+    desc: "Bleus profonds et turquoise",
+    palette: ["#0077B6","#00B4D8","#0096C7","#48CAE4","#023E8A","#2EC4B6","#0A9396","#90E0EF"],
+    primaryColor: "#0077B6", secondaryColor: "#00B4D8",
+    wheelBorderColor: "#03396C", wheelCenterColor: "#F0FBFF", dividerColor: "#F0FBFF", pointerColor: "#00B4D8",
+    ringWidth: 14, bulbs: false, bulbColor: "",
+    wheelFont: "Nunito", wheelSize: 360,
+    bg: "#EAF8FF", bgType: "gradient", bgGradient: "linear-gradient(180deg, #D9F1FF 0%, #F4FBFF 100%)",
+    textColor: "#023E8A", btnColor: "#0077B6", btnRadius: 14,
+    btnText: "",
+    title: "Plongez dans la chance !",
+    welcome: "Tournez la roue et repartez avec un cadeau.",
+    thanks: "Bravo ! Votre cadeau vous attend.",
+    cardColor: "#D9F1FF",
+  },
+  {
+    id: "sunset", name: "Sunset",
+    desc: "Dégradés orange, rose, violet",
+    palette: ["#FF7A18","#FF3D6E","#B5179E","#FFB400","#F72585","#7209B7","#FF5400","#FF9E00"],
+    primaryColor: "#FF3D6E", secondaryColor: "#FF7A18",
+    wheelBorderColor: "#FFFFFF", wheelCenterColor: "#FFF7ED", dividerColor: "#FFF7ED", pointerColor: "#FF3D6E",
+    ringWidth: 14, bulbs: true, bulbColor: "#FFF3B0",
+    wheelFont: "Nunito", wheelSize: 360,
+    bg: "#FF7A18", bgType: "gradient", bgGradient: "linear-gradient(160deg, #FF7A18 0%, #FF3D6E 55%, #7209B7 100%)",
+    textColor: "#FFFFFF", btnColor: "#FFFFFF", btnRadius: 999,
+    btnText: "",
+    title: "Votre cadeau vous attend !",
+    welcome: "Tournez la roue et voyez ce que vous gagnez.",
+    thanks: "Bravo ! Votre cadeau est prêt.",
+    cardColor: "rgba(255,255,255,0.16)",
+  },
+  {
+    id: "bonbon", name: "Bonbon",
+    desc: "Pastel doux et arrondi",
+    palette: ["#FF8FAB","#B8E1FF","#FFD6A5","#CDB4DB","#B9FBC0","#FFC8DD","#A2D2FF","#FDFFB6"],
+    primaryColor: "#FF8FAB", secondaryColor: "#A2D2FF",
+    wheelBorderColor: "#FFFFFF", wheelCenterColor: "#FFFFFF", dividerColor: "#FFFFFF", pointerColor: "#FF8FAB",
+    ringWidth: 16, bulbs: true, bulbColor: "#FFFFFF",
+    wheelFont: "Nunito", wheelSize: 360,
+    bg: "#FFF0F5", bgType: "gradient", bgGradient: "linear-gradient(180deg, #FFE5EC 0%, #F1F7FF 100%)",
+    textColor: "#5C3D5E", btnColor: "#FF8FAB", btnRadius: 999,
+    btnText: "",
+    title: "Un petit cadeau ?",
+    welcome: "Tournez la roue, c'est tout doux et c'est offert.",
+    thanks: "Youpi ! Votre cadeau vous attend.",
+    cardColor: "#FFFFFF",
   },
 ];
 
@@ -140,7 +208,7 @@ const DEFAULT_THEME = {
   font: "DM Sans", wheelSize: 360,
   ringWidth: 12, dividerColor: "", dividerWidth: 2,
   labelColor: "", labelSize: 0, pointerColor: "",
-  shadow: true, spinBtnText: "",
+  shadow: true, effect3d: true, gradient: true, bulbs: false, bulbColor: "", spinBtnText: "",
   bg: "#ffffff", bgType: "color", bgGradient: "",
   banner: "",
   title: "", welcome: "", btnColor: "", btnText: "",
@@ -175,6 +243,10 @@ const wheelStyleProps = (t) => ({
   labelSize:    t.labelSize || 0,
   pointerColor: t.pointerColor || "",
   shadow:       t.shadow !== false,
+  effect3d:     t.effect3d !== false,
+  gradient:     t.gradient !== false,
+  bulbs:        !!t.bulbs,
+  bulbColor:    t.bulbColor || "",
   buttonColor:  t.btnColor || "",
   buttonRadius: t.btnRadius ?? 14,
   buttonText:   t.spinBtnText || "",
@@ -208,6 +280,10 @@ function entrepriseToConfig(e) {
       labelSize:     t.labelSize       || 0,
       pointerColor:  t.pointerColor    || "",
       shadow:        t.shadow !== false,
+      effect3d:      t.effect3d !== false,
+      gradient:      t.gradient !== false,
+      bulbs:         !!t.bulbs,
+      bulbColor:     t.bulbColor       || "",
       spinBtnText:   t.spinBtnText     || "",
       bg:            F("bg",           "page_bg",              "#ffffff"),
       bgType:        F("bgType",       "page_bg_type",         "color"),
@@ -586,6 +662,13 @@ export default function PageWheel() {
         welcome:       tpl.welcome,
         thanks:        tpl.thanks,
         cardColor:     tpl.cardColor || "",
+        dividerColor:  tpl.dividerColor || "",
+        pointerColor:  tpl.pointerColor || "",
+        ringWidth:     tpl.ringWidth ?? 12,
+        bulbs:         !!tpl.bulbs,
+        bulbColor:     tpl.bulbColor || "",
+        effect3d:      true,
+        gradient:      true,
       },
     }));
     setActiveTemplate(tpl.id);
@@ -826,12 +909,14 @@ export default function PageWheel() {
                             height: 36, display: "flex", alignItems: "center", justifyContent: "center", gap: 3,
                             background: tpl.bgType === "gradient" ? tpl.bgGradient : tpl.bg,
                           }}>
-                            {tpl.palette.slice(0,4).map((c,i) => (
-                              <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c, border: "1px solid rgba(255,255,255,0.5)" }} />
-                            ))}
+                            <div style={{
+                              width: 26, height: 26, borderRadius: "50%",
+                              background: `conic-gradient(${tpl.palette.slice(0, 6).map((c, i, arr) => `${c} ${(i / arr.length) * 100}% ${((i + 1) / arr.length) * 100}%`).join(", ")})`,
+                              border: `3px solid ${tpl.wheelBorderColor}`, boxShadow: "0 2px 5px rgba(0,0,0,0.3), inset 0 0 6px rgba(255,255,255,0.35)",
+                            }} />
                           </div>
                           <div style={{ padding: "5px 4px", textAlign: "center" }}>
-                            <div style={{ fontSize: 9, fontWeight: 800, color: "#0F172A" }}>{tpl.emoji} {tpl.name}</div>
+                            <div style={{ fontSize: 9, fontWeight: 800, color: "#0F172A" }}>{tpl.name}</div>
                             {sel && <div style={{ fontSize: 8, color: tpl.primaryColor, fontWeight: 700, marginTop: 1 }}>✓ Actif</div>}
                           </div>
                         </button>
@@ -939,6 +1024,21 @@ export default function PageWheel() {
                           )}
                         </div>
                       </div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 600, color: "#0F172A", cursor: "pointer" }}>
+                        <input type="checkbox" checked={config.theme.effect3d !== false}
+                          onChange={e => updateT("effect3d", e.target.checked)} style={{ accentColor: "#2563EB", width: 16, height: 16 }} />
+                        Effet 3D (relief et reflets)
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 600, color: "#0F172A", cursor: "pointer" }}>
+                        <input type="checkbox" checked={config.theme.gradient !== false}
+                          onChange={e => updateT("gradient", e.target.checked)} style={{ accentColor: "#2563EB", width: 16, height: 16 }} />
+                        Dégradé sur chaque gain
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 600, color: "#0F172A", cursor: "pointer" }}>
+                        <input type="checkbox" checked={!!config.theme.bulbs}
+                          onChange={e => updateT("bulbs", e.target.checked)} style={{ accentColor: "#2563EB", width: 16, height: 16 }} />
+                        Ampoules clignotantes sur le contour
+                      </label>
                       <label style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 600, color: "#0F172A", cursor: "pointer" }}>
                         <input type="checkbox" checked={config.theme.shadow !== false}
                           onChange={e => updateT("shadow", e.target.checked)} style={{ accentColor: "#2563EB", width: 16, height: 16 }} />
@@ -1080,7 +1180,7 @@ export default function PageWheel() {
                           fontWeight: 800, fontSize: 13,
                           fontFamily: `'${config.theme.font}', sans-serif`,
                         }}>
-                          Découvrir mon cadeau 🎁
+                          Découvrir mon cadeau
                         </div>
                       </div>
                     </div>
