@@ -5,7 +5,7 @@ import User from "@/lib/models/User";
 import Code from "@/lib/models/Code";
 import Entreprise from "@/lib/models/Entreprise";
 
-const PLAN_PRICES = { free: 9.99, starter: 29, pro: 79 };
+const PLAN_PRICES = { free: 19.9, starter: 29.99, pro: 69.99 };
 
 export async function GET() {
   const session = getCurrentUser();

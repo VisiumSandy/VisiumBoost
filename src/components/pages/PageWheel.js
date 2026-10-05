@@ -6,6 +6,8 @@ import Icon from "@/components/Icon";
 import SpinWheel from "@/components/SpinWheel";
 import Confetti from "@/components/Confetti";
 import ImageUpload from "@/components/ImageUpload";
+import UpgradeWall from "@/components/UpgradeWall";
+import { capsFor } from "@/lib/plans";
 import { PATTERNS, DARK_BASES, SECTOR_LOOKS, patternStyle, buildPageBg } from "@/lib/pageBackgrounds";
 
 // ═══════════════════════════════════════════════════════════════
@@ -575,7 +577,11 @@ function SliderRow({ label, value, min, max, step = 1, unit = "", onChange }) {
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════
-export default function PageWheel() {
+export default function PageWheel({ user }) {
+  const caps = capsFor(user);
+  const fullCustom = caps.customization === "full";
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState("");
   const [entreprises,  setEntreprises]  = useState([]);
   const [selectedId,   setSelectedId]   = useState(null);
   const [config,       setConfig]       = useState(DEFAULT_CONFIG);
@@ -702,6 +708,38 @@ export default function PageWheel() {
     setSaving(false);
   };
 
+  // ── Pro : applique le design courant à tous les établissements ──
+  const syncAllDesigns = async () => {
+    const others = entreprises.filter(e => e._id !== selectedId);
+    if (!others.length) return;
+    if (!confirm(`Appliquer ce design à ${others.length} autre${others.length > 1 ? "s" : ""} établissement${others.length > 1 ? "s" : ""} ? Leur design actuel sera remplacé.`)) return;
+    setSyncing(true); setSyncMsg("");
+    let ok = 0;
+    for (const e of others) {
+      try {
+        const r = await fetch("/api/entreprises", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: e._id,
+            couleur_principale: config.primaryColor,
+            couleur_secondaire: config.secondaryColor,
+            // On garde le logo propre à chaque site
+            theme: { ...config.theme, centerLogo: (e.theme && e.theme.centerLogo) || "" },
+          }),
+        });
+        if (r.ok) {
+          const { entreprise: upd } = await r.json();
+          setEntreprises(prev => prev.map(x => x._id === upd._id ? upd : x));
+          ok++;
+        }
+      } catch {}
+    }
+    setSyncing(false);
+    setSyncMsg(`Design appliqué à ${ok} établissement${ok > 1 ? "s" : ""}.`);
+    setTimeout(() => setSyncMsg(""), 5000);
+  };
+
   // ── QR ────────────────────────────────────────────────────────
   const getPublicUrl = (slug) => `${APP_URL}/roue/${slug}`;
   const copyLink = async (slug) => {
@@ -813,16 +851,17 @@ export default function PageWheel() {
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
             <Icon name="link" size={18} color="#2563EB" />Lien d&apos;avis Google
           </h3>
-          <input value={config.googleLink} onChange={e => update("googleLink", e.target.value)}
+          {!caps.googleLink && <UpgradeWall feature="googleLink" compact />}
+          {caps.googleLink && <input value={config.googleLink} onChange={e => update("googleLink", e.target.value)}
             placeholder="https://g.page/r/votre-lien-avis" style={inp}
-            onFocus={focusBlue} onBlur={blurGray} />
-          <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 6 }}>
+            onFocus={focusBlue} onBlur={blurGray} />}
+          {caps.googleLink && <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 6 }}>
             Récupérez ce lien depuis votre fiche Google Business → Obtenir plus d&apos;avis
-          </p>
-          <p style={{ fontSize: 12, color: "#64748B", marginTop: 10, lineHeight: 1.5, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "10px 12px" }}>
+          </p>}
+          {caps.googleLink && <p style={{ fontSize: 12, color: "#64748B", marginTop: 10, lineHeight: 1.5, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "10px 12px" }}>
             Ce lien est proposé aux joueurs comme une invitation facultative, une fois leur cadeau obtenu.
             Conformément aux règles de Google, le cadeau ne dépend jamais d&apos;un avis : n&apos;en faites pas une condition.
-          </p>
+          </p>}
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
             <button onClick={() => setStep(2)} className="btn-primary">
               Suivant <Icon name="chevronRight" size={16} color="#fff" />
@@ -847,7 +886,7 @@ export default function PageWheel() {
             <div style={{ flex: 1, overflowY: "auto", padding: "20px 18px 4px" }}>
 
               {/* ─ Templates row ─ */}
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 20, display: fullCustom ? undefined : "none" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 11 }}>
                   Templates
                 </div>
@@ -959,6 +998,8 @@ export default function PageWheel() {
                     </div>
                   </div>
 
+                  {!fullCustom && <UpgradeWall feature="customization" compact />}
+                  {fullCustom && (<>
                   {/* Contour & Centre */}
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Contour & Centre</div>
@@ -1082,11 +1123,13 @@ export default function PageWheel() {
                       <span style={{ fontSize: 13, fontWeight: 800, color: "#0F172A", minWidth: 52 }}>{config.theme.wheelSize}px</span>
                     </div>
                   </div>
+                  </>)}
                 </div>
               )}
 
               {/* ──── PAGE TAB ──── */}
-              {ctrlTab === "page" && (
+              {ctrlTab === "page" && !fullCustom && <UpgradeWall feature="customization" compact />}
+              {ctrlTab === "page" && fullCustom && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
                   {/* Fond */}
@@ -1428,6 +1471,18 @@ export default function PageWheel() {
           <button onClick={addReward} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, marginTop: 4, border: "1.5px dashed #CBD5E1", background: "transparent", color: "#3B82F6", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
             <Icon name="plus" size={14} color="#3B82F6" />Ajouter une récompense
           </button>
+
+          {caps.syncDesign && entreprises.length > 1 && (
+            <div style={{ marginTop: 18, padding: "14px 16px", borderRadius: 12, background: "#F8FAFC", border: "1.5px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.5, flex: "1 1 220px" }}>
+                <strong style={{ color: "#0F172A" }}>Franchise / réseau :</strong> appliquez ce design (couleurs, thème, fond, textes) à vos {entreprises.length - 1} autre{entreprises.length > 2 ? "s" : ""} établissement{entreprises.length > 2 ? "s" : ""}. Les récompenses, noms et liens d&apos;avis restent propres à chaque site.
+              </div>
+              <button onClick={syncAllDesigns} disabled={syncing || !selectedId} className="btn-secondary" style={{ fontSize: 13 }}>
+                {syncing ? "Application…" : "Appliquer à tous mes sites"}
+              </button>
+              {syncMsg && <div style={{ width: "100%", fontSize: 12, fontWeight: 600, color: "#16A34A" }}>{syncMsg}</div>}
+            </div>
+          )}
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
             <button onClick={() => setStep(2)} className="btn-secondary">Retour</button>

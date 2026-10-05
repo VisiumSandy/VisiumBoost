@@ -85,8 +85,9 @@ export default function PageAffiliation() {
         </h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
           {[
-            { plan: "Starter", price: "29 €/mois", commission: "20%", amount: "~5,80 €/mois" },
-            { plan: "Pro", price: "79 €/mois", commission: "20%", amount: "~15,80 €/mois" },
+            { plan: "Essentiel", price: "19,90 €/mois", commission: "20%", amount: "~3,98 €/mois" },
+            { plan: "Starter", price: "29,99 €/mois", commission: "20%", amount: "~6,00 €/mois" },
+            { plan: "Pro", price: "69,99 €/mois", commission: "20%", amount: "~14,00 €/mois" },
           ].map(item => (
             <div key={item.plan} style={{
               padding: "16px", borderRadius: 12, border: "1.5px solid #E2E8F0",

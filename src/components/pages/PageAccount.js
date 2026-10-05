@@ -405,7 +405,7 @@ export default function PageAccount() {
       .then(d => { if (d.user) setUser(d.user); });
   }, []);
 
-  const PLAN_LABELS = { free: "Gratuit", starter: "Starter", pro: "Pro" };
+  const PLAN_LABELS = { free: "Essentiel", starter: "Starter", pro: "Pro" };
   const PLAN_COLORS = { free: "#64748B", starter: "#10B981", pro: "#3B82F6" };
   const planColor = PLAN_COLORS[user?.plan] || "#64748B";
   const planLabel = PLAN_LABELS[user?.plan] || "Gratuit";

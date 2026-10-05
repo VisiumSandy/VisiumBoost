@@ -165,9 +165,9 @@ export default function CGUPage() {
               </thead>
               <tbody>
                 {[
-                  ["Gratuit", "0 €", "1", "50"],
-                  ["Starter", "29 €", "3", "500"],
-                  ["Pro", "79 €", "Illimité", "Illimité"],
+                  ["Essentiel", "19,90 €", "1", "100"],
+                  ["Starter", "29,99 €", "3", "500"],
+                  ["Pro", "69,99 €", "Illimité", "Illimité"],
                 ].map(([plan, prix, etab, scans]) => (
                   <tr key={plan} style={{ borderBottom: "1px solid #F3F4F6" }}>
                     {[plan, prix, etab, scans].map((cell, i) => (

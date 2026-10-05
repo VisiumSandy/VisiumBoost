@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import StatCard from "@/components/StatCard";
 import { SkeletonStatCards, SkeletonCard, Skeleton, SkeletonStyles } from "@/components/Skeleton";
 import { useApp } from "@/lib/context";
+import { capsFor } from "@/lib/plans";
+import UpgradeWall from "@/components/UpgradeWall";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
@@ -16,7 +18,10 @@ export default function PageDashboard({ user }) {
   const [reportSending, setReportSending] = useState(false);
   const [reportResult, setReportResult] = useState(null);
 
+  const hasStats = capsFor(user).stats;
+
   useEffect(() => {
+    if (!hasStats) { setLoading(false); return; }
     fetch("/api/user/stats")
       .then(r => r.json())
       .then(d => setStats(d))
@@ -31,6 +36,24 @@ export default function PageDashboard({ user }) {
   });
 
   const firstName = user?.name?.split(" ")[0] || "là";
+
+  // Offre Essentiel : pas de statistiques, accueil simplifié
+  if (!hasStats) return (
+    <div className="animate-fade-in">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Bonjour, {firstName}</h1>
+        <p className="text-slate-400 text-sm mt-1">Votre roue est prête à être partagée.</p>
+      </div>
+      <div className="card p-6 mb-5" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontWeight: 700, color: "#0F172A", fontSize: 15, marginBottom: 3 }}>Configurer ma roue</div>
+          <div style={{ fontSize: 13, color: "#64748B" }}>Choisissez vos couleurs et vos récompenses, puis partagez le lien.</div>
+        </div>
+        <button onClick={() => setCurrentPage("wheel")} className="btn-primary">Ouvrir ma roue</button>
+      </div>
+      <UpgradeWall feature="stats" compact />
+    </div>
+  );
 
   if (loading) return (
     <div className="animate-fade-in">

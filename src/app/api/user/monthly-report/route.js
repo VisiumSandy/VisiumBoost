@@ -5,6 +5,7 @@ import Entreprise from "@/lib/models/Entreprise";
 import Spin from "@/lib/models/Spin";
 import User from "@/lib/models/User";
 import { sendMonthlyReportEmail } from "@/lib/email";
+import { capsFor } from "@/lib/plans";
 
 export async function POST() {
   const session = getCurrentUser();
@@ -13,8 +14,9 @@ export async function POST() {
   try {
     await connectDB();
 
-    const user = await User.findById(session.id).select("email name").lean();
+    const user = await User.findById(session.id).select("email name role plan trialEndsAt stripeSubscriptionId").lean();
     if (!user) return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+    if (!capsFor(user).stats) return NextResponse.json({ error: "Le rapport mensuel est réservé aux offres Starter et Pro." }, { status: 403 });
 
     const entreprises = await Entreprise.find({ userId: session.id }).lean();
     const ids = entreprises.map(e => e._id);

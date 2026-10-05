@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useApp } from "@/lib/context";
 import Icon from "@/components/Icon";
+import { capsFor } from "@/lib/plans";
 
 const MAIN_ITEMS = [
   { id: "dashboard", icon: "dashboard", label: "Accueil" },
@@ -21,8 +22,9 @@ const MORE_ITEMS = [
 ];
 
 const FREE_PAGES = ["subscription", "account"];
+const PAGE_FEATURE = { stats: "stats", avis: "avis", affiches: "affiches" };
 
-export default function MobileNav({ hasAccess }) {
+export default function MobileNav({ hasAccess, user }) {
   const { currentPage, setCurrentPage, pendingValidations } = useApp();
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -167,6 +169,7 @@ export default function MobileNav({ hasAccess }) {
                 {MORE_ITEMS.map((item) => {
                   const active = currentPage === item.id;
                   const locked = !hasAccess && !FREE_PAGES.includes(item.id);
+                  const planLocked = user?.role !== "admin" && hasAccess && PAGE_FEATURE[item.id] && !capsFor(user)[PAGE_FEATURE[item.id]];
                   return (
                     <button
                       key={item.id}
@@ -188,6 +191,9 @@ export default function MobileNav({ hasAccess }) {
                       }}>
                         {item.label}
                       </span>
+                      {planLocked && (
+                        <svg style={{ marginLeft: "auto" }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-label="Offre supérieure requise"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                      )}
                     </button>
                   );
                 })}

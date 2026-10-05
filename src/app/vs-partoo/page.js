@@ -19,7 +19,7 @@ const FONT_TITLE = "'Special Gothic Expanded One','DM Sans',system-ui,sans-serif
 const FONT_BODY  = "'DM Sans',system-ui,sans-serif";
 
 const ROWS = [
-  { label: "Prix mensuel",          vb: "Dès 9,99 €/mois",       partoo: "Plusieurs centaines €/mois", vbWin: true  },
+  { label: "Prix mensuel",          vb: "Dès 19,90 €/mois",       partoo: "Plusieurs centaines €/mois", vbWin: true  },
   { label: "Engagement",            vb: "Sans engagement ✓",       partoo: "Contrat annuel",        vbWin: true  },
   { label: "Gamification (roue)",   vb: "Roue de la fortune ✓",   partoo: "Aucune ✗",              vbWin: true  },
   { label: "Setup",                 vb: "5 minutes",               partoo: "Plusieurs semaines",    vbWin: true  },

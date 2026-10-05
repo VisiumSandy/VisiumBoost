@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useApp } from "@/lib/context";
 import { trialDaysLeft } from "@/lib/utils";
+import { capsFor, effectivePlan } from "@/lib/plans";
 import Icon from "@/components/Icon";
 
 const NAV_ITEMS = [
@@ -20,11 +21,12 @@ const NAV_ITEMS = [
 
 // Always accessible, even when trial expired
 const FREE_PAGES = ["subscription", "account"];
+const PAGE_FEATURE = { stats: "stats", avis: "avis", affiches: "affiches" };
 
 const PLAN_BADGE = {
   pro:     { label: "Pro",        color: "#60A5FA" },
   starter: { label: "Starter",    color: "#34D399" },
-  free:    { label: "Essai gratuit", color: "#F59E0B" },
+  free:    { label: "Essentiel", color: "#F59E0B" },
 };
 
 export default function Sidebar({ user, hasAccess, daysLeft }) {
@@ -37,7 +39,7 @@ export default function Sidebar({ user, hasAccess, daysLeft }) {
   // Override badge for expired trial
   const planLabel = (!hasAccess && !isAdmin)
     ? { label: "Essai expiré", color: "#EF4444" }
-    : (user?.plan === "free" && trialLeft > 0)
+    : (user?.plan === "free" && !user?.stripeSubscriptionId && trialLeft > 0)
     ? { label: `Essai — ${trialLeft}j`, color: "#F59E0B" }
     : plan;
 
@@ -154,6 +156,7 @@ export default function Sidebar({ user, hasAccess, daysLeft }) {
         {NAV_ITEMS.map((item) => {
           const active = currentPage === item.id;
           const locked = !isAdmin && !hasAccess && !FREE_PAGES.includes(item.id);
+          const planLocked = !isAdmin && hasAccess && PAGE_FEATURE[item.id] && !capsFor(user)[PAGE_FEATURE[item.id]];
           return (
             <button
               key={item.id}
@@ -186,6 +189,9 @@ export default function Sidebar({ user, hasAccess, daysLeft }) {
               </div>
               {!sidebarCollapsed && (
                 <span style={{ color: active ? "#93C5FD" : "#94A3B8", flex: 1 }}>{item.label}</span>
+              )}
+              {!sidebarCollapsed && planLocked && (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-label="Offre supérieure requise"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
               )}
               {!sidebarCollapsed && item.id === "codes" && pendingValidations > 0 && (
                 <span style={{

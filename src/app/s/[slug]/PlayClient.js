@@ -537,8 +537,8 @@ export default function PlayClient({ entreprise }) {
       </section>
 
       <footer style={{ textAlign: "center", padding: "16px", fontSize: 12, color: subtleColor, borderTop: `1px solid ${cardBorder}` }}>
-        Propulsé par{" "}
-        <a href="/" style={{ color: pc, fontWeight: 700, textDecoration: "none" }}>VisiumBoost</a>
+        {entreprise.hideBranding ? entreprise.nom : (<>Propulsé par{" "}
+        <a href="/" style={{ color: pc, fontWeight: 700, textDecoration: "none" }}>VisiumBoost</a></>)}
       </footer>
     </div>
   );

@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useApp } from "@/lib/context";
 import { isAccessAllowed, trialDaysLeft } from "@/lib/utils";
+import { capsFor } from "@/lib/plans";
+import UpgradeWall from "@/components/UpgradeWall";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import Icon from "@/components/Icon";
@@ -32,6 +34,9 @@ const PAGES = {
 };
 
 const FREE_PAGES = ["subscription", "account"];
+
+// Pages qui dépendent d'une fonctionnalité de l'abonnement
+const PAGE_FEATURE = { stats: "stats", avis: "avis", affiches: "affiches" };
 
 // Isolated component to read ?stripe= param without blocking SSR
 function StripeReturnHandler({ onToast }) {
@@ -87,6 +92,8 @@ export default function AppShell({ user }) {
     : currentPage;
 
   const PageComponent = PAGES[effectivePage] || PageDashboard;
+  const needed = PAGE_FEATURE[effectivePage];
+  const planLocked = !isAdmin && hasAccess && needed && !capsFor(user)[needed];
 
   return (
     <>
@@ -170,11 +177,11 @@ export default function AppShell({ user }) {
         )}
 
         <div className="max-w-[1080px]">
-          <PageComponent user={user} />
+          {planLocked ? <UpgradeWall feature={needed} user={user} /> : <PageComponent user={user} />}
         </div>
       </main>
 
-      <MobileNav hasAccess={hasAccess} />
+      <MobileNav hasAccess={hasAccess} user={user} />
 
       <style>{`
         :root { --sidebar-w: ${sidebarCollapsed ? "68px" : "256px"}; }

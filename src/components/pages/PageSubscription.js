@@ -3,53 +3,12 @@
 import { useState } from "react";
 import { isAccessAllowed, trialDaysLeft } from "@/lib/utils";
 import Icon from "@/components/Icon";
+import { PLANS as PLANS_DEF, PLAN_ORDER, effectivePlan } from "@/lib/plans";
 
-const PLANS = [
-  {
-    id: "free",
-    name: "Essentiel",
-    price: "9,99 €",
-    period: "/mois",
-    desc: "Pour démarrer après l'essai gratuit",
-    features: [
-      "1 établissement",
-      "100 scans/mois",
-      "Roue personnalisée",
-      "Codes anti-fraude",
-      "Support email",
-    ],
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    price: "29 €",
-    period: "/mois",
-    desc: "Pour les petits établissements",
-    features: [
-      "3 établissements",
-      "500 scans/mois",
-      "Analytics avancés",
-      "Support prioritaire",
-      "Export des données",
-    ],
-    recommended: true,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "79 €",
-    period: "/mois",
-    desc: "Pour les établissements en croissance",
-    features: [
-      "Établissements illimités",
-      "Scans illimités",
-      "Analytics en temps réel",
-      "Support dédié",
-      "White label",
-      "API access",
-    ],
-  },
-];
+const PLANS = PLAN_ORDER.map((id) => {
+  const p = PLANS_DEF[id];
+  return { id, name: p.name, price: p.priceLabel, period: "/mois", desc: p.desc, features: p.features, missing: p.missing || [], recommended: !!p.recommended };
+});
 
 const FAQ = [
   {
@@ -74,7 +33,7 @@ export default function PageSubscription({ user }) {
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [portalLoading, setPortalLoading] = useState(false);
 
-  const currentPlan = user?.plan || "free";
+  const currentPlan = effectivePlan(user);
   const hasAccess   = isAccessAllowed(user);
   const daysLeft    = trialDaysLeft(user);
   const isAdmin     = user?.role === "admin";
@@ -209,6 +168,14 @@ export default function PageSubscription({ user }) {
                       <Icon name="check" size={11} color="#2563EB" />
                     </div>
                     <span style={{ fontSize: 13, color: "#475569" }}>{feat}</span>
+                  </div>
+                ))}
+                {plan.missing.map((feat, i) => (
+                  <div key={`m${i}`} style={{ display: "flex", alignItems: "center", gap: 9, opacity: 0.55 }}>
+                    <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="3" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </div>
+                    <span style={{ fontSize: 13, color: "#94A3B8", textDecoration: "line-through" }}>{feat}</span>
                   </div>
                 ))}
               </div>

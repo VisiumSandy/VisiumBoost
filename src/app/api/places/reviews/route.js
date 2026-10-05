@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Entreprise from "@/lib/models/Entreprise";
+import User from "@/lib/models/User";
+import { capsFor } from "@/lib/plans";
 
 export async function GET(req) {
   const session = getCurrentUser();
@@ -13,6 +15,10 @@ export async function GET(req) {
 
   // Verify the place_id belongs to one of the user's entreprises
   await connectDB();
+  const owner = await User.findById(session.id).select("role plan trialEndsAt stripeSubscriptionId").lean()
+  if (!capsFor(owner).avis) {
+    return NextResponse.json({ error: "Le suivi des avis est réservé aux offres Starter et Pro.", locked: true }, { status: 403 });
+  }
   const entreprises = await Entreprise.find({ userId: session.id }).select("lien_avis nom").lean();
   const owns = entreprises.some((e) => {
     try {

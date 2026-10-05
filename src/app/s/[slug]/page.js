@@ -4,6 +4,7 @@ import Entreprise from "@/lib/models/Entreprise";
 import User from "@/lib/models/User";
 import PlayClient from "./PlayClient";
 import { isAccessAllowed } from "@/lib/utils";
+import { capsFor, gateEntreprise } from "@/lib/plans";
 
 // Server component — fetch data by slug
 export async function generateMetadata({ params }) {
@@ -82,9 +83,11 @@ export default async function SubdomainPage({ params }) {
 
   // Check owner trial / subscription access
   let ownerBlocked = false;
+  let ownerCaps = capsFor({ role: "admin" });
   try {
-    const owner = await User.findById(entreprise.userId).select("plan trialEndsAt role").lean();
+    const owner = await User.findById(entreprise.userId).select("plan trialEndsAt role stripeSubscriptionId").lean();
     ownerBlocked = !isAccessAllowed(owner);
+    ownerCaps = capsFor(owner);
   } catch {
     ownerBlocked = false;
   }
@@ -129,5 +132,5 @@ export default async function SubdomainPage({ params }) {
     page_text_color:      entreprise.page_text_color      || "",
   };
 
-  return <PlayClient entreprise={data} />;
+  return <PlayClient entreprise={gateEntreprise(data, ownerCaps)} />;
 }

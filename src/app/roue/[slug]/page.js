@@ -4,6 +4,7 @@ import Entreprise from "@/lib/models/Entreprise";
 import User from "@/lib/models/User";
 import PlayClient from "@/app/s/[slug]/PlayClient";
 import { isAccessAllowed } from "@/lib/utils";
+import { capsFor, gateEntreprise } from "@/lib/plans";
 
 export async function generateMetadata({ params }) {
   const { slug } = params;
@@ -76,9 +77,11 @@ export default async function RouePage({ params }) {
 
   // Check owner trial / subscription access
   let ownerBlocked = false;
+  let ownerCaps = capsFor({ role: "admin" });
   try {
-    const owner = await User.findById(entreprise.userId).select("plan trialEndsAt role").lean();
+    const owner = await User.findById(entreprise.userId).select("plan trialEndsAt role stripeSubscriptionId").lean();
     ownerBlocked = !isAccessAllowed(owner);
+    ownerCaps = capsFor(owner);
   } catch {
     ownerBlocked = false;
   }
@@ -123,5 +126,5 @@ export default async function RouePage({ params }) {
     page_text_color:      entreprise.page_text_color      || "",
   };
 
-  return <PlayClient entreprise={data} />;
+  return <PlayClient entreprise={gateEntreprise(data, ownerCaps)} />;
 }

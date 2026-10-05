@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Entreprise from "@/lib/models/Entreprise";
+import User from "@/lib/models/User";
+import { capsFor, planFor, stripLockedFields } from "@/lib/plans";
 
 // GET — list current user's entreprises
 export async function GET() {
@@ -31,6 +33,17 @@ export async function POST(req) {
   try {
     await connectDB();
 
+    // Limite d'établissements selon l'abonnement
+    const owner = await User.findById(session.id).select("role plan trialEndsAt stripeSubscriptionId").lean()
+    const plan = planFor(owner);
+    const count = await Entreprise.countDocuments({ userId: session.id });
+    if (count >= plan.establishments) {
+      return NextResponse.json({
+        error: `Votre offre ${plan.name} est limitée à ${plan.establishments} établissement${plan.establishments > 1 ? "s" : ""}. Passez à l'offre supérieure pour en ajouter.`,
+        upgrade: true,
+      }, { status: 403 });
+    }
+
     const exists = await Entreprise.findOne({ slug });
     if (exists) {
       return NextResponse.json({ error: "Ce slug est déjà utilisé. Choisissez-en un autre." }, { status: 409 });
@@ -40,10 +53,10 @@ export async function POST(req) {
       userId: session.id,
       slug,
       nom,
-      logo: logo || "",
+      logo: plan.caps.customization === "full" ? (logo || "") : "",
       couleur_principale: couleur_principale || "#3B82F6",
       couleur_secondaire: couleur_secondaire || "#0EA5E9",
-      lien_avis: lien_avis || "",
+      lien_avis: plan.caps.googleLink ? (lien_avis || "") : "",
       cta_text: cta_text || "Laissez-nous un avis et tentez votre chance !",
       rewards: rewards || undefined,
     });
@@ -81,8 +94,11 @@ export async function PATCH(req) {
     "page_title", "page_welcome", "page_btn_color", "page_btn_text",
     "page_thanks", "page_text_color",
   ];
-  const updates = {};
-  ALLOWED_FIELDS.forEach(f => { if (body[f] !== undefined) updates[f] = body[f]; });
+  let updates0 = {};
+  ALLOWED_FIELDS.forEach(f => { if (body[f] !== undefined) updates0[f] = body[f]; });
+  // Permissions de l'abonnement : on retire ce que le plan n'autorise pas
+  const owner = await User.findById(session.id).select("role plan trialEndsAt stripeSubscriptionId").lean()
+  const updates = stripLockedFields(updates0, capsFor(owner));
 
   // If changing slug, validate format and uniqueness
   if (updates.slug && updates.slug !== existing.slug) {

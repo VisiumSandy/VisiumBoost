@@ -714,14 +714,14 @@ const TESTIMONIALS = [
   { q: "La mise en place a pris 10 minutes. 15 nouveaux avis chaque semaine sans rien faire.", name: "Karim B.", role: "Gérant café, Paris",            avatar: "KB", color: "#8B5CF6" },
   { q: "Notre note Google est passée de 3.8 à 4.7 en 6 semaines. Absolument magique.", name: "Youssef A.",     role: "Food truck, Toulouse",          avatar: "YA", color: "#06B6D4" },
   { q: "Mes clients reviennent plus souvent depuis la roue. C'est un vrai boost fidélité.", name: "Sophie M.",  role: "Salon de coiffure, Bordeaux",   avatar: "SM", color: "#10B981" },
-  { q: "ROI incroyable : 200 avis en 2 mois pour 29€/mois. Je ne peux plus m'en passer.", name: "Thomas R.",   role: "Pizzeria, Marseille",           avatar: "TR", color: "#F59E0B" },
+  { q: "ROI incroyable : 200 avis en 2 mois pour 29,99€/mois. Je ne peux plus m'en passer.", name: "Thomas R.",   role: "Pizzeria, Marseille",           avatar: "TR", color: "#F59E0B" },
   { q: "Interface simple, résultats impressionnants. Je le recommande à tous mes collègues.", name: "Isabelle V.", role: "Brasserie, Nantes",          avatar: "IV", color: "#EF4444" },
 ];
 
 const PLANS = [
-  { id: "free",    name: "Essentiel", price: "9,99", priceAnnual: "7,99", desc: "Après votre essai gratuit",  features: ["1 établissement","100 scans/mois","Roue personnalisée","Codes anti-fraude","Support email"],                    cta: "Démarrer l'essai",       href: "/register" },
-  { id: "starter", name: "Starter",  price: "29",   priceAnnual: "23",   desc: "Pour les indépendants",      features: ["3 établissements","500 scans/mois","Analytics avancés","URL personnalisée","Support prioritaire"],              cta: "Essai 14 jours gratuit", href: "/register", highlight: true },
-  { id: "pro",     name: "Pro",      price: "79",   priceAnnual: "63",   desc: "Pour les chaînes & agences", features: ["Établissements illimités","Scans illimités","API access","White label","Account manager dédié"],               cta: "Nous contacter",         href: "/register" },
+  { id: "free",    name: "Essentiel", price: "19,90", priceAnnual: "15,90", desc: "Une roue simple, prête en 5 minutes",  features: ["1 établissement, 1 roue","Couleurs personnalisables","Récompenses et probabilités","Codes anti-fraude","Support email"],                    cta: "Démarrer l'essai",       href: "/register" },
+  { id: "starter", name: "Starter",  price: "29,99", priceAnnual: "23,99", desc: "Tout pour faire grandir vos avis",      features: ["3 établissements","Thèmes, fonds et roue 3D","Statistiques et suivi des avis","Affiches QR","Support prioritaire"],              cta: "Essai 14 jours gratuit", href: "/register", highlight: true },
+  { id: "pro",     name: "Pro",      price: "69,99", priceAnnual: "55,99", desc: "Pour les franchises et réseaux", features: ["Établissements illimités","Design appliqué à tous les sites","Marque blanche","Statistiques consolidées","Support dédié"],               cta: "Essai 14 jours gratuit",         href: "/register" },
 ];
 
 const SLIDER_IMGS_DARK  = Array.from({ length: 10 }, (_, i) => `/images/slider_sombre/slider${i+1}.png`);
@@ -980,8 +980,8 @@ export default function LandingPage() {
     "description": "Roue de la fortune de fidélisation pour commerces locaux. Codes anti-fraude, QR code, dashboard analytics.",
     "offers": {
       "@type": "AggregateOffer",
-      "lowPrice": "9.99",
-      "highPrice": "79",
+      "lowPrice": "19.90",
+      "highPrice": "69.99",
       "priceCurrency": "EUR",
       "offerCount": "3"
     },

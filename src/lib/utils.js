@@ -8,6 +8,8 @@ export function isAccessAllowed(user) {
   if (!user) return false;
   if (user.role === "admin") return true;
   if (user.plan === "starter" || user.plan === "pro") return true;
+  // Abonné Essentiel (plan "free" avec abonnement Stripe actif)
+  if (user.stripeSubscriptionId) return true;
   // free plan: check trial
   if (user.trialEndsAt && new Date(user.trialEndsAt) > new Date()) return true;
   return false;

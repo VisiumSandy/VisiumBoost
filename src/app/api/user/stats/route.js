@@ -3,12 +3,19 @@ import { getCurrentUser } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Entreprise from "@/lib/models/Entreprise";
 import Spin from "@/lib/models/Spin";
+import User from "@/lib/models/User";
+import { capsFor } from "@/lib/plans";
 
 export async function GET() {
   const session = getCurrentUser();
   if (!session) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
   await connectDB();
+
+  const owner = await User.findById(session.id).select("role plan trialEndsAt stripeSubscriptionId").lean()
+  if (!capsFor(owner).stats) {
+    return NextResponse.json({ error: "Les statistiques sont réservées aux offres Starter et Pro.", locked: true }, { status: 403 });
+  }
 
   const entreprises = await Entreprise.find({ userId: session.id }).lean();
   const ids = entreprises.map((e) => e._id);
