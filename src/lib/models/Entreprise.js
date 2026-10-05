@@ -15,7 +15,7 @@ const EntrepriseSchema = new mongoose.Schema(
     couleur_principale: { type: String, default: "#3B82F6" },
     couleur_secondaire: { type: String, default: "#0EA5E9" },
     lien_avis: { type: String, default: "" },
-    cta_text: { type: String, default: "Laissez-nous un avis et tentez votre chance !" },
+    cta_text: { type: String, default: "Tentez votre chance !" },
     rewards: {
       type: [RewardSchema],
       default: [],

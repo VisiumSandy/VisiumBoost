@@ -40,7 +40,7 @@ function resolveTheme(e) {
     bgGradient:     F("bgGradient",  "page_bg_gradient",    ""),
     // Page content
     banner:         F("banner",      "page_banner",   ""),
-    title:          F("title",       "page_title",    "") || e.cta_text || "Tournez et gagnez !",
+    title:          F("title",       "page_title",    "") || "Tournez et gagnez !",
     welcome:        F("welcome",     "page_welcome",  ""),
     btnColor:       F("btnColor",    "page_btn_color",""),
     btnText:        F("btnText",     "page_btn_text", ""),
@@ -67,7 +67,6 @@ export default function PlayClient({ entreprise }) {
   // ─────────────────────────────────────────────────────────────────
 
   const [step,           setStep]           = useState(1);
-  const [reviewClicked,  setReviewClicked]  = useState(false);
   const [result,         setResult]         = useState(null);
   const [winCode,        setWinCode]        = useState(null);
   const [generating,     setGenerating]     = useState(false);
@@ -96,9 +95,8 @@ export default function PlayClient({ entreprise }) {
 
   const btnBgRaw = th.btnColor || pc;
   const btnTc    = autoText(btnBgRaw);
-  const btnText  = th.btnText  || "⭐ Laisser mon avis Google";
   const pageTitle  = th.title   || "Tournez et gagnez !";
-  const welcomeMsg = th.welcome || "Laissez-nous un avis Google, puis revenez ici pour tourner la roue et gagner un cadeau !";
+  const welcomeMsg = th.welcome || "Tournez la roue et tentez de gagner un cadeau !";
   const thanksMsg  = th.thanks  || "";
   const btnRadius  = th.btnRadius !== undefined ? th.btnRadius : 16;
 
@@ -156,12 +154,6 @@ export default function PlayClient({ entreprise }) {
   };
 
   // ── Handlers ──────────────────────────────────────────────────────
-  const handleReviewClick = (e) => {
-    e.preventDefault();
-    setReviewClicked(true);
-    if (entreprise.lien_avis) window.open(entreprise.lien_avis, "_blank", "noopener,noreferrer");
-  };
-
   const handleSpinResult = async (reward, rewardIndex) => {
     setResult({ rewardName: reward.name, rewardIndex });
 
@@ -338,73 +330,16 @@ export default function PlayClient({ entreprise }) {
         {/* ── STEPS 1 & 2 ── */}
         {!collectPending && step !== 3 && (
           <div style={{ animation: "fadeUp 0.5s ease" }}>
-            {/* Step indicators */}
-            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 28 }}>
-              {[{ n:1, label:"Avis Google" }, { n:2, label:"Roue" }, { n:3, label:"Cadeau" }].map(({ n, label }) => {
-                const active = step === n || (n === 2 && reviewClicked);
-                const done   = (n === 1 && reviewClicked) || n < step;
-                return (
-                  <div key={n} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                    <div style={{
-                      width: 30, height: 30, borderRadius: "50%",
-                      background: done ? "#00B894" : active ? pc : cardBg,
-                      color: done || active ? "#fff" : subtleColor,
-                      border: `2px solid ${done ? "#00B894" : active ? pc : cardBorder}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 13, fontWeight: 800, transition: "all 0.3s",
-                    }}>
-                      {done ? "✓" : n}
-                    </div>
-                    <span style={{ fontSize: 11, color: active ? pc : subtleColor, fontWeight: 600 }}>{label}</span>
-                  </div>
-                );
-              })}
+            {/* Intro */}
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>🎁</div>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: tc, margin: "0 0 10px", lineHeight: 1.3, fontFamily: `'${ff}', sans-serif` }}>
+                {pageTitle}
+              </h1>
+              <p style={{ color: subtleColor, fontSize: 14, lineHeight: 1.7, margin: "0 auto", maxWidth: 340 }}>
+                {welcomeMsg}
+              </p>
             </div>
-
-            {/* Content */}
-            {!reviewClicked ? (
-              <div style={{ textAlign: "center", marginBottom: 24 }}>
-                <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>⭐</div>
-                <h1 style={{ fontSize: 24, fontWeight: 900, color: tc, margin: "0 0 10px", lineHeight: 1.3, fontFamily: `'${ff}', sans-serif` }}>
-                  {pageTitle}
-                </h1>
-                <p style={{ color: subtleColor, fontSize: 14, lineHeight: 1.7, margin: "0 auto 24px", maxWidth: 340 }}>
-                  {welcomeMsg}
-                </p>
-                <a
-                  onClick={handleReviewClick}
-                  href={entreprise.lien_avis || "#"}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 10,
-                    padding: "17px 36px", borderRadius: btnRadius, textDecoration: "none",
-                    background: btnBgRaw,
-                    color: btnTc, fontWeight: 800, fontSize: 16,
-                    fontFamily: `'${ff}', sans-serif`,
-                    boxShadow: `0 8px 32px ${btnBgRaw}55`,
-                    animation: "pulse 2s infinite", cursor: "pointer",
-                  }}
-                >
-                  {btnText}
-                </a>
-                <p style={{ color: subtleColor, fontSize: 12, marginTop: 16 }}>
-                  Vous serez redirigé vers Google Maps
-                </p>
-              </div>
-            ) : (
-              <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{
-                  display: "inline-flex", alignItems: "center", gap: 8,
-                  background: "#00B89418", border: "1.5px solid #00B89430",
-                  borderRadius: 12, padding: "10px 20px", marginBottom: 16,
-                }}>
-                  <span style={{ color: "#00B894", fontWeight: 800, fontSize: 14 }}>✓ Merci pour votre avis !</span>
-                </div>
-                <p style={{ color: subtleColor, fontSize: 14, margin: "0 0 20px" }}>
-                  Tournez maintenant la roue pour découvrir votre cadeau.
-                </p>
-              </div>
-            )}
 
             {/* Wheel */}
             <div style={{ display: "flex", justifyContent: "center" }}>
@@ -418,7 +353,7 @@ export default function PlayClient({ entreprise }) {
                 centerLogoUrl={th.centerLogo}
                 fontFamily={ff}
                 size={wheelSize}
-                disabled={!reviewClicked}
+                disabled={false}
                 onResult={handleSpinResult}
               />
             </div>
@@ -493,6 +428,19 @@ export default function PlayClient({ entreprise }) {
                 </div>
               ))}
             </div>
+
+            {/* Avis Google : demande séparée, facultative, sans lien avec le cadeau */}
+            {entreprise.lien_avis && (
+              <p style={{ marginTop: 24, fontSize: 13, color: subtleColor, lineHeight: 1.6 }}>
+                Vous avez aimé votre visite ?{" "}
+                <a href={entreprise.lien_avis} target="_blank" rel="noopener noreferrer"
+                   style={{ color: pc, fontWeight: 700, textDecoration: "underline" }}>
+                  Donner votre avis sur Google
+                </a>
+                <br />
+                <span style={{ fontSize: 11 }}>Facultatif : votre cadeau ne dépend pas de votre avis.</span>
+              </p>
+            )}
           </div>
         )}
       </main>

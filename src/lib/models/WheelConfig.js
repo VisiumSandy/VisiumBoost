@@ -6,7 +6,7 @@ const WheelConfigSchema = new mongoose.Schema(
     googleLink: { type: String, default: "" },
     primaryColor: { type: String, default: "#3B82F6" },
     secondaryColor: { type: String, default: "#0EA5E9" },
-    ctaText: { type: String, default: "Laissez-nous un avis et tentez votre chance !" },
+    ctaText: { type: String, default: "Tentez votre chance !" },
     logoUrl: { type: String, default: "" },
     rewards: {
       type: [{ id: String, name: String, prob: Number }],
