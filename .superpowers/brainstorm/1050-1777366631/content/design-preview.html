@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aperçu animations — VisiumBoost Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #0F172A; color: #fff; padding: 24px; }
+
+  h2 { font-size: 20px; font-weight: 800; color: #F1F5F9; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #64748B; margin-bottom: 28px; }
+
+  /* ── Dashboard frame ── */
+  .dash-frame {
+    background: #F8FAFC;
+    border-radius: 20px;
+    padding: 28px 28px 32px;
+    max-width: 860px;
+    margin: 0 auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .dash-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+    animation: slideDownFade 0.5s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .dash-title { font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px; }
+  .dash-sub { font-size: 13px; color: #94A3B8; margin-top: 3px; }
+  .dash-badge {
+    background: #FFFBEB; border: 1.5px solid #FDE68A;
+    border-radius: 12px; padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px;
+    animation: slideDownFade 0.5s 0.1s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .dash-badge-pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #F59E0B;
+    animation: pulseDot 1.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+    50% { transform: scale(1.3); opacity: 0.8; box-shadow: 0 0 0 5px rgba(245,158,11,0); }
+  }
+  .dash-badge-text { font-size: 13px; font-weight: 600; color: #92400E; }
+  .dash-badge-link { font-size: 12px; color: #B45309; font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+  /* ── Stat cards ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .stat-card {
+    background: #fff;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 18px 16px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.22s cubic-bezier(.22,.68,0,1.2), box-shadow 0.22s, border-color 0.2s;
+    /* Stagger entrance */
+    opacity: 0;
+    animation: cardEntrance 0.55s cubic-bezier(.22,.68,0,1.2) forwards;
+  }
+  .stat-card:nth-child(1) { animation-delay: 0.15s; }
+  .stat-card:nth-child(2) { animation-delay: 0.25s; }
+  .stat-card:nth-child(3) { animation-delay: 0.35s; }
+  .stat-card:nth-child(4) { animation-delay: 0.45s; }
+
+  @keyframes cardEntrance {
+    0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.10);
+    border-color: transparent;
+  }
+  .stat-card:active { transform: translateY(-2px) scale(0.99); }
+
+  /* Shimmer on hover */
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    transition: left 0s;
+    pointer-events: none;
+  }
+  .stat-card:hover::before {
+    left: 200%;
+    transition: left 0.5s ease;
+  }
+
+  .stat-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; font-size: 16px;
+  }
+  .stat-value {
+    font-size: 28px; font-weight: 800; color: #0F172A; line-height: 1;
+    margin-bottom: 4px;
+    animation: countUp 1.2s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .stat-card:nth-child(1) .stat-value { animation-delay: 0.3s; }
+  .stat-card:nth-child(2) .stat-value { animation-delay: 0.4s; }
+  .stat-card:nth-child(3) .stat-value { animation-delay: 0.5s; }
+  .stat-card:nth-child(4) .stat-value { animation-delay: 0.6s; }
+  @keyframes countUp {
+    0% { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .stat-label { font-size: 12px; color: #94A3B8; font-weight: 500; }
+
+  /* ── Chart card ── */
+  .chart-card {
+    background: #fff;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    animation: slideUpFade 0.6s 0.5s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  @keyframes slideUpFade {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .chart-title { font-size: 15px; font-weight: 700; color: #0F172A; }
+  .chart-sub { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+  .chart-badge { background: #EFF6FF; color: #2563EB; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+
+  /* Fake bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar {
+    width: 100%; border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, #3B82F6, #60A5FA);
+    animation: barGrow 0.8s cubic-bezier(.22,.68,0,1.2) both;
+    transform-origin: bottom;
+  }
+  .bar:nth-child(1) { animation-delay: 0.55s; }
+  .bar-wrap:nth-child(2) .bar { animation-delay: 0.62s; }
+  .bar-wrap:nth-child(3) .bar { animation-delay: 0.69s; }
+  .bar-wrap:nth-child(4) .bar { animation-delay: 0.76s; }
+  .bar-wrap:nth-child(5) .bar { animation-delay: 0.83s; }
+  .bar-wrap:nth-child(6) .bar { animation-delay: 0.90s; }
+  .bar-wrap:nth-child(7) .bar { animation-delay: 0.97s; }
+  @keyframes barGrow {
+    0% { transform: scaleY(0); opacity: 0; }
+    100% { transform: scaleY(1); opacity: 1; }
+  }
+  .bar-lbl { font-size: 10px; color: #94A3B8; }
+
+  /* ── Benchmark card ── */
+  .bench-card {
+    background: #fff;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 20px;
+    animation: slideUpFade 0.6s 0.65s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .bench-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
+  .bench-row:last-child { border-bottom: none; }
+  .bench-label { font-size: 13px; color: #475569; font-weight: 500; min-width: 140px; }
+  .bench-bar-wrap { flex: 1; height: 6px; background: #F1F5F9; border-radius: 99px; overflow: hidden; }
+  .bench-bar-fill {
+    height: 100%; border-radius: 99px;
+    animation: barFillGrow 1.1s cubic-bezier(.22,.68,0,1.2) both;
+    transform-origin: left;
+  }
+  .bench-row:nth-child(1) .bench-bar-fill { background: #3B82F6; width: 72%; animation-delay: 0.7s; }
+  .bench-row:nth-child(2) .bench-bar-fill { background: #10B981; width: 54%; animation-delay: 0.85s; }
+  .bench-row:nth-child(3) .bench-bar-fill { background: #F59E0B; width: 88%; animation-delay: 1.0s; }
+  @keyframes barFillGrow {
+    0% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+  }
+  .bench-val { font-size: 13px; font-weight: 700; color: #0F172A; min-width: 36px; text-align: right; }
+  .bench-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    background: #DCFCE7; color: #15803D; white-space: nowrap;
+  }
+
+  @keyframes slideDownFade {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Legend ── */
+  .legend {
+    max-width: 860px; margin: 24px auto 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .legend-item {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .legend-title { font-size: 12px; font-weight: 700; color: #E2E8F0; }
+  .legend-desc { font-size: 11px; color: #64748B; margin-top: 2px; line-height: 1.5; }
+
+  /* ── Replay button ── */
+  .replay-btn {
+    display: block; margin: 20px auto 0;
+    padding: 10px 24px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    color: #94A3B8; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background 0.2s;
+  }
+  .replay-btn:hover { background: rgba(255,255,255,0.14); color: #E2E8F0; }
+</style>
+</head>
+<body>
+
+<h2>Aperçu des animations — Mix B+C mesuré</h2>
+<p class="subtitle">Survole les cartes de stats pour voir le shimmer + lift. Recharge la page pour rejouer les entrées.</p>
+
+<div class="dash-frame">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">Bonjour, Alex 👋</div>
+      <div class="dash-sub">Voici l'activité de vos établissements</div>
+    </div>
+    <div class="dash-badge">
+      <div class="dash-badge-pulse"></div>
+      <div>
+        <div class="dash-badge-text"><strong>3 codes</strong> en attente de validation —</div>
+        <div class="dash-badge-link">Voir les validations →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#EFF6FF;">📊</div>
+      <div class="stat-value">1 247</div>
+      <div class="stat-label">Scans de page</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#E0F2FE;">🎡</div>
+      <div class="stat-value">934</div>
+      <div class="stat-label">Roues tournées</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#F0FDF4;">✅</div>
+      <div class="stat-value">712</div>
+      <div class="stat-label">Codes validés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#FFFBEB;">📈</div>
+      <div class="stat-value">76%</div>
+      <div class="stat-label">Taux de retrait</div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-card">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">Activité — 7 derniers jours</div>
+        <div class="chart-sub">Nombre de roues tournées par jour</div>
+      </div>
+      <div class="chart-badge">Total : 934</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-wrap"><div class="bar" style="height:35px"></div><div class="bar-lbl">lun</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:55px"></div><div class="bar-lbl">mar</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:40px"></div><div class="bar-lbl">mer</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:70px"></div><div class="bar-lbl">jeu</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:60px"></div><div class="bar-lbl">ven</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:75px"></div><div class="bar-lbl">sam</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:45px"></div><div class="bar-lbl">dim</div></div>
+    </div>
+  </div>
+
+  <!-- Benchmark -->
+  <div class="bench-card">
+    <div style="font-size:14px; font-weight:700; color:#0F172A; margin-bottom:14px;">Comment vous situez-vous ?</div>
+    <div class="bench-row">
+      <div class="bench-label">Roues / mois</div>
+      <div class="bench-bar-wrap"><div class="bench-bar-fill"></div></div>
+      <div class="bench-val">934</div>
+      <div class="bench-badge">+98% au-dessus</div>
+    </div>
+    <div class="bench-row">
+      <div class="bench-label">Taux de validation</div>
+      <div class="bench-bar-wrap"><div class="bench-bar-fill"></div></div>
+      <div class="bench-val">76%</div>
+      <div class="bench-badge">+12% au-dessus</div>
+    </div>
+    <div class="bench-row">
+      <div class="bench-label">Scans / mois</div>
+      <div class="bench-bar-wrap"><div class="bench-bar-fill"></div></div>
+      <div class="bench-val">1 247</div>
+      <div class="bench-badge">+40% au-dessus</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#6366F1;"></div>
+    <div>
+      <div class="legend-title">Stagger d'entrée</div>
+      <div class="legend-desc">Chaque carte apparaît avec 100ms de décalage — donne vie au chargement</div>
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#3B82F6;"></div>
+    <div>
+      <div class="legend-title">Hover lift + shimmer</div>
+      <div class="legend-desc">translateY(-5px) + un reflet qui glisse sur la carte — discret, premium</div>
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#F59E0B;"></div>
+    <div>
+      <div class="legend-title">Pulse dot</div>
+      <div class="legend-desc">Badge "codes en attente" avec point orange pulsant — attire l'œil sans agresser</div>
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#10B981;"></div>
+    <div>
+      <div class="legend-title">Barres benchmark</div>
+      <div class="legend-desc">Les barres s'animent depuis 0 à l'entrée — comme dans Stripe Dashboard</div>
+    </div>
+  </div>
+</div>
+
+<button class="replay-btn" onclick="location.reload()">↺ Rejouer les animations</button>
+
+</body>
+</html>

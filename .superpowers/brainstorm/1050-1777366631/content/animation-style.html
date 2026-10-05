@@ -1,0 +1,266 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { font-family: 'DM Sans', sans-serif; background: #F8FAFC; padding: 32px 24px; }
+
+  h2 { font-size: 22px; font-weight: 800; color: #0F172A; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #64748B; margin-bottom: 32px; }
+
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+  .option {
+    background: #fff;
+    border: 2px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 0;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+  }
+  .option:hover { border-color: #6366F1; box-shadow: 0 8px 32px rgba(99,102,241,0.12); }
+  .option.selected { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+
+  .preview-zone {
+    height: 200px;
+    background: #F8FAFC;
+    border-bottom: 1.5px solid #F1F5F9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-meta { padding: 18px 20px; }
+  .option-label { font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .option-title { font-size: 16px; font-weight: 800; color: #0F172A; margin-bottom: 6px; }
+  .option-desc { font-size: 13px; color: #64748B; line-height: 1.6; }
+
+  /* ── Option A: Subtle polish ── */
+  .stat-card-a {
+    background: #fff;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    width: 110px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    animation: fadeSlideA 2.5s ease-in-out infinite;
+  }
+  .stat-card-a:nth-child(2) { animation-delay: 0.3s; }
+  .stat-card-a:nth-child(3) { animation-delay: 0.6s; }
+  @keyframes fadeSlideA {
+    0%, 80%, 100% { opacity: 1; transform: translateY(0); }
+    40% { opacity: 0.85; transform: translateY(-3px); }
+  }
+  .stat-icon-a {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px; font-size: 14px;
+  }
+  .stat-val-a { font-size: 20px; font-weight: 800; color: #0F172A; }
+  .stat-lbl-a { font-size: 10px; color: #94A3B8; margin-top: 2px; }
+
+  /* ── Option B: Dynamic micro-interactions ── */
+  .stat-card-b {
+    background: #fff;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    width: 110px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .stat-card-b:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    border-color: #6366F1;
+  }
+  .counter-b {
+    font-size: 20px; font-weight: 800; color: #0F172A;
+    animation: countUp 1.8s ease-out forwards infinite;
+  }
+  .counter-b:nth-child(1) { animation-delay: 0s; }
+  @keyframes countUp {
+    0% { opacity: 0; transform: translateY(8px); }
+    15% { opacity: 1; transform: translateY(0); }
+    80%, 100% { opacity: 1; transform: translateY(0); }
+  }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #10B981;
+    animation: pulseDot 1.5s ease-in-out infinite;
+    margin-top: 6px;
+  }
+  @keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.6); opacity: 0.5; }
+  }
+  .stat-icon-b {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px; font-size: 14px;
+    transition: transform 0.3s;
+  }
+  .stat-card-b:hover .stat-icon-b { transform: rotate(-12deg) scale(1.15); }
+
+  /* ── Option C: Rich — entrance + shimmer + stagger ── */
+  .card-c {
+    background: linear-gradient(135deg, #1E1B4B, #312E81);
+    border-radius: 14px;
+    padding: 14px 16px;
+    width: 100px;
+    position: relative;
+    overflow: hidden;
+    animation: entranceC 0.6s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .card-c:nth-child(1) { animation-delay: 0s; }
+  .card-c:nth-child(2) { animation-delay: 0.12s; }
+  .card-c:nth-child(3) { animation-delay: 0.24s; }
+  @keyframes entranceC {
+    0% { opacity: 0; transform: translateY(24px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .card-c::after {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: shimmerC 3s ease-in-out infinite;
+  }
+  .card-c:nth-child(2)::after { animation-delay: 0.5s; }
+  .card-c:nth-child(3)::after { animation-delay: 1s; }
+  @keyframes shimmerC {
+    0% { left: -100%; }
+    50%, 100% { left: 200%; }
+  }
+  .val-c { font-size: 22px; font-weight: 800; color: #fff; }
+  .lbl-c { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+  .icon-c {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px; font-size: 13px;
+  }
+  .bar-c {
+    height: 3px; background: rgba(255,255,255,0.1);
+    border-radius: 99px; margin-top: 8px; overflow: hidden;
+  }
+  .bar-fill-c {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, #818CF8, #A5B4FC);
+    animation: barGrow 2s ease-out infinite;
+  }
+  .card-c:nth-child(1) .bar-fill-c { width: 72%; }
+  .card-c:nth-child(2) .bar-fill-c { width: 54%; animation-delay: 0.3s; }
+  .card-c:nth-child(3) .bar-fill-c { width: 88%; animation-delay: 0.6s; }
+  @keyframes barGrow {
+    0% { transform: scaleX(0); transform-origin: left; }
+    50%, 100% { transform: scaleX(1); transform-origin: left; }
+  }
+
+  /* ── Reset animation loop ── */
+  .restart-hint {
+    position: absolute; bottom: 8px; right: 10px;
+    font-size: 10px; color: #CBD5E1; font-style: italic;
+  }
+</style>
+
+<h2>Quel style d'animation te parle le plus ?</h2>
+<p class="subtitle">Chaque option montre une approche différente — clique pour sélectionner.</p>
+
+<div class="options">
+
+  <!-- Option A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="preview-zone">
+      <div class="stat-card-a">
+        <div class="stat-icon-a" style="background:#EFF6FF;">📊</div>
+        <div class="stat-val-a">1 247</div>
+        <div class="stat-lbl-a">Scans</div>
+      </div>
+      <div class="stat-card-a">
+        <div class="stat-icon-a" style="background:#F0FDF4;">✅</div>
+        <div class="stat-val-a">892</div>
+        <div class="stat-lbl-a">Validés</div>
+      </div>
+      <div class="stat-card-a">
+        <div class="stat-icon-a" style="background:#FFFBEB;">📈</div>
+        <div class="stat-val-a">71%</div>
+        <div class="stat-lbl-a">Taux</div>
+      </div>
+      <span class="restart-hint">en boucle</span>
+    </div>
+    <div class="option-meta">
+      <div class="option-label">Option A</div>
+      <div class="option-title">Subtil & Professionnel</div>
+      <div class="option-desc">Entrées douces au chargement, hover discret, transitions fluides. Style Notion / Linear.</div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="preview-zone" style="flex-direction: column; gap: 8px;">
+      <div style="display:flex; gap: 8px;">
+        <div class="stat-card-b">
+          <div class="stat-icon-b" style="background:#EFF6FF;">📊</div>
+          <div class="counter-b">1 247</div>
+          <div class="stat-lbl-a">Scans</div>
+        </div>
+        <div class="stat-card-b" style="animation-delay:0.3s">
+          <div class="stat-icon-b" style="background:#F0FDF4;">✅</div>
+          <div class="counter-b" style="animation-delay:0.3s">892</div>
+          <div class="stat-lbl-a">Validés</div>
+          <div class="pulse-dot"></div>
+        </div>
+        <div class="stat-card-b" style="animation-delay:0.6s">
+          <div class="stat-icon-b" style="background:#FFFBEB;">📈</div>
+          <div class="counter-b" style="animation-delay:0.6s">71%</div>
+          <div class="stat-lbl-a">Taux</div>
+        </div>
+      </div>
+      <div style="font-size:11px; color:#94A3B8;">↑ Survole les cartes</div>
+      <span class="restart-hint">interactif</span>
+    </div>
+    <div class="option-meta">
+      <div class="option-label">Option B</div>
+      <div class="option-title">Micro-interactions Vives</div>
+      <div class="option-desc">Compteurs animés au chargement, lift + scale au hover, dots pulsants pour les KPIs actifs.</div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="preview-zone" style="background: linear-gradient(135deg, #0F0A2E, #1E1B4B);">
+      <div class="card-c">
+        <div class="icon-c">📊</div>
+        <div class="val-c">1 247</div>
+        <div class="lbl-c">Scans</div>
+        <div class="bar-c"><div class="bar-fill-c"></div></div>
+      </div>
+      <div class="card-c">
+        <div class="icon-c">✅</div>
+        <div class="val-c">892</div>
+        <div class="lbl-c">Validés</div>
+        <div class="bar-c"><div class="bar-fill-c"></div></div>
+      </div>
+      <div class="card-c">
+        <div class="icon-c">📈</div>
+        <div class="val-c">71%</div>
+        <div class="lbl-c">Taux</div>
+        <div class="bar-c"><div class="bar-fill-c"></div></div>
+      </div>
+      <span class="restart-hint" style="color:rgba(255,255,255,0.2);">en boucle</span>
+    </div>
+    <div class="option-meta">
+      <div class="option-label">Option C</div>
+      <div class="option-title">Riche & Premium</div>
+      <div class="option-desc">Entrée en stagger (décalé), shimmer doré, barres de progression animées. Style Stripe / Vercel.</div>
+    </div>
+  </div>
+
+</div>
