@@ -7,6 +7,9 @@ import { logSpin, logRateLimit, logServerError } from "@/lib/discord";
 
 const VALIDITY_MS = 30 * 24 * 60 * 60 * 1000;     // lot valable 30 jours
 
+// IP exemptées de la limite d'une partie (tests) : variable SPIN_BYPASS_IPS="ip1,ip2"
+const BYPASS_IPS = (process.env.SPIN_BYPASS_IPS || "").split(",").map((v) => v.trim()).filter(Boolean);
+
 // Génère un code gagnant unique format WIN-XXXX-XXXX
 function generateWinCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -51,7 +54,7 @@ export async function POST(req) {
     }
 
     // Anti-rejeu : une seule partie par IP et par entreprise
-    const spinByIp = ip && ip !== "unknown"
+    const spinByIp = ip && ip !== "unknown" && !BYPASS_IPS.includes(ip)
       ? await Spin.findOne({ entrepriseId: entreprise._id, ip }).select("_id").lean()
       : null;
     if (spinByIp) {
