@@ -4,6 +4,27 @@ import { useState } from "react";
 import SpinWheel from "@/components/SpinWheel";
 import Confetti  from "@/components/Confetti";
 
+// Pastille d'icône (remplace les emojis)
+function IconBadge({ name, color }) {
+  const icons = {
+    gift: <><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5" /></>,
+    form: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h3" /></>,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    check: <><circle cx="12" cy="12" r="9" /><path d="M8 12.5l2.7 2.7L16 9.5" /></>,
+  };
+  return (
+    <div style={{
+      width: 60, height: 60, borderRadius: "50%", margin: "0 auto 18px",
+      background: `${color}14`, border: `1.5px solid ${color}30`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {icons[name]}
+      </svg>
+    </div>
+  );
+}
+
 // Luminance-based contrast helper
 function autoText(hex) {
   if (!hex) return "#fff";
@@ -34,6 +55,14 @@ function resolveTheme(e) {
     centerColor:    F("centerColor", "wheel_center_color", ""),
     centerLogo:     F("centerLogo",  "wheel_center_logo",  "") || e.logo || "",
     wheelSize:      F("wheelSize",   "wheel_size",          360),
+    ringWidth:      t.ringWidth ?? 12,
+    dividerColor:   t.dividerColor || "",
+    dividerWidth:   t.dividerWidth ?? 2,
+    labelColor:     t.labelColor || "",
+    labelSize:      t.labelSize || 0,
+    pointerColor:   t.pointerColor || "",
+    shadow:         t.shadow !== false,
+    spinBtnText:    t.spinBtnText || "",
     // Page background
     bgType:         F("bgType",      "page_bg_type",        "color"),
     bg:             F("bg",          "page_bg",             ""),
@@ -252,7 +281,7 @@ export default function PlayClient({ entreprise }) {
         {/* ── Déjà joué (une seule partie) ── */}
         {alreadyPlayed && (
           <div style={{ textAlign: "center", animation: "fadeUp 0.5s ease", padding: "40px 0" }}>
-            <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>⏳</div>
+            <IconBadge name="clock" color={pc} />
             <h2 style={{ fontSize: 22, fontWeight: 900, color: tc, margin: "0 0 10px" }}>Vous avez déjà joué</h2>
             <p style={{ color: subtleColor, fontSize: 14, lineHeight: 1.7, maxWidth: 340, margin: "0 auto" }}>
               Une seule partie est autorisée par personne. Présentez-vous à {entreprise.nom} avec le code obtenu lors de votre partie.
@@ -264,7 +293,7 @@ export default function PlayClient({ entreprise }) {
         {!alreadyPlayed && collectPending && step !== 3 && (
           <div style={{ animation: "fadeUp 0.5s ease" }}>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
-              <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>📋</div>
+              <IconBadge name="form" color={pc} />
               <h2 style={{ fontSize: 22, fontWeight: 900, color: tc, margin: "0 0 10px", lineHeight: 1.3 }}>
                 Encore une étape !
               </h2>
@@ -332,7 +361,7 @@ export default function PlayClient({ entreprise }) {
                 cursor: submittingCollect ? "not-allowed" : "pointer",
               }}
             >
-              {submittingCollect ? "Un instant…" : "Découvrir mon cadeau 🎁"}
+              {submittingCollect ? "Un instant…" : "Découvrir mon cadeau"}
             </button>
 
             <p style={{ color: subtleColor, fontSize: 11, textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
@@ -346,7 +375,7 @@ export default function PlayClient({ entreprise }) {
           <div style={{ animation: "fadeUp 0.5s ease" }}>
             {/* Intro */}
             <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>🎁</div>
+              <IconBadge name="gift" color={pc} />
               <h1 style={{ fontSize: 24, fontWeight: 900, color: tc, margin: "0 0 10px", lineHeight: 1.3, fontFamily: `'${ff}', sans-serif` }}>
                 {pageTitle}
               </h1>
@@ -367,6 +396,16 @@ export default function PlayClient({ entreprise }) {
                 centerLogoUrl={th.centerLogo}
                 fontFamily={ff}
                 size={wheelSize}
+                ringWidth={th.ringWidth}
+                dividerColor={th.dividerColor}
+                dividerWidth={th.dividerWidth}
+                labelColor={th.labelColor}
+                labelSize={th.labelSize}
+                pointerColor={th.pointerColor}
+                shadow={th.shadow}
+                buttonColor={btnBgRaw}
+                buttonRadius={btnRadius}
+                buttonText={th.spinBtnText}
                 disabled={false}
                 onResult={handleSpinResult}
               />
@@ -384,7 +423,7 @@ export default function PlayClient({ entreprise }) {
         {/* ── STEP 3 : Result ── */}
         {step === 3 && (
           <div style={{ textAlign: "center", animation: "fadeUp 0.5s ease" }}>
-            <div style={{ fontSize: 72, marginBottom: 8, lineHeight: 1 }}>🎉</div>
+            <IconBadge name="check" color={pc} />
             <h2 style={{ fontSize: 26, fontWeight: 900, color: tc, margin: "0 0 8px", fontFamily: `'${ff}', sans-serif` }}>
               Félicitations !
             </h2>

@@ -138,6 +138,9 @@ const DEFAULT_THEME = {
   segmentColors: [],
   borderColor: "#ffffff", centerColor: "#ffffff", centerLogo: "",
   font: "DM Sans", wheelSize: 360,
+  ringWidth: 12, dividerColor: "", dividerWidth: 2,
+  labelColor: "", labelSize: 0, pointerColor: "",
+  shadow: true, spinBtnText: "",
   bg: "#ffffff", bgType: "color", bgGradient: "",
   banner: "",
   title: "", welcome: "", btnColor: "", btnText: "",
@@ -163,6 +166,20 @@ function lum(hex) {
 }
 const autoText = (hex) => lum(hex) > 0.55 ? "#000000" : "#ffffff";
 
+// Réglages visuels avancés de la roue, communs à tous les aperçus
+const wheelStyleProps = (t) => ({
+  ringWidth:    t.ringWidth ?? 12,
+  dividerColor: t.dividerColor || "",
+  dividerWidth: t.dividerWidth ?? 2,
+  labelColor:   t.labelColor || "",
+  labelSize:    t.labelSize || 0,
+  pointerColor: t.pointerColor || "",
+  shadow:       t.shadow !== false,
+  buttonColor:  t.btnColor || "",
+  buttonRadius: t.btnRadius ?? 14,
+  buttonText:   t.spinBtnText || "",
+});
+
 function entrepriseToConfig(e) {
   const t = (e.theme && typeof e.theme === "object") ? e.theme : {};
   const F = (key, legacy, fallback) =>
@@ -184,6 +201,14 @@ function entrepriseToConfig(e) {
       centerLogo:    F("centerLogo",   "wheel_center_logo",    ""),
       font:          F("font",         "wheel_font",           "DM Sans"),
       wheelSize:     t.wheelSize       || e.wheel_size         || 360,
+      ringWidth:     t.ringWidth       ?? 12,
+      dividerColor:  t.dividerColor    || "",
+      dividerWidth:  t.dividerWidth    ?? 2,
+      labelColor:    t.labelColor      || "",
+      labelSize:     t.labelSize       || 0,
+      pointerColor:  t.pointerColor    || "",
+      shadow:        t.shadow !== false,
+      spinBtnText:   t.spinBtnText     || "",
       bg:            F("bg",           "page_bg",              "#ffffff"),
       bgType:        F("bgType",       "page_bg_type",         "color"),
       bgGradient:    F("bgGradient",   "page_bg_gradient",     ""),
@@ -291,7 +316,7 @@ function LivePreview({ config, entreprise, compact = false }) {
               <div style={{ marginTop: 16, opacity: 0.35, pointerEvents: "none" }}>
                 <SpinWheel key={`prev-idle-${spinKey}`}
                   rewards={previewRewards} primaryColor={pc} secondaryColor={sc}
-                  segmentColors={theme.segmentColors} borderColor={theme.borderColor}
+                  segmentColors={theme.segmentColors} borderColor={theme.borderColor} {...wheelStyleProps(theme)}
                   centerColor={theme.centerColor} centerLogoUrl={theme.centerLogo || config.logoUrl}
                   fontFamily={ff} size={180} disabled />
               </div>
@@ -305,7 +330,7 @@ function LivePreview({ config, entreprise, compact = false }) {
             {previewRewards.length > 0
               ? <SpinWheel key={`prev-spin-${spinKey}`}
                   rewards={previewRewards} primaryColor={pc} secondaryColor={sc}
-                  segmentColors={theme.segmentColors} borderColor={theme.borderColor}
+                  segmentColors={theme.segmentColors} borderColor={theme.borderColor} {...wheelStyleProps(theme)}
                   centerColor={theme.centerColor} centerLogoUrl={theme.centerLogo || config.logoUrl}
                   fontFamily={ff} size={200} disabled={false}
                   onResult={rw => { setWinItem(rw); setPvStep(3); }}
@@ -454,6 +479,20 @@ function ColorField({ label, value, onChange }) {
         <input value={value || ""} onChange={e => onChange(e.target.value)}
           style={{ flex: 1, padding: "7px 10px", borderRadius: 9, border: "1.5px solid #E2E8F0", fontSize: 12, outline: "none", fontFamily: "'DM Mono',monospace", background: "#fff", color: "#0F172A", boxSizing: "border-box" }} />
       </div>
+    </div>
+  );
+}
+
+function SliderRow({ label, value, min, max, step = 1, unit = "", onChange }) {
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 5 }}>
+        <span>{label}</span>
+        <span style={{ color: "#0F172A" }}>{value}{unit}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        style={{ width: "100%", accentColor: "#2563EB" }} />
     </div>
   );
 }
@@ -812,7 +851,7 @@ export default function PageWheel() {
 
               {/* ─ Sub-tabs ─ */}
               <div style={{ display: "flex", gap: 2, marginBottom: 18, background: "#F8FAFC", borderRadius: 11, padding: 3 }}>
-                {[["roue","🎡 Roue"],["page","📄 Page"]].map(([id, label]) => (
+                {[["roue","Roue"],["page","Page"]].map(([id, label]) => (
                   <button key={id} onClick={() => setCtrlTab(id)} style={{
                     flex: 1, padding: "7px 10px", borderRadius: 8, border: "none", fontSize: 12, fontWeight: 700,
                     background: ctrlTab === id ? "#0F172A" : "transparent",
@@ -839,7 +878,7 @@ export default function PageWheel() {
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Contour & Centre</div>
                     <div style={{ display: "flex", gap: 10 }}>
-                      <div style={{ flex: 1 }}><ColorField label="Contour / flèche" value={config.theme.borderColor} onChange={v => updateT("borderColor", v)} /></div>
+                      <div style={{ flex: 1 }}><ColorField label="Contour" value={config.theme.borderColor} onChange={v => updateT("borderColor", v)} /></div>
                       <div style={{ flex: 1 }}><ColorField label="Centre (hub)" value={config.theme.centerColor} onChange={v => updateT("centerColor", v)} /></div>
                     </div>
                   </div>
@@ -874,6 +913,44 @@ export default function PageWheel() {
                       Ajoutez des récompenses (étape 3) pour personnaliser chaque segment.
                     </div>
                   )}
+
+                  {/* Style de la roue */}
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Style de la roue</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                      <SliderRow label="Épaisseur du contour" min={0} max={28} unit="px"
+                        value={config.theme.ringWidth ?? 12} onChange={v => updateT("ringWidth", v)} />
+                      <SliderRow label="Épaisseur des séparateurs" min={0} max={8} unit="px"
+                        value={config.theme.dividerWidth ?? 2} onChange={v => updateT("dividerWidth", v)} />
+                      <SliderRow label="Taille du texte (0 = automatique)" min={0} max={22} unit="px"
+                        value={config.theme.labelSize || 0} onChange={v => updateT("labelSize", v)} />
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <div style={{ flex: 1 }}><ColorField label="Séparateurs" value={config.theme.dividerColor || "#ffffff"} onChange={v => updateT("dividerColor", v)} /></div>
+                        <div style={{ flex: 1 }}><ColorField label="Flèche" value={config.theme.pointerColor || config.primaryColor} onChange={v => updateT("pointerColor", v)} /></div>
+                      </div>
+                      <div>
+                        <ColorField label="Texte des segments" value={config.theme.labelColor || "#ffffff"} onChange={v => updateT("labelColor", v)} />
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                          <span style={{ fontSize: 11, color: config.theme.labelColor ? "#64748B" : "#16A34A", fontWeight: 600 }}>
+                            {config.theme.labelColor ? "Couleur fixe" : "Contraste automatique (blanc ou noir selon le segment)"}
+                          </span>
+                          {config.theme.labelColor && (
+                            <button onClick={() => updateT("labelColor", "")} style={{ background: "none", border: "none", cursor: "pointer", color: "#2563EB", fontSize: 11, fontWeight: 700, padding: 0 }}>Remettre en auto</button>
+                          )}
+                        </div>
+                      </div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 600, color: "#0F172A", cursor: "pointer" }}>
+                        <input type="checkbox" checked={config.theme.shadow !== false}
+                          onChange={e => updateT("shadow", e.target.checked)} style={{ accentColor: "#2563EB", width: 16, height: 16 }} />
+                        Ombre douce autour de la roue
+                      </label>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 5 }}>Texte du bouton de la roue</div>
+                        <input value={config.theme.spinBtnText || ""} onChange={e => updateT("spinBtnText", e.target.value)}
+                          placeholder="Tourner la roue" maxLength={30} style={inp} onFocus={focusBlue} onBlur={blurGray} />
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Police */}
                   <div>
@@ -1218,7 +1295,7 @@ export default function PageWheel() {
           <SpinWheel
             rewards={config.rewards.filter(r => r.name).map(r => ({ ...r, probability: r.prob }))}
             primaryColor={config.primaryColor} secondaryColor={config.secondaryColor}
-            segmentColors={config.theme.segmentColors} borderColor={config.theme.borderColor}
+            segmentColors={config.theme.segmentColors} borderColor={config.theme.borderColor} {...wheelStyleProps(config.theme)}
             centerColor={config.theme.centerColor} centerLogoUrl={config.theme.centerLogo || config.logoUrl}
             fontFamily={config.theme.font} size={Math.min(config.theme.wheelSize, 420)}
             onResult={() => { setConfetti(true); setTimeout(() => setConfetti(false), 4000); }}

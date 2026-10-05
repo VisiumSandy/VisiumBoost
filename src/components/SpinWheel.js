@@ -7,205 +7,328 @@ const DEFAULT_PALETTE = [
   "#0984E3", "#E84393", "#74B9FF", "#55EFC4",
 ];
 
+// Luminance relative d'une couleur hex (#rgb ou #rrggbb), 0 = noir, 1 = blanc
+function lum(hex) {
+  let h = String(hex || "").replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length < 6) return 0;
+  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+  if ([r, g, b].some(Number.isNaN)) return 0;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+const textOn = (bg) => (lum(bg) > 0.62 ? "#111827" : "#FFFFFF");
+const isWhite = (c) => !c || c.toLowerCase() === "#fff" || c.toLowerCase() === "#ffffff";
+
+// Coupe un texte avec "…" pour qu'il tienne dans maxW
+function ellipsize(ctx, text, maxW) {
+  let t = text;
+  while (t.length > 1 && ctx.measureText(t + "…").width > maxW) t = t.slice(0, -1);
+  return t + "…";
+}
+
+// Découpe un libellé en 1 ou 2 lignes qui tiennent dans maxW
+function fitLines(ctx, text, maxW) {
+  if (ctx.measureText(text).width <= maxW) return { lines: [text], fits: true };
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    let best = null;
+    for (let i = 1; i < words.length; i++) {
+      const a = words.slice(0, i).join(" ");
+      const b = words.slice(i).join(" ");
+      const w = Math.max(ctx.measureText(a).width, ctx.measureText(b).width);
+      if (!best || w < best.w) best = { a, b, w };
+    }
+    if (best && best.w <= maxW) return { lines: [best.a, best.b], fits: true };
+    if (best) {
+      const a = ctx.measureText(best.a).width > maxW ? ellipsize(ctx, best.a, maxW) : best.a;
+      const b = ctx.measureText(best.b).width > maxW ? ellipsize(ctx, best.b, maxW) : best.b;
+      return { lines: [a, b], fits: false };
+    }
+  }
+  return { lines: [ellipsize(ctx, text, maxW)], fits: false };
+}
+
 /**
- * SpinWheel — shared component for dashboard preview + public page.
+ * SpinWheel — composant partagé (aperçu dashboard + page publique).
  *
- * Props:
+ * Props :
  *   rewards[]          { name, probability|prob }
- *   primaryColor       base color 1
- *   secondaryColor     base color 2
- *   onResult(rw, idx)  callback when spin ends
- *   segmentColors[]    per-segment color overrides (index-aligned with rewards)
- *   borderColor        outer ring + pointer color
- *   centerColor        hub fill
- *   centerLogoUrl      image overlaid at center
- *   fontFamily         CSS font for segment labels
- *   size               canvas px (default 360)
- *   disabled           grayed overlay + block spin
+ *   primaryColor / secondaryColor   couleurs de base
+ *   segmentColors[]    couleur par segment (optionnelle)
+ *   borderColor        couleur de l'anneau extérieur
+ *   ringWidth          épaisseur de l'anneau (px sur une roue de 360, défaut 12)
+ *   dividerColor       couleur des séparateurs entre segments (défaut blanc)
+ *   dividerWidth       épaisseur des séparateurs (défaut 2)
+ *   labelColor         couleur des textes (défaut : contraste automatique)
+ *   labelSize          taille des textes en px (0 = automatique)
+ *   centerColor        couleur du centre
+ *   centerLogoUrl      logo affiché au centre
+ *   pointerColor       couleur de la flèche (défaut : anneau ou couleur principale)
+ *   shadow             ombre portée douce autour de la roue (défaut true)
+ *   fontFamily         police des textes
+ *   size               taille en px (défaut 360)
+ *   buttonColor / buttonRadius / buttonText   bouton "Tourner la roue"
+ *   disabled           roue grisée et non cliquable
+ *   onResult(rw, idx)  appelé à la fin du tour
  */
 export default function SpinWheel({
   rewards = [],
-  primaryColor  = "#6C5CE7",
+  primaryColor = "#6C5CE7",
   secondaryColor = "#00B894",
   onResult,
   segmentColors,
   borderColor,
+  ringWidth = 12,
+  dividerColor,
+  dividerWidth = 2,
+  labelColor,
+  labelSize = 0,
   centerColor,
   centerLogoUrl,
+  pointerColor,
+  shadow = true,
   fontFamily,
   size = 360,
+  buttonColor,
+  buttonRadius = 14,
+  buttonText,
   disabled = false,
 }) {
-  const canvasRef  = useRef(null);
+  const canvasRef = useRef(null);
+  const angleRef = useRef(0);
+  const rafRef = useRef(0);
   const [spinning, setSpinning] = useState(false);
-  const [done,     setDone]     = useState(false);
-  const angleRef   = useRef(0);
+  const [done, setDone] = useState(false);
 
-  // ── Resolved per-segment colors ──────────────────────────────────────
   const resolvedColors = useMemo(() => {
     const base = [primaryColor, secondaryColor, ...DEFAULT_PALETTE];
     return rewards.map((_, i) =>
-      (segmentColors?.[i] && segmentColors[i] !== "") ? segmentColors[i] : base[i % base.length]
+      segmentColors?.[i] && segmentColors[i] !== "" ? segmentColors[i] : base[i % base.length]
     );
   }, [rewards, segmentColors, primaryColor, secondaryColor]);
 
-  // ── Canvas draw ──────────────────────────────────────────────────────
+  const ringColor = borderColor || "#FFFFFF";
+  const arrowColor = pointerColor || (!isWhite(borderColor) ? borderColor : primaryColor);
+  const hubFill = centerColor || "#FFFFFF";
+
+  // ── Dessin ─────────────────────────────────────────────────────────
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const S = size;
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 3);
+    const px = Math.round(S * dpr);
+    if (canvas.width !== px || canvas.height !== px) {
+      canvas.width = px;
+      canvas.height = px;
+    }
     const ctx = canvas.getContext("2d");
-    const W   = canvas.width;
-    const cx  = W / 2;
-    const R   = cx - 20;
-
-    ctx.clearRect(0, 0, W, W);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, S, S);
     if (rewards.length === 0) return;
 
-    const n   = rewards.length;
+    const k = S / 360;                       // facteur d'échelle
+    const c = S / 2;
+    const outerR = c - 1;
+    const ringPx = Math.max(0, ringWidth) * k;
+    const R = outerR - ringPx;               // rayon des segments
+    const hubR = Math.max(S * 0.085, 22 * k);
+    const n = rewards.length;
     const arc = (Math.PI * 2) / n;
-    const ff  = fontFamily ? `'${fontFamily}', sans-serif` : "'DM Sans', sans-serif";
+    const ff = fontFamily ? `'${fontFamily}', sans-serif` : "'DM Sans', sans-serif";
 
-    // Shadow ring
-    ctx.save();
-    ctx.shadowColor   = "rgba(0,0,0,0.14)";
-    ctx.shadowBlur    = 28;
-    ctx.shadowOffsetY = 8;
-    ctx.beginPath(); ctx.arc(cx, cx, R + 7, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff"; ctx.fill();
-    ctx.restore();
-
-    // Outer border ring
-    const bc = (borderColor && borderColor !== "#ffffff") ? borderColor : null;
-    if (bc) {
-      ctx.beginPath(); ctx.arc(cx, cx, R + 7, 0, Math.PI * 2);
-      ctx.fillStyle = bc; ctx.fill();
-    }
+    // Anneau extérieur
+    ctx.beginPath();
+    ctx.arc(c, c, outerR, 0, Math.PI * 2);
+    ctx.fillStyle = ringColor;
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(15,23,42,0.10)";
+    ctx.stroke();
 
     // Segments
-    rewards.forEach((rw, i) => {
+    for (let i = 0; i < n; i++) {
       const a0 = angleRef.current + i * arc;
-      ctx.beginPath(); ctx.moveTo(cx, cx); ctx.arc(cx, cx, R, a0, a0 + arc); ctx.closePath();
-      ctx.fillStyle = resolvedColors[i]; ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(c, c);
+      ctx.arc(c, c, R, a0, a0 + arc);
+      ctx.closePath();
+      ctx.fillStyle = resolvedColors[i];
+      ctx.fill();
+    }
 
-      // Label
+    // Séparateurs
+    if (dividerWidth > 0) {
+      ctx.strokeStyle = dividerColor || "#FFFFFF";
+      ctx.lineWidth = dividerWidth * k;
+      ctx.lineCap = "butt";
+      for (let i = 0; i < n; i++) {
+        const a0 = angleRef.current + i * arc;
+        ctx.beginPath();
+        ctx.moveTo(c, c);
+        ctx.lineTo(c + Math.cos(a0) * R, c + Math.sin(a0) * R);
+        ctx.stroke();
+      }
+    }
+
+    // Filet intérieur de l'anneau
+    ctx.beginPath();
+    ctx.arc(c, c, R, 0, Math.PI * 2);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(15,23,42,0.12)";
+    ctx.stroke();
+
+    // Textes
+    const maxW = R - hubR - 26 * k;
+    const baseSize = labelSize > 0 ? labelSize * k : Math.min(Math.max(S * 0.042, 11), 18);
+    const fs = Math.min(baseSize, arc * R * 0.4);
+    for (let i = 0; i < n; i++) {
+      const a0 = angleRef.current + i * arc;
+      const name = (rewards[i].name || "").trim();
+      if (!name) continue;
       ctx.save();
-      ctx.translate(cx, cx); ctx.rotate(a0 + arc / 2);
-      ctx.textAlign = "right"; ctx.fillStyle = "#fff";
-      ctx.font = `bold 13px ${ff}`;
-      ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 4;
-      const label = (rw.name || "").length > 14 ? rw.name.slice(0, 14) + "…" : (rw.name || "");
-      ctx.fillText(label, R - 16, 5);
-      ctx.restore();
-    });
-
-    // Center hub
-    ctx.beginPath(); ctx.arc(cx, cx, 28, 0, Math.PI * 2);
-    ctx.fillStyle = (centerColor && centerColor !== "#ffffff") ? centerColor : "#fff";
-    ctx.fill();
-    ctx.strokeStyle = bc || primaryColor || "#6C5CE7"; ctx.lineWidth = 3; ctx.stroke();
-
-    // Pointer
-    const pointerColor = bc || "#E17055";
-    ctx.save();
-    ctx.translate(cx + R + 5, cx);
-    ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-6, -13); ctx.lineTo(-6, 13); ctx.closePath();
-    ctx.fillStyle = pointerColor;
-    ctx.shadowColor = "rgba(0,0,0,0.25)"; ctx.shadowBlur = 6;
-    ctx.fill();
-    ctx.restore();
-
-    // Disabled overlay
-    if (disabled && !spinning) {
-      ctx.save(); ctx.globalAlpha = 0.35;
-      ctx.fillStyle = "#000";
-      ctx.beginPath(); ctx.arc(cx, cx, R + 7, 0, Math.PI * 2); ctx.fill();
+      ctx.translate(c, c);
+      ctx.rotate(a0 + arc / 2);
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = labelColor || textOn(resolvedColors[i]);
+      // On réduit la police (jusqu'à 70 %) avant de couper le texte avec "…"
+      let size = fs;
+      let res = null;
+      for (const f of [1, 0.9, 0.8, 0.7]) {
+        size = fs * f;
+        ctx.font = `700 ${size}px ${ff}`;
+        res = fitLines(ctx, name, maxW);
+        if (res.fits) break;
+      }
+      const lines = res.lines;
+      const lh = size * 1.1;
+      const x = R - 16 * k;
+      lines.forEach((line, li) => {
+        const y = (li - (lines.length - 1) / 2) * lh;
+        ctx.fillText(line, x, y);
+      });
       ctx.restore();
     }
-  }, [rewards, resolvedColors, primaryColor, borderColor, centerColor, fontFamily, disabled, spinning]);
+
+    // Centre
+    ctx.beginPath();
+    ctx.arc(c, c, hubR, 0, Math.PI * 2);
+    ctx.fillStyle = hubFill;
+    ctx.fill();
+    ctx.lineWidth = 3 * k;
+    ctx.strokeStyle = isWhite(borderColor) ? "rgba(15,23,42,0.10)" : borderColor;
+    ctx.stroke();
+  }, [rewards, resolvedColors, size, ringWidth, ringColor, borderColor, dividerColor, dividerWidth, labelColor, labelSize, hubFill, fontFamily]);
 
   useEffect(() => { draw(); }, [draw]);
 
-  // Sync canvas size
+  // Redessine quand la police est chargée
   useEffect(() => {
-    const c = canvasRef.current;
-    if (!c) return;
-    c.width  = size;
-    c.height = size;
-    draw();
-  }, [size, draw]);
+    if (!fontFamily || typeof document === "undefined" || !document.fonts?.load) return;
+    let alive = true;
+    document.fonts.load(`700 16px '${fontFamily}'`).then(() => { if (alive) draw(); }).catch(() => {});
+    return () => { alive = false; };
+  }, [fontFamily, draw]);
 
-  // ── Spin logic ───────────────────────────────────────────────────────
+  // Stoppe l'animation si le composant est démonté
+  useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
+
+  // ── Tour de roue ───────────────────────────────────────────────────
   const spin = () => {
     if (spinning || done || disabled || rewards.length === 0) return;
     setSpinning(true);
 
-    const rand = Math.random() * 100;
-    let acc = 0, winIdx = 0;
-    for (let i = 0; i < rewards.length; i++) {
-      acc += (rewards[i].probability ?? rewards[i].prob ?? 0);
-      if (rand <= acc) { winIdx = i; break; }
+    const probs = rewards.map((r) => Number(r.probability ?? r.prob ?? 0) || 0);
+    const total = probs.reduce((a, b) => a + b, 0);
+    let winIdx = 0;
+    if (total > 0) {
+      const rand = Math.random() * total;
+      let acc = 0;
+      for (let i = 0; i < probs.length; i++) {
+        acc += probs[i];
+        if (rand <= acc) { winIdx = i; break; }
+      }
+    } else {
+      winIdx = Math.floor(Math.random() * rewards.length);
     }
 
-    const arc    = (Math.PI * 2) / rewards.length;
-    const target = -(winIdx * arc + arc / 2);
+    const arc = (Math.PI * 2) / rewards.length;
+    // La flèche est en haut (-π/2) : on amène le milieu du segment gagnant dessous, avec un léger décalage naturel
+    const jitter = (Math.random() - 0.5) * arc * 0.5;
+    const target = -Math.PI / 2 - (winIdx * arc + arc / 2) + jitter;
 
-    // Integer spins only — fractional spins shift the landing segment
-    const fullSpins  = 6 + Math.floor(Math.random() * 4); // 6, 7, 8 or 9
+    const fullSpins = 6 + Math.floor(Math.random() * 3);
     const currentMod = angleRef.current % (Math.PI * 2);
-    // Always-positive delta in [0, 2π) to reach target from current position
-    const delta = (target - currentMod + Math.PI * 4) % (Math.PI * 2);
-    const total = fullSpins * Math.PI * 2 + delta;
-    const dur    = 5000;
-    const start  = Date.now();
+    const delta = (((target - currentMod) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const totalAngle = fullSpins * Math.PI * 2 + delta;
+    const dur = 5200;
+    const t0 = performance.now();
     const startA = angleRef.current;
-    const ease   = t => 1 - Math.pow(1 - t, 4);
+    const ease = (t) => 1 - Math.pow(1 - t, 4);
 
-    const anim = () => {
-      const t = Math.min((Date.now() - start) / dur, 1);
-      angleRef.current = startA + total * ease(t);
+    const anim = (now) => {
+      const t = Math.min((now - t0) / dur, 1);
+      angleRef.current = startA + totalAngle * ease(t);
       draw();
-      if (t < 1) requestAnimationFrame(anim);
-      else { setSpinning(false); setDone(true); onResult?.(rewards[winIdx], winIdx); }
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(anim);
+      } else {
+        setSpinning(false);
+        setDone(true);
+        onResult?.(rewards[winIdx], winIdx);
+      }
     };
-    requestAnimationFrame(anim);
+    rafRef.current = requestAnimationFrame(anim);
   };
 
-  const btnBg = disabled || spinning
-    ? "#b2bec3"
-    : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
+  const btnBase = buttonColor || primaryColor;
+  const ffCss = fontFamily ? `'${fontFamily}', sans-serif` : "'DM Sans', sans-serif";
+  const pointerW = Math.max(22, Math.round(size * 0.075));
+  const pointerH = Math.round(pointerW * 1.28);
+  const logoSize = Math.round(Math.max(size * 0.085, 22 * (size / 360)) * 2 * 0.78);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
-      <div style={{ position: "relative", display: "inline-block" }}>
-        <canvas
-          ref={canvasRef}
-          width={size}
-          height={size}
-          style={{
-            maxWidth: "100%", display: "block",
-            cursor: disabled || done ? "default" : (spinning ? "wait" : "pointer"),
-            transition: "opacity 0.3s",
-          }}
-          onClick={spin}
-        />
-        {/* Center logo overlay */}
-        {centerLogoUrl && (
-          <img
-            src={centerLogoUrl}
-            alt=""
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 28, maxWidth: "100%" }}>
+      <div style={{ position: "relative", width: size, maxWidth: "100%", padding: `${Math.round(pointerH * 0.45)}px 0 6px` }}>
+        {/* Roue */}
+        <div style={{
+          position: "relative", width: "100%",
+          filter: shadow ? "drop-shadow(0 12px 24px rgba(15,23,42,0.16)) drop-shadow(0 2px 4px rgba(15,23,42,0.10))" : "none",
+          opacity: disabled && !spinning ? 0.5 : 1, transition: "opacity 0.3s",
+        }}>
+          <canvas
+            ref={canvasRef}
+            role="img"
+            aria-label="Roue de la fortune"
             style={{
-              position: "absolute",
-              top: "50%", left: "50%",
-              transform: "translate(-50%,-50%)",
-              width:  Math.round(size * 0.135),
-              height: Math.round(size * 0.135),
-              borderRadius: "50%",
-              objectFit: "contain",
-              pointerEvents: "none",
+              display: "block", width: "100%", height: "auto", aspectRatio: "1 / 1",
+              cursor: disabled || done ? "default" : spinning ? "wait" : "pointer",
             }}
+            onClick={spin}
           />
-        )}
+          {centerLogoUrl && (
+            <img
+              src={centerLogoUrl}
+              alt=""
+              style={{
+                position: "absolute", top: "50%", left: "50%",
+                transform: "translate(-50%,-50%)",
+                width: `${(logoSize / size) * 100}%`, aspectRatio: "1 / 1",
+                borderRadius: "50%", objectFit: "contain", pointerEvents: "none",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Flèche (SVG net, jamais coupée) */}
+        <svg
+          width={pointerW} height={pointerH} viewBox="0 0 28 36" aria-hidden="true"
+          style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", pointerEvents: "none", filter: shadow ? "drop-shadow(0 2px 3px rgba(15,23,42,0.25))" : "none" }}
+        >
+          <path d="M14 35 L3 13 A12.5 12.5 0 1 1 25 13 Z" fill={arrowColor} stroke="#FFFFFF" strokeWidth="2" strokeLinejoin="round" />
+          <circle cx="14" cy="11.5" r="4" fill="#FFFFFF" fillOpacity="0.92" />
+        </svg>
       </div>
 
       {!done && (
@@ -213,16 +336,19 @@ export default function SpinWheel({
           onClick={spin}
           disabled={spinning || disabled}
           style={{
-            padding: "15px 38px", borderRadius: 14, border: "none",
+            minWidth: 220, padding: "16px 36px", borderRadius: buttonRadius, border: "none",
             cursor: spinning || disabled ? "not-allowed" : "pointer",
-            background: btnBg,
-            color: "#fff", fontWeight: 800, fontSize: 16,
-            fontFamily: fontFamily ? `'${fontFamily}', sans-serif` : "'DM Sans', sans-serif",
-            boxShadow: disabled || spinning ? "none" : `0 6px 24px ${primaryColor}55`,
-            transition: "all 0.2s",
+            background: spinning || disabled ? "#CBD5E1" : btnBase,
+            color: spinning || disabled ? "#64748B" : textOn(btnBase),
+            fontWeight: 700, fontSize: 16, letterSpacing: "0.01em", fontFamily: ffCss,
+            boxShadow: spinning || disabled ? "none" : `0 8px 20px ${btnBase}40`,
+            transition: "transform 0.15s, box-shadow 0.15s, background 0.2s",
           }}
+          onMouseDown={(e) => { if (!spinning && !disabled) e.currentTarget.style.transform = "scale(0.98)"; }}
+          onMouseUp={(e) => { e.currentTarget.style.transform = "none"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; }}
         >
-          {spinning ? "La roue tourne…" : "🎡 Tourner la roue !"}
+          {spinning ? "La roue tourne…" : (buttonText || "Tourner la roue")}
         </button>
       )}
     </div>
