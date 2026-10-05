@@ -5,9 +5,7 @@ import Spin from "@/lib/models/Spin";
 import { spinLimiter, getIp } from "@/lib/rateLimit";
 import { logSpin, logRateLimit, logServerError } from "@/lib/discord";
 
-const IP_WINDOW_MS = 24 * 60 * 60 * 1000;         // fenêtre du plafond par IP
 const VALIDITY_MS = 30 * 24 * 60 * 60 * 1000;     // lot valable 30 jours
-const MAX_SPINS_PER_IP = 10;                      // plafond par IP / 24 h : un wifi de commerce est partagé
 
 // Génère un code gagnant unique format WIN-XXXX-XXXX
 function generateWinCode() {
@@ -33,8 +31,7 @@ export async function POST(req) {
       );
     }
 
-    const { slug, rewardName, rewardIndex, clientName, clientEmail, clientPhone, deviceId: rawDeviceId } = await req.json();
-    const deviceId = typeof rawDeviceId === "string" && /^[A-Za-z0-9-]{8,64}$/.test(rawDeviceId) ? rawDeviceId : "";
+    const { slug, rewardName, rewardIndex, clientName, clientEmail, clientPhone } = await req.json();
 
     if (!slug || typeof slug !== "string" || !rewardName || typeof rewardName !== "string") {
       return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
@@ -53,17 +50,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "Récompense invalide" }, { status: 400 });
     }
 
-    // Anti-rejeu : une seule partie par appareil et par entreprise (+ plafond par IP sur 24 h en filet de sécurité)
-    const since = new Date(Date.now() - IP_WINDOW_MS);
-    const [lastByDevice, countByIp] = await Promise.all([
-      deviceId
-        ? Spin.findOne({ entrepriseId: entreprise._id, deviceId }).select("_id").lean()
-        : null,
-      ip && ip !== "unknown"
-        ? Spin.countDocuments({ entrepriseId: entreprise._id, ip, createdAt: { $gte: since } })
-        : 0,
-    ]);
-    if (lastByDevice || countByIp >= MAX_SPINS_PER_IP) {
+    // Anti-rejeu : une seule partie par IP et par entreprise
+    const spinByIp = ip && ip !== "unknown"
+      ? await Spin.findOne({ entrepriseId: entreprise._id, ip }).select("_id").lean()
+      : null;
+    if (spinByIp) {
       return NextResponse.json(
         { error: "Vous avez déjà joué.", code: "ALREADY_PLAYED" },
         { status: 429 }
@@ -86,7 +77,6 @@ export async function POST(req) {
       clientEmail: (clientEmail || "").slice(0, 200),
       clientPhone: (clientPhone || "").slice(0, 30),
       ip,
-      deviceId,
       expiresAt: new Date(Date.now() + VALIDITY_MS),
     });
 

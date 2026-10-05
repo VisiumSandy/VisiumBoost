@@ -56,20 +56,6 @@ function resolveTheme(e) {
   };
 }
 
-// Identifiant anonyme d'appareil, stocké en local, pour limiter à une seule partie
-function getDeviceId() {
-  try {
-    let id = localStorage.getItem("vb_device");
-    if (!id) {
-      id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`);
-      localStorage.setItem("vb_device", id);
-    }
-    return id;
-  } catch {
-    return "";
-  }
-}
-
 export default function PlayClient({ entreprise }) {
   // ── DEBUG — remove after confirming collectFields values ──────────
   console.log(
@@ -144,7 +130,6 @@ export default function PlayClient({ entreprise }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          deviceId:    getDeviceId(),
           slug:        entreprise.slug,
           rewardName:  reward.name,
           rewardIndex,
