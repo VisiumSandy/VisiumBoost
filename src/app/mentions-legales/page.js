@@ -99,16 +99,13 @@ export default function MentionsLegales() {
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "56px clamp(20px,5vw,40px) 80px" }}>
 
         <Section title="1. Éditeur du site">
-          <Row label="Raison sociale / Nom" value="[VOTRE NOM OU RAISON SOCIALE]" />
-          <Row label="Forme juridique"      value="[EX : Auto-entrepreneur / SAS / SARL]" />
-          <Row label="Adresse"              value="[VOTRE ADRESSE COMPLÈTE]" />
-          <Row label="SIRET"                value="[NUMÉRO SIRET]" />
-          <Row label="N° TVA intracommunautaire" value="[FR XX XXXXXXXXX]" />
+          <Row label="Nom"                  value="Sandy MORLON" />
+          <Row label="Statut"               value="Micro-entrepreneur (micro-entreprise)" />
           <Row label="Email de contact"     value="contact@visium-boost.fr" />
           <Row label="Site web"             value="https://visium-boost.fr" />
           <Para>
             Le directeur de la publication est{" "}
-            <strong style={{ color: "#374151" }}>[VOTRE NOM COMPLET]</strong>.
+            <strong style={{ color: "#374151" }}>Sandy MORLON</strong>.
           </Para>
         </Section>
 
@@ -198,7 +195,7 @@ export default function MentionsLegales() {
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span style={{ fontSize: 13, color: "#9CA3AF", fontWeight: 500 }}>
-            Dernière mise à jour : 16 avril 2026
+            Dernière mise à jour : 5 octobre 2026
           </span>
         </div>
       </div>
