@@ -56,7 +56,7 @@ function resolveTheme(e) {
   };
 }
 
-// Identifiant anonyme d'appareil, stocké en local, pour limiter à une partie par 48 h
+// Identifiant anonyme d'appareil, stocké en local, pour limiter à une seule partie
 function getDeviceId() {
   try {
     let id = localStorage.getItem("vb_device");
@@ -86,7 +86,7 @@ export default function PlayClient({ entreprise }) {
   const [generating,     setGenerating]     = useState(false);
   const [confetti,       setConfetti]       = useState(false);
   const [copied,         setCopied]         = useState(false);
-  const [blockedUntil,   setBlockedUntil]   = useState(null);
+  const [alreadyPlayed,  setAlreadyPlayed]  = useState(false);
 
   // Collect form state
   const [collectPending, setCollectPending] = useState(false);
@@ -160,7 +160,7 @@ export default function PlayClient({ entreprise }) {
         setConfetti(true);
         setTimeout(() => setConfetti(false), 5500);
       } else if (res.status === 429 && data.code === "ALREADY_PLAYED") {
-        setBlockedUntil(data.retryAt ? new Date(data.retryAt) : new Date());
+        setAlreadyPlayed(true);
       } else {
         setWinCode("ERREUR");
         setStep(3);
@@ -264,20 +264,19 @@ export default function PlayClient({ entreprise }) {
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "28px 20px 80px" }}>
 
-        {/* ── Déjà joué (limite 48 h) ── */}
-        {blockedUntil && (
+        {/* ── Déjà joué (une seule partie) ── */}
+        {alreadyPlayed && (
           <div style={{ textAlign: "center", animation: "fadeUp 0.5s ease", padding: "40px 0" }}>
             <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>⏳</div>
             <h2 style={{ fontSize: 22, fontWeight: 900, color: tc, margin: "0 0 10px" }}>Vous avez déjà joué</h2>
             <p style={{ color: subtleColor, fontSize: 14, lineHeight: 1.7, maxWidth: 340, margin: "0 auto" }}>
-              Une seule partie par personne toutes les 48 heures. Revenez le{" "}
-              {blockedUntil.toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}.
+              Une seule partie est autorisée par personne. Présentez-vous à {entreprise.nom} avec le code obtenu lors de votre partie.
             </p>
           </div>
         )}
 
         {/* ── COLLECT FORM (between spin and result) ── */}
-        {!blockedUntil && collectPending && step !== 3 && (
+        {!alreadyPlayed && collectPending && step !== 3 && (
           <div style={{ animation: "fadeUp 0.5s ease" }}>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>📋</div>
@@ -358,7 +357,7 @@ export default function PlayClient({ entreprise }) {
         )}
 
         {/* ── STEPS 1 & 2 ── */}
-        {!blockedUntil && !collectPending && step !== 3 && (
+        {!alreadyPlayed && !collectPending && step !== 3 && (
           <div style={{ animation: "fadeUp 0.5s ease" }}>
             {/* Intro */}
             <div style={{ textAlign: "center", marginBottom: 24 }}>
@@ -493,7 +492,7 @@ export default function PlayClient({ entreprise }) {
           </summary>
           <div style={{ fontSize: 12, color: subtleColor, lineHeight: 1.7, marginTop: 12 }}>
             <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>1. Organisateur.</strong> Ce jeu est organisé par {entreprise.nom}. VisiumBoost fournit uniquement l&apos;outil technique.</p>
-            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>2. Participation.</strong> Gratuite et sans obligation d&apos;achat, ouverte aux personnes majeures (mineurs avec l&apos;accord de leur représentant légal). Une partie par personne toutes les 48 heures.</p>
+            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>2. Participation.</strong> Gratuite et sans obligation d&apos;achat, ouverte aux personnes majeures (mineurs avec l&apos;accord de leur représentant légal). Une seule partie par personne.</p>
             <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>3. Lots.</strong> {(entreprise.rewards || []).length > 0 ? (entreprise.rewards.map(r => r.name).join(", ") + ". ") : ""}Le résultat est tiré au sort par la roue, sans lien avec une autre action que le lancement du jeu. Les lots ne sont ni échangeables ni remboursables.</p>
             <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>4. Retrait.</strong> Le code gagnant est valable 30 jours et utilisable une seule fois, sur présentation à l&apos;établissement.</p>
             <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>5. Avis Google.</strong> Aucun avis n&apos;est exigé ni récompensé : le lot est identique, que vous laissiez un avis ou non, et quel que soit son contenu ou sa note. Le lien vers la fiche Google est proposé de la même façon à tous les participants, à titre facultatif. Cet établissement n&apos;offre aucun avantage en échange d&apos;un avis, conformément à la politique de Google sur les avis.</p>

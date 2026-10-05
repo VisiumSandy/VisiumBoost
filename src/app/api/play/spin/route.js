@@ -5,9 +5,9 @@ import Spin from "@/lib/models/Spin";
 import { spinLimiter, getIp } from "@/lib/rateLimit";
 import { logSpin, logRateLimit, logServerError } from "@/lib/discord";
 
-const PLAY_WINDOW_MS = 48 * 60 * 60 * 1000;      // une partie par appareil / 48 h
+const IP_WINDOW_MS = 24 * 60 * 60 * 1000;         // fenêtre du plafond par IP
 const VALIDITY_MS = 30 * 24 * 60 * 60 * 1000;     // lot valable 30 jours
-const MAX_SPINS_PER_IP = 10;                      // plafond large : un wifi de commerce est partagé
+const MAX_SPINS_PER_IP = 10;                      // plafond par IP / 24 h : un wifi de commerce est partagé
 
 // Génère un code gagnant unique format WIN-XXXX-XXXX
 function generateWinCode() {
@@ -53,20 +53,19 @@ export async function POST(req) {
       return NextResponse.json({ error: "Récompense invalide" }, { status: 400 });
     }
 
-    // Anti-rejeu : une partie par appareil toutes les 48 h (+ plafond large par IP en filet de sécurité)
-    const since = new Date(Date.now() - PLAY_WINDOW_MS);
+    // Anti-rejeu : une seule partie par appareil et par entreprise (+ plafond par IP sur 24 h en filet de sécurité)
+    const since = new Date(Date.now() - IP_WINDOW_MS);
     const [lastByDevice, countByIp] = await Promise.all([
       deviceId
-        ? Spin.findOne({ entrepriseId: entreprise._id, deviceId, createdAt: { $gte: since } }).sort({ createdAt: -1 }).select("createdAt").lean()
+        ? Spin.findOne({ entrepriseId: entreprise._id, deviceId }).select("_id").lean()
         : null,
       ip && ip !== "unknown"
         ? Spin.countDocuments({ entrepriseId: entreprise._id, ip, createdAt: { $gte: since } })
         : 0,
     ]);
     if (lastByDevice || countByIp >= MAX_SPINS_PER_IP) {
-      const retryAt = lastByDevice ? new Date(lastByDevice.createdAt.getTime() + PLAY_WINDOW_MS) : new Date(Date.now() + PLAY_WINDOW_MS);
       return NextResponse.json(
-        { error: "Vous avez déjà joué récemment.", code: "ALREADY_PLAYED", retryAt },
+        { error: "Vous avez déjà joué.", code: "ALREADY_PLAYED" },
         { status: 429 }
       );
     }
