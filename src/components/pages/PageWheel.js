@@ -6,6 +6,7 @@ import Icon from "@/components/Icon";
 import SpinWheel from "@/components/SpinWheel";
 import Confetti from "@/components/Confetti";
 import ImageUpload from "@/components/ImageUpload";
+import { PATTERNS, DARK_BASES, SECTOR_LOOKS, patternStyle, buildPageBg } from "@/lib/pageBackgrounds";
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -209,7 +210,7 @@ const DEFAULT_THEME = {
   ringWidth: 12, dividerColor: "", dividerWidth: 2,
   labelColor: "", labelSize: 0, pointerColor: "",
   shadow: true, effect3d: true, gradient: true, bulbs: false, bulbColor: "", spinBtnText: "",
-  bg: "#ffffff", bgType: "color", bgGradient: "",
+  bg: "#ffffff", bgType: "color", bgGradient: "", bgPattern: "",
   banner: "",
   title: "", welcome: "", btnColor: "", btnText: "",
   btnRadius: 14, thanks: "", textColor: "#0F0F1A", cardColor: "",
@@ -288,6 +289,7 @@ function entrepriseToConfig(e) {
       bg:            F("bg",           "page_bg",              "#ffffff"),
       bgType:        F("bgType",       "page_bg_type",         "color"),
       bgGradient:    F("bgGradient",   "page_bg_gradient",     ""),
+      bgPattern:     t.bgPattern       || "",
       banner:        F("banner",       "page_banner",          ""),
       title:         F("title",        "page_title",           ""),
       welcome:       F("welcome",      "page_welcome",         ""),
@@ -324,10 +326,7 @@ function LivePreview({ config, entreprise, compact = false }) {
   const btnTc    = autoText(btn);
   const subtleTc = `${tc}95`;
 
-  const pageBg = (theme.bgType === "gradient" && theme.bgGradient)
-    ? theme.bgGradient
-    : (theme.bg && theme.bg !== "#ffffff") ? theme.bg
-    : `linear-gradient(160deg, ${pc}12 0%, ${sc}08 50%, #F8FAFC 100%)`;
+  const bgStyle = buildPageBg(theme, pc, sc);
 
   const isOnDark = lum(tc) > 0.5;
   const cardBg   = theme.cardColor || (isOnDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.04)");
@@ -338,7 +337,7 @@ function LivePreview({ config, entreprise, compact = false }) {
   const hasCollect = cf.prenom === true || cf.email === true || cf.telephone === true;
 
   const pageContent = (
-    <div style={{ background: pageBg, fontFamily: `'${ff}', DM Sans, system-ui, sans-serif`, minHeight: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ ...bgStyle, fontFamily: `'${ff}', DM Sans, system-ui, sans-serif`, minHeight: "100%", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <header style={{
         padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
@@ -512,7 +511,7 @@ function LivePreview({ config, entreprise, compact = false }) {
               width: compact ? 240 : 300,
               height: compact ? 480 : 580,
               borderRadius: compact ? 26 : 32,
-              overflow: "hidden", background: pageBg,
+              overflow: "hidden", background: "transparent",
             }}>
               <div style={{ height: "100%", overflowY: "auto", scrollbarWidth: "none" }}>
                 {pageContent}
@@ -533,7 +532,7 @@ function LivePreview({ config, entreprise, compact = false }) {
               visium-boost.fr/roue/{entreprise?.slug || "mon-etablissement"}
             </div>
           </div>
-          <div style={{ height: compact ? 460 : 560, overflowY: "auto", scrollbarWidth: "none", background: pageBg }}>
+          <div style={{ height: compact ? 460 : 560, overflowY: "auto", scrollbarWidth: "none" }}>
             {pageContent}
           </div>
         </div>
@@ -586,6 +585,7 @@ export default function PageWheel() {
   const [step,         setStep]         = useState(1);
   const [ctrlTab,      setCtrlTab]      = useState("roue");
   const [activeTemplate, setActiveTemplate] = useState(null);
+  const [bgTab, setBgTab] = useState(null);
   const [confetti,     setConfetti]     = useState(false);
   const [previewOpen,  setPreviewOpen]  = useState(false);
   const [copiedSlug,   setCopiedSlug]   = useState(null);
@@ -653,7 +653,7 @@ export default function PageWheel() {
         centerColor:   tpl.wheelCenterColor,
         font:          tpl.wheelFont,
         wheelSize:     tpl.wheelSize,
-        bg:            tpl.bg, bgType: tpl.bgType, bgGradient: tpl.bgGradient || "",
+        bg:            tpl.bg, bgType: tpl.bgType, bgGradient: tpl.bgGradient || "", bgPattern: tpl.bgPattern || "",
         textColor:     tpl.textColor,
         btnColor:      tpl.btnColor,
         btnText:       tpl.btnText,
@@ -1090,39 +1090,124 @@ export default function PageWheel() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
                   {/* Fond */}
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Fond de page</div>
-                    <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-                      {[["color","Couleur"],["gradient","Dégradé"]].map(([v,l]) => (
-                        <button key={v} onClick={() => updateT("bgType", v)} style={{
-                          padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 700,
-                          border: `2px solid ${config.theme.bgType === v ? "#2563EB" : "#E2E8F0"}`,
-                          background: config.theme.bgType === v ? "#2563EB" : "#fff",
-                          color: config.theme.bgType === v ? "#fff" : "#64748B", cursor: "pointer",
-                        }}>{l}</button>
-                      ))}
-                    </div>
-                    {config.theme.bgType === "color" ? (
-                      <ColorField label="" value={config.theme.bg} onChange={v => updateT("bg", v)} />
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                        <div style={{ display: "flex", gap: 8 }}>
-                          <div style={{ flex: 1 }}>
-                            <ColorField label="Début" value={config.theme.bg} onChange={v => {
-                              updateT("bg", v);
-                              const end = (config.theme.bgGradient.match(/#[0-9a-fA-F]{6}/g) || [])[1] || "#ffffff";
-                              updateT("bgGradient", `linear-gradient(135deg, ${v} 0%, ${end} 100%)`);
-                            }} />
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <ColorField label="Fin" value={(config.theme.bgGradient.match(/#[0-9a-fA-F]{6}/g) || [])[1] || "#ffffff"}
-                              onChange={v => updateT("bgGradient", `linear-gradient(135deg, ${config.theme.bg} 0%, ${v} 100%)`)} />
-                          </div>
+                  {(() => {
+                    const th = config.theme;
+                    const mode = bgTab || (th.bgType === "pattern" ? "pattern" : th.bgType === "gradient" ? "gradient" : "color");
+                    const pickMode = (m) => {
+                      setBgTab(m);
+                      if (m === "color" || m === "gradient") updateT("bgType", m);
+                      if (m === "pattern") {
+                        setConfig(p => ({ ...p, theme: {
+                          ...p.theme, bgType: "pattern", bgPattern: p.theme.bgPattern || "dots",
+                          bg: lum(p.theme.bg) > 0.35 ? DARK_BASES[0] : p.theme.bg,
+                        } }));
+                      }
+                    };
+                    const lab = { fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 };
+                    return (
+                      <div>
+                        <div style={lab}>Fond de page</div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5, marginBottom: 12 }}>
+                          {[["color", "Couleur"], ["gradient", "Dégradé"], ["pattern", "Motif"], ["sector", "Métier"]].map(([v, l]) => (
+                            <button key={v} onClick={() => pickMode(v)} style={{
+                              padding: "8px 4px", borderRadius: 8, fontSize: 12, fontWeight: 700,
+                              border: `2px solid ${mode === v ? "#2563EB" : "#E2E8F0"}`,
+                              background: mode === v ? "#2563EB" : "#fff",
+                              color: mode === v ? "#fff" : "#64748B", cursor: "pointer",
+                            }}>{l}</button>
+                          ))}
                         </div>
-                        <div style={{ height: 36, borderRadius: 9, background: config.theme.bgGradient || `linear-gradient(135deg, ${config.theme.bg}, #fff)`, border: "1.5px solid #E2E8F0" }} />
+
+                        {mode === "color" && (
+                          <ColorField label="" value={th.bg} onChange={v => { updateT("bgType", "color"); updateT("bg", v); }} />
+                        )}
+
+                        {mode === "gradient" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <div style={{ flex: 1 }}>
+                                <ColorField label="Début" value={th.bg} onChange={v => {
+                                  updateT("bg", v);
+                                  const end = ((th.bgGradient || "").match(/#[0-9a-fA-F]{6}/g) || [])[1] || "#ffffff";
+                                  updateT("bgGradient", `linear-gradient(135deg, ${v} 0%, ${end} 100%)`);
+                                }} />
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <ColorField label="Fin" value={((th.bgGradient || "").match(/#[0-9a-fA-F]{6}/g) || [])[1] || "#ffffff"}
+                                  onChange={v => updateT("bgGradient", `linear-gradient(135deg, ${th.bg} 0%, ${v} 100%)`)} />
+                              </div>
+                            </div>
+                            <div style={{ height: 36, borderRadius: 9, background: th.bgGradient || `linear-gradient(135deg, ${th.bg}, #fff)`, border: "1.5px solid #E2E8F0" }} />
+                          </div>
+                        )}
+
+                        {mode === "pattern" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            <div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 6 }}>Motif</div>
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+                                {PATTERNS.map(pt => {
+                                  const sel = (th.bgPattern || "dots") === pt.id;
+                                  return (
+                                    <button key={pt.id} onClick={() => setConfig(p => ({ ...p, theme: { ...p.theme, bgType: "pattern", bgPattern: pt.id } }))} style={{
+                                      padding: 0, borderRadius: 9, overflow: "hidden", cursor: "pointer", background: "#fff",
+                                      border: `2px solid ${sel ? "#2563EB" : "#E2E8F0"}`,
+                                    }}>
+                                      <div style={{ height: 34, ...patternStyle(th.bg || DARK_BASES[0], pt.id) }} />
+                                      <div style={{ fontSize: 10, fontWeight: 700, color: "#334155", padding: "3px 0" }}>{pt.label}</div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 6 }}>Couleur de fond</div>
+                              <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 8 }}>
+                                {DARK_BASES.map(c => (
+                                  <button key={c} onClick={() => setConfig(p => ({ ...p, theme: { ...p.theme, bgType: "pattern", bg: c } }))} aria-label={c} style={{
+                                    width: 30, height: 30, borderRadius: "50%", background: c, cursor: "pointer",
+                                    border: `3px solid ${th.bg === c ? "#2563EB" : "#E2E8F0"}`,
+                                  }} />
+                                ))}
+                              </div>
+                              <ColorField label="" value={th.bg} onChange={v => setConfig(p => ({ ...p, theme: { ...p.theme, bgType: "pattern", bg: v } }))} />
+                            </div>
+                          </div>
+                        )}
+
+                        {mode === "sector" && (
+                          <div>
+                            <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 10px", lineHeight: 1.5 }}>
+                              Un clic applique un univers complet : fond, roue, couleurs et textes harmonisés avec votre métier.
+                            </p>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+                              {SECTOR_LOOKS.map(lk => {
+                                const sel = activeTemplate === lk.id;
+                                return (
+                                  <button key={lk.id} onClick={() => applyTemplate(lk)} style={{
+                                    padding: 0, borderRadius: 12, overflow: "hidden", cursor: "pointer", background: "#fff", textAlign: "left",
+                                    border: `2px solid ${sel ? "#2563EB" : "#E2E8F0"}`, boxShadow: sel ? "0 2px 12px #2563EB35" : "none",
+                                  }}>
+                                    <div style={{ height: 62, display: "flex", alignItems: "center", justifyContent: "center", ...patternStyle(lk.bg, lk.bgPattern) }}>
+                                      <div style={{
+                                        width: 38, height: 38, borderRadius: "50%",
+                                        background: `conic-gradient(${lk.palette.slice(0, 6).map((c, i, arr) => `${c} ${(i / arr.length) * 100}% ${((i + 1) / arr.length) * 100}%`).join(", ")})`,
+                                        border: `4px solid ${lk.wheelBorderColor}`, boxShadow: "0 3px 8px rgba(0,0,0,0.4), inset 0 0 8px rgba(255,255,255,0.3)",
+                                      }} />
+                                    </div>
+                                    <div style={{ padding: "6px 8px" }}>
+                                      <div style={{ fontSize: 12, fontWeight: 800, color: "#0F172A" }}>{lk.name}</div>
+                                      <div style={{ fontSize: 10, color: "#64748B", lineHeight: 1.3 }}>{sel ? "Appliqué" : lk.desc}</div>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()}
 
                   {/* Bannière */}
                   <div>

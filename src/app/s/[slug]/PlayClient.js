@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import SpinWheel from "@/components/SpinWheel";
+import { buildPageBg } from "@/lib/pageBackgrounds";
 import Confetti  from "@/components/Confetti";
 
 // Pastille d'icône (remplace les emojis)
@@ -71,6 +72,7 @@ function resolveTheme(e) {
     bgType:         F("bgType",      "page_bg_type",        "color"),
     bg:             F("bg",          "page_bg",             ""),
     bgGradient:     F("bgGradient",  "page_bg_gradient",    ""),
+    bgPattern:      t.bgPattern || "",
     // Page content
     banner:         F("banner",      "page_banner",   ""),
     title:          F("title",       "page_title",    "") || "Tournez et gagnez !",
@@ -121,11 +123,7 @@ export default function PlayClient({ entreprise }) {
   const tc  = th.textColor;
   const ff  = th.font;
 
-  const pageBg = (th.bgType === "gradient" && th.bgGradient)
-    ? th.bgGradient
-    : (th.bg && th.bg !== "#ffffff")
-    ? th.bg
-    : `linear-gradient(160deg, ${pc}12 0%, ${sc}08 50%, #F8FAFC 100%)`;
+  const bgStyle = buildPageBg(th, pc, sc);
 
   const btnBgRaw = th.btnColor || pc;
   const btnTc    = autoText(btnBgRaw);
@@ -241,7 +239,7 @@ export default function PlayClient({ entreprise }) {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", background: pageBg, fontFamily: `'${ff}', 'DM Sans', system-ui, sans-serif` }}>
+    <div style={{ minHeight: "100dvh", ...bgStyle, fontFamily: `'${ff}', 'DM Sans', system-ui, sans-serif` }}>
       <Confetti active={confetti} />
 
       <style>{`
