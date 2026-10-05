@@ -461,15 +461,20 @@ export default function PlayClient({ entreprise }) {
 
             {/* Avis Google : demande séparée, facultative, sans lien avec le cadeau */}
             {entreprise.lien_avis && (
-              <p style={{ marginTop: 24, fontSize: 13, color: subtleColor, lineHeight: 1.6 }}>
-                Vous avez aimé votre visite ?{" "}
+              <div style={{ marginTop: 28, textAlign: "center" }}>
                 <a href={entreprise.lien_avis} target="_blank" rel="noopener noreferrer"
-                   style={{ color: pc, fontWeight: 700, textDecoration: "underline" }}>
-                  Donner votre avis sur Google
+                   style={{
+                     display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                     width: "100%", padding: "15px 24px", borderRadius: btnRadius, textDecoration: "none",
+                     background: "transparent", color: pc, border: `2px solid ${pc}`,
+                     fontWeight: 800, fontSize: 15, fontFamily: `'${ff}', sans-serif`,
+                   }}>
+                  ⭐ Donner votre avis sur Google
                 </a>
-                <br />
-                <span style={{ fontSize: 11 }}>Facultatif : votre cadeau ne dépend pas de votre avis.</span>
-              </p>
+                <p style={{ margin: "10px 0 0", fontSize: 12, color: subtleColor, lineHeight: 1.5 }}>
+                  Facultatif : votre cadeau ne dépend pas de votre avis.
+                </p>
+              </div>
             )}
           </div>
         )}
