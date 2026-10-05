@@ -59,7 +59,7 @@ export async function POST(req) {
       : null;
     if (spinByIp) {
       return NextResponse.json(
-        { error: "Vous avez déjà joué.", code: "ALREADY_PLAYED", debugIp: ip }, // TODO: retirer debugIp après les tests
+        { error: "Vous avez déjà joué.", code: "ALREADY_PLAYED" },
         { status: 429 }
       );
     }

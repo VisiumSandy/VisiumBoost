@@ -73,7 +73,6 @@ export default function PlayClient({ entreprise }) {
   const [confetti,       setConfetti]       = useState(false);
   const [copied,         setCopied]         = useState(false);
   const [alreadyPlayed,  setAlreadyPlayed]  = useState(false);
-  const [debugIp,        setDebugIp]        = useState(""); // TODO: retirer après les tests
 
   // Collect form state
   const [collectPending, setCollectPending] = useState(false);
@@ -146,7 +145,7 @@ export default function PlayClient({ entreprise }) {
         setConfetti(true);
         setTimeout(() => setConfetti(false), 5500);
       } else if (res.status === 429 && data.code === "ALREADY_PLAYED") {
-        setAlreadyPlayed(true); setDebugIp(data.debugIp || "");
+        setAlreadyPlayed(true);
       } else {
         setWinCode("ERREUR");
         setStep(3);
@@ -256,7 +255,7 @@ export default function PlayClient({ entreprise }) {
             <div style={{ fontSize: 52, marginBottom: 12, lineHeight: 1 }}>⏳</div>
             <h2 style={{ fontSize: 22, fontWeight: 900, color: tc, margin: "0 0 10px" }}>Vous avez déjà joué</h2>
             <p style={{ color: subtleColor, fontSize: 14, lineHeight: 1.7, maxWidth: 340, margin: "0 auto" }}>
-              Une seule partie est autorisée par personne. Présentez-vous à {entreprise.nom} avec le code obtenu lors de votre partie.{debugIp && <span style={{ display: "block", marginTop: 12, fontSize: 11 }}>[test] IP vue par le serveur : {debugIp}</span>}
+              Une seule partie est autorisée par personne. Présentez-vous à {entreprise.nom} avec le code obtenu lors de votre partie.
             </p>
           </div>
         )}
