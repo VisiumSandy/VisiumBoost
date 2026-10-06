@@ -534,7 +534,6 @@ export default function SpinWheel({
   const pointerH = Math.round(pointerW * 1.32);
   const overlap = Math.max(0, ringWidth) * k + 8 * k;           // la pointe s'arrête juste dans l'anneau
   const padTop = Math.max(6, Math.round(pointerH - overlap));
-  const logoSize = Math.round((centerLogoUrl ? eff * 0.12 : 0) * 2 * 0.74);
   const inactive = spinning || disabled;
   const btnTop = effect3d ? shade(btnBase, 0.14) : btnBase;
   const btnEdge = shade(btnBase, -0.28);
@@ -572,16 +571,22 @@ export default function SpinWheel({
             onClick={spin}
           />
           {centerLogoUrl && (
-            <img
-              src={centerLogoUrl}
-              alt=""
+            // Logo rond : le logo est contenu (jamais rogné) dans un disque aux dimensions du centre
+            <div
+              aria-hidden="true"
               style={{
-                position: "absolute", top: "50%", left: "50%",
-                transform: "translate(-50%,-50%)",
-                width: `${(logoSize / eff) * 100}%`, aspectRatio: "1 / 1",
-                borderRadius: 6, objectFit: "contain", pointerEvents: "none",
+                position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+                width: `${((eff * 0.12 * 2 * 0.94) / eff) * 100}%`, aspectRatio: "1 / 1", borderRadius: "50%",
+                background: hubFill, overflow: "hidden", pointerEvents: "none",
+                display: "flex", alignItems: "center", justifyContent: "center",
               }}
-            />
+            >
+              <img
+                src={centerLogoUrl}
+                alt=""
+                style={{ width: "70%", height: "70%", objectFit: "contain" }}
+              />
+            </div>
           )}
         </div>
 

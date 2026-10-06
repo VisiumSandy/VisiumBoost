@@ -55,7 +55,7 @@ export default function RootLayout({ children }) {
     <html lang="fr">
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:wght@400;500&family=Calistoga&family=Inter:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:wght@400;500&family=Calistoga&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;700;800;900&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
       </head>

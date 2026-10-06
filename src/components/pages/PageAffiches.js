@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import ThemedPoster from "@/components/ThemedPoster";
+import { TEMPLATES as WHEEL_THEMES } from "@/lib/wheelThemes";
+import { SECTOR_LOOKS } from "@/lib/pageBackgrounds";
+import { capsFor } from "@/lib/plans";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://visium-boost.fr";
 
@@ -18,6 +22,41 @@ const TEMPLATES = [
   { id: "neon",      name: "Neon",        desc: "Fond sombre, texte lumineux néon",      thumb: "#0A0A1E" },
   { id: "ardoise",   name: "Ardoise",     desc: "Tableau noir, ambiance bistrot",        thumb: "#1E2D3D" },
 ];
+
+// ── Affiches assorties aux thèmes de roue ──────────────────────────
+const DEFAULT_PALETTE = ["#6C5CE7", "#00B894", "#FDCB6E", "#E17055", "#0984E3", "#E84393", "#74B9FF", "#55EFC4"];
+
+const THEMED = [
+  ...WHEEL_THEMES.map((t) => ({ ...t, group: "Thèmes de roue" })),
+  ...SECTOR_LOOKS.map((t) => ({ ...t, group: "Univers métier" })),
+].map((t) => ({ ...t, tplId: `t:${t.id}` }));
+
+const isThemed = (id) => id === "mine" || String(id || "").startsWith("t:");
+
+// Affiche reprenant exactement la roue de l'entreprise (couleurs, fond, police, ampoules…)
+function lookFromEntreprise(e) {
+  const t = (e && e.theme && typeof e.theme === "object") ? e.theme : {};
+  const pc = e?.couleur_principale || "#2563EB";
+  const sc = e?.couleur_secondaire || "#7C3AED";
+  const base = [pc, sc, ...DEFAULT_PALETTE];
+  const seg = Array.isArray(t.segmentColors) ? t.segmentColors : [];
+  const palette = Array.from({ length: 8 }, (_, i) => seg[i] || base[i % base.length]);
+  const hasBg = t.bg && t.bg !== "#ffffff";
+  return {
+    palette, primaryColor: pc, secondaryColor: sc,
+    wheelBorderColor: t.borderColor || "#FFFFFF", wheelCenterColor: t.centerColor || "#FFFFFF",
+    dividerColor: t.dividerColor || "#FFFFFF", pointerColor: t.pointerColor || pc,
+    ringWidth: t.ringWidth ?? 14, bulbs: !!t.bulbs, bulbColor: t.bulbColor || "#FFF1C1",
+    wheelFont: t.font || "DM Sans",
+    bg: hasBg ? t.bg : "#0F172A", bgType: t.bgType || "color", bgGradient: t.bgGradient || "", bgPattern: t.bgPattern || "",
+    textColor: t.textColor || (hasBg ? "#FFFFFF" : "#0F172A"), btnColor: t.btnColor || pc, btnRadius: t.btnRadius ?? 12,
+  };
+}
+
+function getLook(tplId, ent) {
+  if (tplId === "mine") return lookFromEntreprise(ent);
+  return THEMED.find((t) => t.tplId === tplId) || THEMED[0];
+}
 
 // ── Shared QR placeholder ──────────────────────────────────────────
 function QrPlaceholder({ size, color = "#CBD5E1" }) {
@@ -715,23 +754,28 @@ const POSTER_MAP = {
   ardoise:   PosterArdoise,
 };
 
-function Poster({ tplId, ...props }) {
+function Poster({ tplId, ent, hideBranding, ...props }) {
+  if (isThemed(tplId)) return <ThemedPoster look={getLook(tplId, ent)} hideBranding={hideBranding} {...props} />;
   const C = POSTER_MAP[tplId] || PosterBold;
   return <C {...props} />;
 }
 
+// Nom lisible d'un modèle (classique ou assorti)
+const tplName = (id) => id === "mine" ? "Ma roue" : (TEMPLATES.find((t) => t.id === id)?.name || THEMED.find((t) => t.tplId === id)?.name || "");
+
 // ════════════════════════════════════════════════════════════════════
 // MAIN PAGE
 // ════════════════════════════════════════════════════════════════════
-export default function PageAffiches() {
+export default function PageAffiches({ user }) {
+  const hideBranding = capsFor(user).whiteLabel;
   const [entreprises,  setEntreprises]  = useState([]);
   const [selectedEnt,  setSelectedEnt]  = useState(null);
   const [selectedTpl,  setSelectedTpl]  = useState(null);
   const [format,       setFormat]       = useState("a4p");
   const [primaryColor, setPrimaryColor] = useState("#2563EB");
-  const [headline,     setHeadline]     = useState("LAISSEZ UN\nAVIS GOOGLE");
+  const [headline,     setHeadline]     = useState("TOURNEZ\nLA ROUE !");
   const [subheadline,  setSubheadline]  = useState("et tentez de gagner un cadeau !");
-  const [customText,   setCustomText]   = useState("Scannez le QR code pour participer");
+  const [customText,   setCustomText]   = useState("Scannez pour jouer");
   const [qrDataUrl,    setQrDataUrl]    = useState("");
   const [qrThumb,      setQrThumb]      = useState("");
   const [showWheel,    setShowWheel]    = useState(false);
@@ -830,6 +874,8 @@ export default function PageAffiches() {
     subheadline,
     customText,
     showWheel,
+    ent: selectedEnt,
+    hideBranding,
   };
 
   if (loading) return (
@@ -861,6 +907,51 @@ export default function PageAffiches() {
         )}
       </div>
 
+      {/* Modèles assortis à la roue */}
+      {[
+        { title: "Assorti à votre roue", sub: "Les couleurs, le fond et la police de votre roue", items: [{ id: "mine", tplId: "mine", name: "Ma roue", desc: "Reprend exactement votre design" }] },
+        ...["Thèmes de roue", "Univers métier"].map(g => ({
+          title: g, sub: g === "Univers métier" ? "Resto, pizzeria, garage… comme dans l'éditeur de roue" : "Les mêmes thèmes que dans l'éditeur de roue",
+          items: THEMED.filter(t => t.group === g),
+        })),
+      ].map(sec => (
+        <div key={sec.title} style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A" }}>{sec.title}</div>
+          <div style={{ fontSize: 12, color: "#94A3B8", margin: "2px 0 12px" }}>{sec.sub}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
+            {sec.items.map(tpl => (
+              <div
+                key={tpl.tplId}
+                onClick={() => setSelectedTpl(tpl.tplId)}
+                style={{
+                  background: "#fff", borderRadius: 18, overflow: "hidden", border: "1.5px solid #E8ECF0", cursor: "pointer",
+                  transition: "all 0.18s", boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.10)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.04)"; }}
+              >
+                <div style={{ height: 260, overflow: "hidden", position: "relative" }}>
+                  <div style={{ width: PAPER.a4p.W, height: PAPER.a4p.H, transform: `scale(${220 / PAPER.a4p.W})`, transformOrigin: "top left", pointerEvents: "none" }}>
+                    <Poster
+                      tplId={tpl.tplId} ent={selectedEnt} hideBranding={hideBranding}
+                      W={PAPER.a4p.W} H={PAPER.a4p.H}
+                      nom={selectedEnt?.nom || "Mon Établissement"} logo={selectedEnt?.logo || ""}
+                      qrDataUrl={qrThumb} headline={headline} subheadline={subheadline} customText={customText}
+                    />
+                  </div>
+                </div>
+                <div style={{ padding: "10px 14px" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A" }}>{tpl.name}</div>
+                  <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 2 }}>{tpl.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A" }}>Classiques</div>
+      <div style={{ fontSize: 12, color: "#94A3B8", margin: "2px 0 12px" }}>Modèles indépendants du thème de la roue</div>
       {/* Template grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
         {TEMPLATES.map(tpl => (
@@ -928,30 +1019,29 @@ export default function PageAffiches() {
             <div style={{ padding: "15px 22px", borderBottom: "1.5px solid #F0F0F5", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: "#0F172A" }}>
-                  Affiche — {TEMPLATES.find(t => t.id === selectedTpl)?.name}
+                  Affiche — {tplName(selectedTpl)}
                 </div>
                 <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 1 }}>
                   {selectedEnt?.nom || "Établissement"} · {paper.label}
                 </div>
               </div>
               {/* Template switcher */}
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {TEMPLATES.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedTpl(t.id)}
-                    style={{
-                      padding: "4px 12px", borderRadius: 8, border: `1.5px solid ${selectedTpl === t.id ? "#2563EB" : "#E2E8F0"}`,
-                      background: selectedTpl === t.id ? "#EFF6FF" : "#fff",
-                      color: selectedTpl === t.id ? "#1D4ED8" : "#64748B",
-                      fontSize: 12, fontWeight: 600, cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif",
-                    }}
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              </div>
+              <select
+                value={selectedTpl}
+                onChange={e => setSelectedTpl(e.target.value)}
+                style={{ padding: "6px 10px", borderRadius: 9, border: "1.5px solid #E2E8F0", fontSize: 12, fontWeight: 600, color: "#334155", background: "#fff", cursor: "pointer", maxWidth: 190 }}
+              >
+                <option value="mine">Ma roue</option>
+                <optgroup label="Thèmes de roue">
+                  {THEMED.filter(t => t.group === "Thèmes de roue").map(t => <option key={t.tplId} value={t.tplId}>{t.name}</option>)}
+                </optgroup>
+                <optgroup label="Univers métier">
+                  {THEMED.filter(t => t.group === "Univers métier").map(t => <option key={t.tplId} value={t.tplId}>{t.name}</option>)}
+                </optgroup>
+                <optgroup label="Classiques">
+                  {TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </optgroup>
+              </select>
               <button onClick={() => setSelectedTpl(null)} style={{ width: 34, height: 34, borderRadius: 9, border: "none", background: "#F1F5F9", cursor: "pointer", fontSize: 18, color: "#64748B", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
             </div>
 
@@ -1020,7 +1110,7 @@ export default function PageAffiches() {
                     />
                     <p style={{ fontSize: 10, color: "#94A3B8", margin: "3px 0 0" }}>↵ Entrée pour couper en 2 lignes</p>
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
-                      {["LAISSEZ UN\nAVIS GOOGLE","GAGNEZ\nUN CADEAU !","TOURNEZ\nLA ROUE !","SCANNEZ &\nGAGNEZ !"].map(s => (
+                      {["TOURNEZ\nLA ROUE !","GAGNEZ\nUN CADEAU !","SCANNEZ &\nJOUEZ !","TENTEZ\nVOTRE CHANCE !"].map(s => (
                         <button key={s} onClick={() => setHeadline(s)} style={{
                           padding: "3px 9px", borderRadius: 6, border: "1.5px solid #E2E8F0",
                           background: headline === s ? "#EFF6FF" : "#F8FAFC",
@@ -1063,7 +1153,7 @@ export default function PageAffiches() {
                       onBlur={e => e.target.style.borderColor = "#E2E8F0"}
                     />
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
-                      {["Scannez pour participer →","Scannez le QR code 👆","Avis Google = cadeau garanti 🎁"].map(s => (
+                      {["Scannez pour jouer","Scannez le QR code","Un cadeau à gagner"].map(s => (
                         <button key={s} onClick={() => setCustomText(s)} style={{
                           padding: "3px 9px", borderRadius: 6, border: "1.5px solid #E2E8F0",
                           background: "#F8FAFC", fontSize: 10, color: "#64748B", cursor: "pointer",
@@ -1080,7 +1170,7 @@ export default function PageAffiches() {
                 <div style={{ height: 1, background: "#F1F5F9" }} />
 
                 {/* === ROUE === */}
-                <div>
+                <div style={{ display: isThemed(selectedTpl) ? "none" : undefined }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 10 }}>
                     🎡 Roue de la fortune
                   </div>
@@ -1159,7 +1249,7 @@ export default function PageAffiches() {
                 </div>
 
                 {/* === COULEUR === */}
-                <div>
+                <div style={{ display: isThemed(selectedTpl) ? "none" : undefined }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: "#8896A5", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 8 }}>Couleur principale</div>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <input type="color" value={primaryColor} onChange={e => setPrimaryColor(e.target.value)}

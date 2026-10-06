@@ -24,6 +24,17 @@ export const PATTERNS = [
   { id: "chevron", label: "Chevrons", size: 40, alpha: 0.07, svg: (c) => svg(40, 20, `<path d="M0 15L20 5l20 10" fill="none" stroke="${c}" stroke-width="1.6"/>`) },
 ];
 
+// amt > 0 éclaircit (vers le blanc), amt < 0 assombrit (vers le noir)
+export function shade(hex, amt) {
+  let h = String(hex || "").replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length < 6) return hex;
+  const rgb = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  if (rgb.some(Number.isNaN)) return hex;
+  const target = amt > 0 ? 255 : 0, t = Math.abs(amt);
+  return `rgb(${rgb.map((v) => Math.round(v + (target - v) * t)).join(",")})`;
+}
+
 export const DARK_BASES = ["#0F0F1A", "#111827", "#0B1F1A", "#1A0A0C", "#1C1410", "#0B1A2E", "#1E1033", "#161616"];
 
 export function patternStyle(base, patternId) {
