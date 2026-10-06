@@ -65,7 +65,7 @@ const DEFAULT_THEME = {
   font: "DM Sans", wheelSize: 360,
   ringWidth: 12, dividerColor: "", dividerWidth: 2,
   labelColor: "", labelSize: 0, pointerColor: "",
-  shadow: true, effect3d: true, gradient: true, bulbs: false, bulbColor: "", spinBtnText: "",
+  requireReview: false, shadow: true, effect3d: true, gradient: true, bulbs: false, bulbColor: "", spinBtnText: "",
   bg: "#ffffff", bgType: "color", bgGradient: "", bgPattern: "",
   banner: "",
   title: "", welcome: "", btnColor: "", btnText: "",
@@ -137,6 +137,7 @@ function entrepriseToConfig(e) {
       labelSize:     t.labelSize       || 0,
       pointerColor:  t.pointerColor    || "",
       shadow:        t.shadow !== false,
+      requireReview: t.requireReview === true,
       effect3d:      t.effect3d !== false,
       gradient:      t.gradient !== false,
       bulbs:         !!t.bulbs,
@@ -709,6 +710,23 @@ export default function PageWheel({ user }) {
           {caps.googleLink && <input value={config.googleLink} onChange={e => update("googleLink", e.target.value)}
             placeholder="https://g.page/r/votre-lien-avis" style={inp}
             onFocus={focusBlue} onBlur={blurGray} />}
+          {caps.googleLink && (
+            <div style={{ marginTop: 16, padding: "14px 16px", borderRadius: 12, border: `1.5px solid ${config.theme.requireReview ? "#F59E0B" : "#E2E8F0"}`, background: config.theme.requireReview ? "#FFFBEB" : "#F8FAFC" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 700, color: "#0F172A", cursor: "pointer" }}>
+                <input type="checkbox" checked={!!config.theme.requireReview} disabled={!config.googleLink}
+                  onChange={e => updateT("requireReview", e.target.checked)} style={{ accentColor: "#2563EB", width: 16, height: 16 }} />
+                Demander un avis Google avant de jouer
+              </label>
+              <p style={{ fontSize: 12, color: "#64748B", margin: "8px 0 0", lineHeight: 1.5 }}>
+                Le client clique sur « Laisser mon avis Google », puis la roue se débloque. Il faut renseigner le lien d&apos;avis ci-dessus.
+              </p>
+              {config.theme.requireReview && (
+                <p style={{ fontSize: 12, color: "#92400E", margin: "8px 0 0", lineHeight: 1.5, fontWeight: 600 }}>
+                  Attention : la politique de Google interdit d&apos;offrir une récompense en échange d&apos;avis. Votre fiche Google peut voir ses avis supprimés ou être suspendue. Vous activez cette option sous votre seule responsabilité.
+                </p>
+              )}
+            </div>
+          )}
           {caps.googleLink && <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 6 }}>
             Récupérez ce lien depuis votre fiche Google Business → Obtenir plus d&apos;avis
           </p>}

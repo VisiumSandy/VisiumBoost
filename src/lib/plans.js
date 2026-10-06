@@ -165,6 +165,9 @@ export function gateEntreprise(data, caps) {
   } else if (out.theme && !caps.collect) {
     out.theme = { ...out.theme, collectFields: { prenom: false, email: false, telephone: false } };
   }
-  if (!caps.googleLink) out.lien_avis = "";
+  if (!caps.googleLink) {
+    out.lien_avis = "";
+    if (out.theme) out.theme = { ...out.theme, requireReview: false };
+  }
   return out;
 }

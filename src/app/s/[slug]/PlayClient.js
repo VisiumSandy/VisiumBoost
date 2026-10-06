@@ -63,6 +63,7 @@ function resolveTheme(e) {
     labelSize:      t.labelSize || 0,
     pointerColor:   t.pointerColor || "",
     shadow:         t.shadow !== false,
+    requireReview:  t.requireReview === true,
     effect3d:       t.effect3d !== false,
     gradient:       t.gradient !== false,
     bulbs:          !!t.bulbs,
@@ -92,15 +93,6 @@ function resolveTheme(e) {
 }
 
 export default function PlayClient({ entreprise }) {
-  // ── DEBUG — remove after confirming collectFields values ──────────
-  console.log(
-    "[VisiumBoost] entreprise.theme.collectFields (raw from DB):",
-    JSON.stringify(entreprise.theme?.collectFields ?? "undefined"),
-    "| typeof prenom:", typeof entreprise.theme?.collectFields?.prenom,
-    "| value:", entreprise.theme?.collectFields?.prenom,
-  );
-  // ─────────────────────────────────────────────────────────────────
-
   const [step,           setStep]           = useState(1);
   const [result,         setResult]         = useState(null);
   const [winCode,        setWinCode]        = useState(null);
@@ -108,6 +100,7 @@ export default function PlayClient({ entreprise }) {
   const [confetti,       setConfetti]       = useState(false);
   const [copied,         setCopied]         = useState(false);
   const [alreadyPlayed,  setAlreadyPlayed]  = useState(false);
+  const [reviewClicked, setReviewClicked]  = useState(false);
 
   // Collect form state
   const [collectPending, setCollectPending] = useState(false);
@@ -128,7 +121,11 @@ export default function PlayClient({ entreprise }) {
   const btnBgRaw = th.btnColor || pc;
   const btnTc    = autoText(btnBgRaw);
   const pageTitle  = th.title   || "Tournez et gagnez !";
-  const welcomeMsg = th.welcome || "Tournez la roue et tentez de gagner un cadeau !";
+  // Option du commerçant : avis Google demandé avant de jouer (la roue reste verrouillée jusqu'au clic)
+  const gated = th.requireReview && !!entreprise.lien_avis;
+  const welcomeMsg = th.welcome || (gated
+    ? "Laissez-nous un avis Google, puis revenez ici pour tourner la roue et tenter de gagner un cadeau !"
+    : "Tournez la roue et tentez de gagner un cadeau !");
   const thanksMsg  = th.thanks  || "";
   const btnRadius  = th.btnRadius !== undefined ? th.btnRadius : 16;
 
@@ -223,6 +220,10 @@ export default function PlayClient({ entreprise }) {
     await callSpinApi(pendingReward.reward, pendingReward.rewardIndex, collectData);
     setCollectPending(false);
     setSubmittingCollect(false);
+  };
+
+  const handleReviewClick = () => {
+    setReviewClicked(true);
   };
 
   const copyCode = () => {
@@ -388,6 +389,40 @@ export default function PlayClient({ entreprise }) {
               </p>
             </div>
 
+            {/* Avis demandé avant de jouer (option du commerçant) */}
+            {gated && !reviewClicked && (
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <a
+                  onClick={handleReviewClick}
+                  href={entreprise.lien_avis}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                    width: "100%", padding: "17px 24px", borderRadius: btnRadius, textDecoration: "none",
+                    background: `linear-gradient(135deg, ${pc}, ${sc})`, color: autoText(pc),
+                    fontWeight: 800, fontSize: 16, fontFamily: `'${ff}', sans-serif`,
+                    boxShadow: `0 10px 30px ${pc}40`, animation: "pulse 2s infinite",
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  {th.btnText || "Laisser mon avis Google"}
+                </a>
+                <p style={{ color: subtleColor, fontSize: 12, marginTop: 10 }}>
+                  Vous serez redirigé vers Google, puis la roue se débloquera ici.
+                </p>
+              </div>
+            )}
+            {gated && reviewClicked && (
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  background: "#00B89418", border: "1.5px solid #00B89430", borderRadius: 12, padding: "10px 20px",
+                }}>
+                  <span style={{ color: "#00B894", fontWeight: 800, fontSize: 14 }}>Merci pour votre avis ! Tournez la roue.</span>
+                </div>
+              </div>
+            )}
+
             {/* Wheel */}
             <div style={{ display: "flex", justifyContent: "center" }}>
               <SpinWheel
@@ -414,7 +449,7 @@ export default function PlayClient({ entreprise }) {
                 buttonColor={btnBgRaw}
                 buttonRadius={btnRadius}
                 buttonText={th.spinBtnText}
-                disabled={false}
+                disabled={gated && !reviewClicked}
                 onResult={handleSpinResult}
               />
             </div>
@@ -472,7 +507,7 @@ export default function PlayClient({ entreprise }) {
             </div>
 
             {/* Avis Google : demande séparée, facultative, proposée à tous, sans lien avec le cadeau */}
-            {entreprise.lien_avis && (
+            {entreprise.lien_avis && !gated && (
               <div style={{ marginBottom: 28 }}>
                 <a href={entreprise.lien_avis} target="_blank" rel="noopener noreferrer"
                    style={{
@@ -530,7 +565,9 @@ export default function PlayClient({ entreprise }) {
             <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>2. Participation.</strong> Gratuite et sans obligation d&apos;achat, ouverte aux personnes majeures (mineurs avec l&apos;accord de leur représentant légal). Une seule partie par personne.</p>
             <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>3. Lots.</strong> {(entreprise.rewards || []).length > 0 ? (entreprise.rewards.map(r => r.name).join(", ") + ". ") : ""}Le résultat est tiré au sort par la roue, sans lien avec une autre action que le lancement du jeu. Les lots ne sont ni échangeables ni remboursables.</p>
             <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>4. Retrait.</strong> Le code gagnant est valable 30 jours et utilisable une seule fois, sur présentation à l&apos;établissement.</p>
-            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>5. Avis Google.</strong> Aucun avis n&apos;est exigé ni récompensé : le lot est identique, que vous laissiez un avis ou non, et quel que soit son contenu ou sa note. Le lien vers la fiche Google est proposé de la même façon à tous les participants, à titre facultatif. Cet établissement n&apos;offre aucun avantage en échange d&apos;un avis, conformément à la politique de Google sur les avis.</p>
+            <p style={{ margin: "0 0 8px" }}><strong style={{ color: tc }}>5. Avis Google.</strong> {gated
+              ? "Pour jouer, le participant est invité à se rendre sur la fiche Google de l'établissement. Le lot est tiré au sort par la roue, indépendamment du contenu ou de la note de tout avis éventuel."
+              : "Aucun avis n'est exigé ni récompensé : le lot est identique, que vous laissiez un avis ou non, et quel que soit son contenu ou sa note. Le lien vers la fiche Google est proposé de la même façon à tous les participants, à titre facultatif. Cet établissement n'offre aucun avantage en échange d'un avis, conformément à la politique de Google sur les avis."}</p>
             <p style={{ margin: 0 }}><strong style={{ color: tc }}>6. Données et réclamations.</strong> Les éventuelles données saisies servent uniquement à la remise du lot. Vous disposez des droits d&apos;accès, de rectification et d&apos;effacement (RGPD) auprès de {entreprise.nom}, que vous pouvez aussi contacter pour toute réclamation.</p>
           </div>
         </details>
